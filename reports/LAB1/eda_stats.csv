@@ -6,7 +6,7 @@ missing_cells,0.0
 duplicate_rows,0.0
 class_0_share,0.5
 class_1_share,0.5
-x1_mean,0.49880257403614164
+x1_mean,0.4988025740361416
 x1_std,0.8937316238341527
 x1_min,-1.6837335782
 x1_max,2.736883301
@@ -16,3 +16,6 @@ x2_min,-1.248838363
 x2_max,1.7377152326
 x1_x2_corr,-0.3989314341796892
 linear_train_accuracy,0.8679166666666667
+non_finite_feature_values,0.0
+invalid_target_values,0.0
+target_unique_values,2.0

@@ -1,0 +1,4 @@
+field,dtype,missing,non_finite,unique_values,min,max
+x1,float64,0,0,24000,-1.6837335782,2.736883301
+x2,float64,0,0,24000,-1.248838363,1.7377152326
+y,int64,0,0,2,0.0,1.0

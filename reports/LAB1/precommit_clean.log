@@ -1,3 +1,10 @@
 local style checks.......................................................Passed
-local secret scan........................................................Passed
+local secret scan........................................................Failed
+- hook id: secrets
+- exit code: 1
+
+BLOCKED
+- secret-like token: FINALIZE_LAB1.ps1
+- secret-like token: FINALIZE_LAB1_RESUME.ps1
+
 local large-file guard...................................................Passed

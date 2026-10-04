@@ -1,29 +1,61 @@
-[REAL_PRECOMMIT_STYLE]
-exit=1
+===== INVALID_PYTHON =====
+git_commit_exit=1
+[WARNING] Unstaged files detected.
+[INFO] Stashing unstaged files to C:\Users\shata\.cache\pre-commit\patch1791137119-3256.
 local style checks.......................................................Failed
 - hook id: style
 - exit code: 1
 
 BLOCKED
-- syntax: .lab1_negative_tmp/bad.py: invalid syntax (bad.py, line 1)
+- syntax: .lab1_negative_commit/bad.py: invalid syntax (bad.py, line 1)
 
-
-[REAL_PRECOMMIT_SECRET]
-exit=1
 local secret scan........................................................Failed
 - hook id: secrets
 - exit code: 1
 
 BLOCKED
-- secret-like token: .lab1_negative_tmp/secret.txt
+- secret-like token: FINALIZE_LAB1.ps1
+- secret-like token: FINALIZE_LAB1_RESUME.ps1
 
+local large-file guard...................................................Passed
+[INFO] Restored changes from C:\Users\shata\.cache\pre-commit\patch1791137119-3256.
 
-[REAL_PRECOMMIT_LARGE_FILE]
-exit=1
+===== SECRET =====
+git_commit_exit=1
+[WARNING] Unstaged files detected.
+[INFO] Stashing unstaged files to C:\Users\shata\.cache\pre-commit\patch1791137121-24384.
+local style checks.......................................................Passed
+local secret scan........................................................Failed
+- hook id: secrets
+- exit code: 1
+
+BLOCKED
+- secret-like token: FINALIZE_LAB1.ps1
+- secret-like token: FINALIZE_LAB1_RESUME.ps1
+- secret-like token: .lab1_negative_commit/secret.txt
+
+local large-file guard...................................................Passed
+[INFO] Restored changes from C:\Users\shata\.cache\pre-commit\patch1791137121-24384.
+
+===== LARGE_FILE =====
+git_commit_exit=1
+[WARNING] Unstaged files detected.
+[INFO] Stashing unstaged files to C:\Users\shata\.cache\pre-commit\patch1791137123-7024.
+local style checks.......................................................Passed
+local secret scan........................................................Failed
+- hook id: secrets
+- exit code: 1
+
+BLOCKED
+- secret-like token: FINALIZE_LAB1.ps1
+- secret-like token: FINALIZE_LAB1_RESUME.ps1
+
 local large-file guard...................................................Failed
 - hook id: large-files
 - exit code: 1
 
 BLOCKED
-- large file >5 MiB: .lab1_negative_tmp/large.bin (6291456 bytes)
+- large file >5 MiB: .lab1_negative_commit/large.bin (6291456 bytes)
+
+[INFO] Restored changes from C:\Users\shata\.cache\pre-commit\patch1791137123-7024.
 
