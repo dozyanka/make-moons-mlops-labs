@@ -1,0 +1,23 @@
+{
+  "generator": {
+    "chunk_size": 700,
+    "n_samples": 24000,
+    "noise": 0.22,
+    "seed": 42,
+    "test_fraction": 0.15,
+    "validation_fraction": 0.15,
+    "variant": 9
+  },
+  "raw": {
+    "bytes": 711486,
+    "path": "data\\raw\\moons.csv",
+    "sha256": "dd38bd033f2300777fb0420e4c7bf895946435fa3b76c4d495a69e120b54be91"
+  },
+  "source": "sklearn.datasets.make_moons",
+  "splits": {
+    "chunks": 24,
+    "test": 3600,
+    "train": 16800,
+    "validation": 3600
+  }
+}

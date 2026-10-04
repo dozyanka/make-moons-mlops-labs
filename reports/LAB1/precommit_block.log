@@ -1,0 +1,29 @@
+[REAL_PRECOMMIT_STYLE]
+exit=1
+local style checks.......................................................Failed
+- hook id: style
+- exit code: 1
+
+BLOCKED
+- syntax: .lab1_negative_tmp/bad.py: invalid syntax (bad.py, line 1)
+
+
+[REAL_PRECOMMIT_SECRET]
+exit=1
+local secret scan........................................................Failed
+- hook id: secrets
+- exit code: 1
+
+BLOCKED
+- secret-like token: .lab1_negative_tmp/secret.txt
+
+
+[REAL_PRECOMMIT_LARGE_FILE]
+exit=1
+local large-file guard...................................................Failed
+- hook id: large-files
+- exit code: 1
+
+BLOCKED
+- large file >5 MiB: .lab1_negative_tmp/large.bin (6291456 bytes)
+

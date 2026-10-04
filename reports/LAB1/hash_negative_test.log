@@ -1,0 +1,6 @@
+{
+  "expected_sha256": "dd38bd033f2300777fb0420e4c7bf895946435fa3b76c4d495a69e120b54be91",
+  "altered_sha256": "9d021449f187e6c94b6e2aeb78c515e4c6650c4954ad7f80ab80c0e485e8c0da",
+  "match": false,
+  "verdict": "tampering_detected"
+}

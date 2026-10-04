@@ -1,0 +1,18 @@
+repos:
+  - repo: local
+    hooks:
+      - id: style
+        name: local style checks
+        entry: python scripts/precommit_checks.py --style
+        language: system
+        pass_filenames: false
+      - id: secrets
+        name: local secret scan
+        entry: python scripts/precommit_checks.py --secrets
+        language: system
+        pass_filenames: false
+      - id: large-files
+        name: local large-file guard
+        entry: python scripts/precommit_checks.py --large-files
+        language: system
+        pass_filenames: false
