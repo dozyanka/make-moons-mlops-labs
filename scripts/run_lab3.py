@@ -30,7 +30,9 @@ def _plot_histories(histories: dict[str, list[dict[str, float]]]) -> None:
     ax.grid(alpha=0.2)
     ax.legend()
     fig.tight_layout()
-    fig.savefig(ROOT / "reports/LAB3/figures/loss_curves.png", dpi=150)
+    figure_dir = ROOT / "reports/LAB3/figures"
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure_dir / "loss_curves.png", dpi=150)
     plt.close(fig)
 
 
@@ -169,3 +171,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

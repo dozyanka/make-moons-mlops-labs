@@ -1,0 +1,7 @@
+{
+  "reference_seed": 42,
+  "alternate_seed": 43,
+  "prediction_max_abs_diff": 0.23098742961883545,
+  "accuracy_abs_diff": 0.0011111111111110628,
+  "pass": true
+}

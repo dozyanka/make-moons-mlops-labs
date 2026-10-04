@@ -1,0 +1,25 @@
+{
+  "full_vs_chunk_prediction_max_abs_diff": 0.09655901789665222,
+  "full_model_sha256": "e739b5620b312f4c5104df0c5bed1980ada64e164d77c886eb32d55b664b6cc3",
+  "ml_lab2_full_accuracy": 0.9552777777777778,
+  "dl_full_accuracy": 0.9527777777777777,
+  "device_parity": {
+    "status": "checked",
+    "reason": "",
+    "max_abs_diff": 1.7881393432617188e-07
+  },
+  "reproducibility": {
+    "mode": "full_cpu_deterministic",
+    "prediction_max_abs_diff": 0.0,
+    "metric_diff_accuracy": 0.0,
+    "allowed_metric_diff": 0.005,
+    "pass": true
+  },
+  "seed_negative_control": {
+    "reference_seed": 42,
+    "alternate_seed": 43,
+    "prediction_max_abs_diff": 0.23098742961883545,
+    "accuracy_abs_diff": 0.0011111111111110628,
+    "pass": true
+  }
+}

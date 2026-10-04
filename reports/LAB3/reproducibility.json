@@ -1,0 +1,7 @@
+{
+  "mode": "full_cpu_deterministic",
+  "prediction_max_abs_diff": 0.0,
+  "metric_diff_accuracy": 0.0,
+  "allowed_metric_diff": 0.005,
+  "pass": true
+}
