@@ -12,3 +12,5 @@ runs_fallback/
 .vscode/
 
 data/runtime_synthetic/
+mlflow.db
+mlartifacts/

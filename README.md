@@ -8,7 +8,7 @@
 
 ## Статус
 
-Лабораторная работа 1 завершена.
+Лабораторные работы 1 и 2 завершены.
 
 Реализованы:
 
@@ -55,3 +55,11 @@ pre-commit run --all-files
 - `src/moons_lab/` — код проекта;
 - `tests/` — тесты;
 - `.github/` — CI и шаблон pull request.
+
+## ЛР2
+
+Классический ML для make_moons сравнивается в двух режимах: full dataset и 24 чанка.
+
+Pipeline: StandardScaler -> RBFSampler -> SGDClassifier.
+
+Итоговые метрики, bootstrap-интервалы, время, память и MLflow run ID находятся в eports/LAB2/.

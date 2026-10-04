@@ -1,0 +1,27 @@
+{
+  "best_gamma": 1.4,
+  "linear_baseline_validation": {
+    "accuracy": 0.8741666666666666,
+    "f1": 0.8742714404662781,
+    "roc_auc": 0.9504487654320988
+  },
+  "linear_baseline_test": {
+    "accuracy": 0.8730555555555556,
+    "f1": 0.8722393066815768,
+    "roc_auc": 0.9508447530864198
+  },
+  "full_test": {
+    "accuracy": 0.9552777777777778,
+    "f1": 0.9553150152650569,
+    "roc_auc": 0.9927719135802469
+  },
+  "chunk_test": {
+    "accuracy": 0.9552777777777778,
+    "f1": 0.9553150152650569,
+    "roc_auc": 0.9927719135802469
+  },
+  "prediction_max_abs_diff": 0.0,
+  "model_sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+  "chunk_model_sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+  "chunks": 24
+}

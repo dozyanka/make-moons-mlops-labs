@@ -1,0 +1,6 @@
+experiment_id,experiment_name,run_id,status,run_name,params,metrics
+2,lab2_ml,92db92877da945769ba1fc79b7b3ad6e,FINISHED,lab2_chunks,"{""alpha"": ""0.0001"", ""best_gamma"": ""1.4"", ""bootstrap_rounds"": ""250"", ""chunk_size"": ""700"", ""gamma_candidates"": ""[0.7, 1.0, 1.4, 1.8]"", ""mode"": ""chunks"", ""passes"": ""4"", ""rbf_components"": ""128"", ""seed"": ""42"", ""test_used_for_tuning"": ""False""}","{""accuracy"": 0.9552777777777778, ""elapsed_s"": 0.5425637000007555, ""f1"": 0.9553150152650569, ""peak_memory_mb"": 1.5650758743286133, ""roc_auc"": 0.9927719135802469}"
+2,lab2_ml,266a11fa19084bbd89cbd9dde34b5957,FINISHED,lab2_full,"{""alpha"": ""0.0001"", ""best_gamma"": ""1.4"", ""bootstrap_rounds"": ""250"", ""chunk_size"": ""700"", ""gamma_candidates"": ""[0.7, 1.0, 1.4, 1.8]"", ""mode"": ""full"", ""passes"": ""4"", ""rbf_components"": ""128"", ""seed"": ""42"", ""test_used_for_tuning"": ""False""}","{""accuracy"": 0.9552777777777778, ""elapsed_s"": 0.33201039998675697, ""f1"": 0.9553150152650569, ""peak_memory_mb"": 1.8371801376342773, ""roc_auc"": 0.9927719135802469}"
+1,tests,3cc56cdc46564f01a9204ce0e621d5f4,FINISHED,test_run,"{""a"": ""1""}","{""m"": 0.5}"
+1,tests,eaca96916987477895adc50b4a71150c,FINISHED,test_run,"{""a"": ""1""}","{""m"": 0.5}"
+1,tests,54dfafb481d24e9185aa2063265bf6a0,FINISHED,test_run,"{""a"": ""1""}","{""m"": 0.5}"

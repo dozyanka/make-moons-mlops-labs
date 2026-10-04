@@ -45,7 +45,7 @@ def tracked_run(run_name: str, experiment: str = "make_moons") -> Iterator[RunHa
     try:
         import mlflow
 
-        mlflow.set_tracking_uri("file:./mlruns")
+        mlflow.set_tracking_uri("sqlite:///mlflow.db")
         mlflow.set_experiment(experiment)
         with mlflow.start_run(run_name=run_name) as active:
             yield RunHandle(active.info.run_id, "mlflow", mlflow_mod=mlflow)
@@ -58,3 +58,4 @@ def tracked_run(run_name: str, experiment: str = "make_moons") -> Iterator[RunHa
             encoding="utf-8",
         )
         yield RunHandle(run_id, "fallback", base=base)
+
