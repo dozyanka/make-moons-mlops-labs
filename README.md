@@ -60,19 +60,21 @@ pre-commit run --all-files
 
 Классический ML для make_moons сравнивается в двух режимах: full dataset и 24 чанка.
 
-Pipeline: StandardScaler -> RBFSampler -> SGDClassifier.
+StandardScaler -> RBFSampler -> SGDClassifier.
 
-Итоговые метрики, bootstrap-интервалы, время, память и MLflow run ID находятся в eports/LAB2/.
+Итоговые метрики, bootstrap-интервалы, время, память и MLflow run ID находятся в 
+eports/LAB2/.
 
 ## ЛР3
 
 PyTorch MLP 2 -> 32 -> 32 -> 1 обучается в двух режимах: full dataset и streaming по 24 чанкам.
 
-Метрики, bootstrap-интервалы, кривые обучения, память/время, reproducibility, seed negative-control и device parity находятся в eports/LAB3/.
+Метрики, bootstrap-интервалы, кривые обучения, память/время, reproducibility, seed negative-control и device parity находятся в 
+eports/LAB3/.
 
 ## Live defense demos
 
-Готовые модели ЛР1–ЛР3, команды для живой демонстрации и заметки
+Модели ЛР1–ЛР3, команды и заметки
 по каждому пункту задания находятся в `defense_demo/`.
 
 Запуск всех моделей:
