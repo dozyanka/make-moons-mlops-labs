@@ -1,0 +1,14 @@
+{
+  "linear_baseline.joblib": {
+    "bytes": 879,
+    "sha256": "66d6deb6c892b5e46d6bdd4ec8342a4840a23b242ca58c981218a4cec482f679"
+  },
+  "ml_model.joblib": {
+    "bytes": 5957,
+    "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b"
+  },
+  "ml_model_chunk.joblib": {
+    "bytes": 5957,
+    "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b"
+  }
+}

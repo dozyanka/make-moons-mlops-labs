@@ -1,0 +1,13 @@
+{
+  "production_scaler": {
+    "error_to_train_mean": 1.1102230246251565e-16,
+    "error_to_train_plus_forbidden_mean": 0.006993876921832787,
+    "leak_suspected": false
+  },
+  "intentionally_leaky_scaler": {
+    "error_to_train_mean": 0.006993876921832898,
+    "error_to_train_plus_forbidden_mean": 0.0,
+    "leak_suspected": true
+  },
+  "pass": true
+}

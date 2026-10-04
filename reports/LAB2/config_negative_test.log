@@ -1,0 +1,3 @@
+case_1: REJECTED: () -> Value error, all gamma values must be positive
+case_2: REJECTED: ('chunk_size',) -> Input should be greater than or equal to 50
+case_3: REJECTED: ('passes',) -> Input should be greater than or equal to 1

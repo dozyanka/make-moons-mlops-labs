@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "lab2"]
   pull_request:
     branches: ["main"]
 
@@ -22,20 +22,29 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install current project and Lab 1 tools
-        run: pip install -e ".[test]"
+      - name: Install project
+        run: pip install -e ".[test,tracking]"
 
-      - name: Reproduce dataset
+      - name: Generate deterministic dataset
         run: python scripts/prepare_data.py
 
-      - name: Run Lab 1 tests with coverage
+      - name: Run Lab 2
+        run: python scripts/run_lab2.py
+
+      - name: Run Lab 1 and Lab 2 tests with coverage
         run: |
           python -m pytest \
             tests/test_data.py \
             tests/test_eda.py \
+            tests/test_metrics.py \
+            tests/test_ml.py \
+            tests/test_tracking_utils.py \
             -q \
             --cov=moons_lab.data \
             --cov=moons_lab.eda \
+            --cov=moons_lab.metrics \
+            --cov=moons_lab.ml_pipeline \
+            --cov=moons_lab.tracking \
             --cov-report=term-missing
 
       - name: Run project checks
