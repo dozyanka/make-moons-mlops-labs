@@ -1,19 +1,45 @@
 name: CI
+
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - run: python -m pip install -U pip
-      - run: pip install -e '.[test,dl]'
-      - run: python scripts/precommit_checks.py --all
-      - run: pytest --cov=moons_lab --cov-report=term-missing
+          python-version: "3.13"
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install current project and Lab 1 tools
+        run: pip install -e ".[test]"
+
+      - name: Reproduce dataset
+        run: python scripts/prepare_data.py
+
+      - name: Run Lab 1 tests with coverage
+        run: |
+          python -m pytest \
+            tests/test_data.py \
+            tests/test_eda.py \
+            -q \
+            --cov=moons_lab.data \
+            --cov=moons_lab.eda \
+            --cov-report=term-missing
+
+      - name: Run project checks
+        run: python scripts/precommit_checks.py --all
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files
