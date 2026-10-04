@@ -1,0 +1,12 @@
+{
+  "dl_model.pt": {
+    "bytes": 8161,
+    "sha256": "e739b5620b312f4c5104df0c5bed1980ada64e164d77c886eb32d55b664b6cc3",
+    "tensor_parameter_count": 1185
+  },
+  "dl_model_chunk.pt": {
+    "bytes": 8233,
+    "sha256": "9571051ccab02b5cf97ef10f67da662b7f5064f6c1586a58df66df044ff925c8",
+    "tensor_parameter_count": 1185
+  }
+}

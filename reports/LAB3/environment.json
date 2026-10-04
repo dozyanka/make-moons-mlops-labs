@@ -1,0 +1,7 @@
+{
+  "torch_version": "2.14.0+cu130",
+  "cuda_available": true,
+  "cuda_version": "13.0",
+  "device_count": 1,
+  "gpu_name": "NVIDIA GeForce RTX 5070"
+}

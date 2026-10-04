@@ -8,7 +8,7 @@
 
 ## Статус
 
-Лабораторные работы 1 и 2 завершены.
+Лабораторные работы 1, 2 и 3 завершены.
 
 Реализованы:
 
@@ -63,3 +63,9 @@ pre-commit run --all-files
 Pipeline: StandardScaler -> RBFSampler -> SGDClassifier.
 
 Итоговые метрики, bootstrap-интервалы, время, память и MLflow run ID находятся в eports/LAB2/.
+
+## ЛР3
+
+PyTorch MLP 2 -> 32 -> 32 -> 1 обучается в двух режимах: full dataset и streaming по 24 чанкам.
+
+Метрики, bootstrap-интервалы, кривые обучения, память/время, reproducibility, seed negative-control и device parity находятся в eports/LAB3/.
