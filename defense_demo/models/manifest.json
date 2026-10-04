@@ -1,0 +1,22 @@
+{
+  "lab1_logistic.joblib": {
+    "bytes": 879,
+    "sha256": "8fa53a5fbe0bfe6a13b46f146e9d079009eeeffc0edfaf5fb8a8b2f99b56b2ec"
+  },
+  "lab2_chunks.joblib": {
+    "bytes": 5957,
+    "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b"
+  },
+  "lab2_full.joblib": {
+    "bytes": 5957,
+    "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b"
+  },
+  "lab3_full.pt": {
+    "bytes": 8161,
+    "sha256": "e739b5620b312f4c5104df0c5bed1980ada64e164d77c886eb32d55b664b6cc3"
+  },
+  "lab3_streaming.pt": {
+    "bytes": 8233,
+    "sha256": "9571051ccab02b5cf97ef10f67da662b7f5064f6c1586a58df66df044ff925c8"
+  }
+}

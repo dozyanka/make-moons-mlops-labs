@@ -1,0 +1,18 @@
+{
+  "lab": 3,
+  "mode": "full",
+  "checkpoint": "lab3_full.pt",
+  "model_loader": "moons_lab.dl_pipeline.MoonMLP",
+  "scaler": "recomputed from train split",
+  "actual": {
+    "accuracy": 0.9527777777777777,
+    "f1": 0.9527777777777777,
+    "roc_auc": 0.9925404320987655
+  },
+  "report": {
+    "accuracy": 0.9527777777777776,
+    "f1": 0.9527777777777776,
+    "roc_auc": 0.9925404320987654
+  },
+  "pass": true
+}

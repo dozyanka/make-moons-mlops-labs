@@ -1,0 +1,8 @@
+{
+  "lab": 1,
+  "model": "LogisticRegression",
+  "actual_accuracy": 0.8679166666666667,
+  "report_accuracy": 0.8679166666666667,
+  "difference": 0.0,
+  "pass": true
+}
