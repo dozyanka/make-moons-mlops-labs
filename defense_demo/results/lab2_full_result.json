@@ -1,0 +1,17 @@
+{
+  "lab": 2,
+  "mode": "full",
+  "model_file": "lab2_full.joblib",
+  "test_data": "data\\processed\\test.csv",
+  "actual": {
+    "accuracy": 0.9552777777777778,
+    "f1": 0.9553150152650569,
+    "roc_auc": 0.9927719135802469
+  },
+  "report": {
+    "accuracy": 0.9552777777777778,
+    "f1": 0.9553150152650568,
+    "roc_auc": 0.9927719135802467
+  },
+  "pass": true
+}

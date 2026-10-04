@@ -1,0 +1,18 @@
+{
+  "lab": 3,
+  "mode": "streaming",
+  "checkpoint": "lab3_streaming.pt",
+  "model_loader": "moons_lab.dl_pipeline.MoonMLP",
+  "scaler": "recomputed from train split",
+  "actual": {
+    "accuracy": 0.9530555555555555,
+    "f1": 0.9529116745611591,
+    "roc_auc": 0.9926040123456791
+  },
+  "report": {
+    "accuracy": 0.9530555555555555,
+    "f1": 0.9529116745611592,
+    "roc_auc": 0.9926040123456792
+  },
+  "pass": true
+}

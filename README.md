@@ -69,3 +69,14 @@ Pipeline: StandardScaler -> RBFSampler -> SGDClassifier.
 PyTorch MLP 2 -> 32 -> 32 -> 1 обучается в двух режимах: full dataset и streaming по 24 чанкам.
 
 Метрики, bootstrap-интервалы, кривые обучения, память/время, reproducibility, seed negative-control и device parity находятся в eports/LAB3/.
+
+## Live defense demos
+
+Готовые модели ЛР1–ЛР3, команды для живой демонстрации и заметки
+по каждому пункту задания находятся в `defense_demo/`.
+
+Запуск всех моделей:
+
+```powershell
+python .\defense_demo\run_all.py
+```
