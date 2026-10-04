@@ -1,0 +1,9 @@
+{
+  "variant": 9,
+  "seed": 42,
+  "n_samples": 24000,
+  "noise": 0.22,
+  "test_fraction": 0.15,
+  "validation_fraction": 0.15,
+  "chunk_size": 700
+}

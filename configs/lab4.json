@@ -1,0 +1,8 @@
+{
+  "seed": 42,
+  "chunk_size": 700,
+  "target_false_reject_rate": 0.03,
+  "confidence_threshold": 0.52,
+  "ood_samples": 2000,
+  "ood_shift": 3.5
+}

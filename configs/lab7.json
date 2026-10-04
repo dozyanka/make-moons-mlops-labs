@@ -1,0 +1,13 @@
+{
+  "seed": 101,
+  "benchmark_batch_size": 6000,
+  "benchmark_repeats": 4,
+  "jobs": [1, 2, 4],
+  "window_size": 1000,
+  "n_windows": 8,
+  "drift_start_window": 4,
+  "drift_shift_x": 0.9,
+  "drift_shift_y": 0.35,
+  "psi_alert_threshold": 0.2,
+  "csi_alert_threshold": 0.15
+}

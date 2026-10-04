@@ -1,0 +1,40 @@
+digraph G {
+  graph [rankdir=TB, splines=ortho, bgcolor="white", pad=0.35, nodesep=0.55, ranksep=0.75, fontname="DejaVu Sans", label="C4 Container — вариант 09 make_moons", labelloc=t, fontsize=24, dpi=150];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, margin="0.20,0.14", width=2.8];
+  edge [fontname="DejaVu Sans", fontsize=10, arrowsize=0.8];
+
+  engineer [shape=oval, fillcolor="#dbeafe", label="ML-инженер\nобучение, promote/rollback, runtime"];
+  analyst [shape=oval, fillcolor="#dbeafe", label="Аналитик\nкачество, uptime, latency, drift"];
+  client [shape=oval, fillcolor="#e5e7eb", label="Источник запросов / нагрузочный тест\n/predict, /predict/batch"];
+  {rank=same; engineer; analyst; client;}
+
+  generator [fillcolor="#c7d2fe", label="Online Generator Service\nЛР5\nPATCH /config → POST /generate\nбез перезапуска"];
+  training [fillcolor="#ddd6fe", label="Training / Evaluation\nЛР2–4,8\nscikit-learn + PyTorch + validator"];
+  service [fillcolor="#bfdbfe", label="FastAPI Model Service\nЛР6–7\n/predict, /predict/batch\n/metrics, /models, /runtime"];
+  {rank=same; generator; training; service;}
+
+  data [shape=cylinder, fillcolor="#a7f3d0", label="Data Storage\nraw / processed / 24 chunks / synthetic"];
+  tracking [shape=cylinder, fillcolor="#fde68a", label="Experiment Tracking\nMLflow (fallback offline)\nparams + metrics + artifacts"];
+  registry [shape=cylinder, fillcolor="#a5f3fc", label="Model Registry\njoblib / .pt / .npz\nSHA-256 + statuses + history"];
+  monitor [fillcolor="#bae6fd", label="Monitoring Service\nЛР6–8\nPSI / KS / CSI\nuptime / latency / online accuracy"];
+  {rank=same; data; tracking; registry; monitor;}
+
+  alerts [fillcolor="#fecaca", label="Alert Manager — ЛР8\ndrift / reject-rate / error-rate\n+ cooldown / JSONL log"];
+
+  engineer -> training [label="run configs"];
+  engineer -> generator [label="PATCH config"];
+  engineer -> service [label="promote / rollback / runtime"];
+  client -> service [label="HTTP requests"];
+  analyst -> tracking [label="compare runs"];
+  analyst -> monitor [label="read metrics"];
+
+  generator -> data [label="similar / random / drifted"];
+  data -> training [label="full / chunks"];
+  training -> tracking [label="log runs"];
+  training -> registry [label="save model / validator"];
+  registry -> service [label="active version + hash"];
+  generator -> monitor [label="drift stream"];
+  service -> monitor [label="observations + service metrics"];
+  monitor -> alerts [label="threshold events"];
+  alerts -> analyst [label="alert log", constraint=false];
+}

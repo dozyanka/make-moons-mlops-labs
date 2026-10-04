@@ -1,0 +1,38 @@
+<mxfile host="app.diagrams.net" modified="2026-09-21T00:00:00.000Z" agent="ChatGPT" version="24.7.17">
+  <diagram id="make-moons-c4" name="C4 make_moons">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="eng" value="ML-инженер&#xa;обучение, promote/rollback, runtime" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="120" width="190" height="85" as="geometry"/></mxCell>
+        <mxCell id="ana" value="Аналитик&#xa;качество, uptime, latency, drift" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1"><mxGeometry x="40" y="300" width="190" height="85" as="geometry"/></mxCell>
+        <mxCell id="cli" value="Источник запросов / нагрузочный тест&#xa;/predict, /predict/batch" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666" vertex="1" parent="1"><mxGeometry x="40" y="500" width="210" height="85" as="geometry"/></mxCell>
+
+        <mxCell id="train" value="Training / Evaluation&#xa;ЛР2–4,8&#xa;sklearn + PyTorch + validator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1" vertex="1" parent="1"><mxGeometry x="330" y="80" width="230" height="100" as="geometry"/></mxCell>
+        <mxCell id="gen" value="Online Generator Service&#xa;ЛР5&#xa;PATCH /config → POST /generate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1"><mxGeometry x="330" y="240" width="230" height="100" as="geometry"/></mxCell>
+        <mxCell id="svc" value="FastAPI Model Service&#xa;ЛР6–7&#xa;/predict /batch /metrics /models /runtime" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1"><mxGeometry x="330" y="440" width="250" height="115" as="geometry"/></mxCell>
+        <mxCell id="mon" value="Monitoring Service&#xa;ЛР6–8&#xa;PSI / KS / CSI, service metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0e0e3;strokeColor=#0e8088;fontStyle=1" vertex="1" parent="1"><mxGeometry x="680" y="390" width="240" height="110" as="geometry"/></mxCell>
+        <mxCell id="alert" value="Alert Manager&#xa;ЛР8&#xa;drift / reject-rate / error-rate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1" vertex="1" parent="1"><mxGeometry x="1030" y="390" width="220" height="105" as="geometry"/></mxCell>
+
+        <mxCell id="data" value="Data Storage&#xa;raw / processed / 24 chunks / synthetic" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1" vertex="1" parent="1"><mxGeometry x="680" y="80" width="230" height="95" as="geometry"/></mxCell>
+        <mxCell id="reg" value="Model Registry&#xa;joblib / .pt / .npz&#xa;SHA-256, status, history" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#b1ddf0;strokeColor=#10739e;fontStyle=1" vertex="1" parent="1"><mxGeometry x="1030" y="80" width="220" height="95" as="geometry"/></mxCell>
+        <mxCell id="track" value="Experiment Tracking&#xa;MLflow (offline fallback)&#xa;params / metrics / artifacts" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1" vertex="1" parent="1"><mxGeometry x="1030" y="220" width="220" height="95" as="geometry"/></mxCell>
+
+        <mxCell id="e1" value="run configs" edge="1" parent="1" source="eng" target="train" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="runtime / promote / rollback" edge="1" parent="1" source="eng" target="svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="PATCH config" edge="1" parent="1" source="eng" target="gen" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="HTTP requests" edge="1" parent="1" source="cli" target="svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" value="full / chunks" edge="1" parent="1" source="data" target="train" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="similar / random / drift" edge="1" parent="1" source="gen" target="data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" value="save models" edge="1" parent="1" source="train" target="reg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" value="log runs" edge="1" parent="1" source="train" target="track" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" value="active version + hash" edge="1" parent="1" source="reg" target="svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" value="observations / metrics" edge="1" parent="1" source="svc" target="mon" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e11" value="drift stream" edge="1" parent="1" source="gen" target="mon" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e12" value="threshold events" edge="1" parent="1" source="mon" target="alert" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e13" value="metrics" edge="1" parent="1" source="mon" target="ana" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e14" value="runs" edge="1" parent="1" source="track" target="ana" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e15" value="alerts" edge="1" parent="1" source="alert" target="ana" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,9 @@
+{
+  "seed": 42,
+  "chunk_size": 700,
+  "rbf_components": 128,
+  "gamma_candidates": [0.7, 1.0, 1.4, 1.8],
+  "alpha": 0.0001,
+  "passes": 4,
+  "bootstrap_rounds": 250
+}

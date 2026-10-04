@@ -1,0 +1,10 @@
+{
+  "seed": 77,
+  "n_samples": 12000,
+  "similar_noise": 0.22,
+  "random_range": 4.0,
+  "drift_shift_x": 0.9,
+  "drift_shift_y": 0.35,
+  "drift_rotation_deg": 12.0,
+  "drift_label_flip_rate": 0.04
+}

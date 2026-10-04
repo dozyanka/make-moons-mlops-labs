@@ -1,0 +1,8 @@
+[console_scripts]
+evaluate = moons_lab.cli:evaluate_entry
+generate = moons_lab.cli:generate_entry
+monitor = moons_lab.cli:monitor_entry
+serve = moons_lab.cli:serve_entry
+train_dl = moons_lab.cli:train_dl_entry
+train_ml = moons_lab.cli:train_ml_entry
+train_validator = moons_lab.cli:train_validator_entry

@@ -1,0 +1,7 @@
+{
+  "seed": 42,
+  "drift_psi_threshold": 0.2,
+  "validator_reject_rate_threshold": 0.15,
+  "service_error_rate_threshold": 0.01,
+  "alert_cooldown_seconds": 60
+}
