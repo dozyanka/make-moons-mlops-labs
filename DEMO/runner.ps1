@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$AutoSetup
 )
 
@@ -95,13 +95,29 @@ function Install-PythonIfMissing {
     return $base
 }
 
+function Get-Sha256Hex([string]$Path) {
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    $stream = $null
+
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        $hashBytes = $sha256.ComputeHash($stream)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "")
+    }
+    finally {
+        if ($null -ne $stream) {
+            $stream.Dispose()
+        }
+        $sha256.Dispose()
+    }
+}
 function Get-DependencySignature {
     $parts = @()
 
     foreach ($file in @("pyproject.toml", "requirements-lock.txt")) {
         $path = Join-Path $Root $file
         if (Test-Path $path) {
-            $parts += (Get-FileHash $path -Algorithm SHA256).Hash
+            $parts += (Get-Sha256Hex $path)
         }
     }
 
