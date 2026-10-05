@@ -375,21 +375,31 @@ def start_mlflow(
     )
 
 
-def mlflow_smoke_test() -> None:
-    port = 5051
+def get_free_local_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
 
-    if port_is_open(port):
-        raise RuntimeError(
-            f"Тестовый порт {port} уже занят. "
-            "Закройте процесс на этом порту и повторите."
+
+def stop_process_tree(process: subprocess.Popen[str]) -> None:
+    if process.poll() is not None:
+        return
+
+    if os.name == "nt":
+        result = subprocess.run(
+            [
+                "taskkill",
+                "/PID",
+                str(process.pid),
+                "/T",
+                "/F",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
         )
-
-    process = start_mlflow(port, open_browser=False)
-
-    if process is None:
-        raise RuntimeError("MLflow smoke-test did not start its own process.")
-
-    print("[OK] MLflow one-worker smoke test passed.")
+        if result.returncode == 0:
+            return
 
     process.terminate()
     try:
@@ -398,6 +408,32 @@ def mlflow_smoke_test() -> None:
         process.kill()
         process.wait(timeout=5)
 
+
+def mlflow_smoke_test() -> None:
+    port = get_free_local_port()
+    process: subprocess.Popen[str] | None = None
+
+    try:
+        process = start_mlflow(port, open_browser=False)
+
+        if process is None:
+            raise RuntimeError("MLflow smoke-test did not start its own process.")
+
+        print(f"[OK] MLflow one-worker smoke test passed on port {port}.")
+    finally:
+        if process is not None:
+            stop_process_tree(process)
+
+    deadline = time.time() + 10.0
+    while time.time() < deadline:
+        if not port_is_open(port):
+            print(f"[OK] MLflow smoke-test process tree stopped; port {port} is free.")
+            return
+        time.sleep(0.25)
+
+    raise RuntimeError(
+        f"MLflow smoke-test left port {port} occupied after cleanup."
+    )
 
 def open_results() -> None:
     DEMO_OUTPUT.mkdir(parents=True, exist_ok=True)
