@@ -1,4 +1,4 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -18,3 +18,4 @@ mlartifacts/
 demo_output/
 .demo_backup/
 
+*.egg-info/

@@ -4,9 +4,11 @@ import argparse
 import contextlib
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
+import time
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -15,11 +17,21 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON = Path(sys.executable)
 DEMO_OUTPUT = ROOT / "demo_output"
 
+os.environ["PYTHONUTF8"] = "1"
+os.environ["PYTHONIOENCODING"] = "utf-8"
+os.environ["PYTHONUNBUFFERED"] = "1"
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except AttributeError:
+    pass
+
 
 def run(args: list[str], *, log_name: str | None = None) -> None:
     cmd = [str(PYTHON), *args]
     print()
-    print(">", " ".join(cmd))
+    print(">", " ".join(cmd), flush=True)
 
     if log_name is None:
         subprocess.run(cmd, cwd=ROOT, check=True)
@@ -29,7 +41,7 @@ def run(args: list[str], *, log_name: str | None = None) -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = log_dir / f"{log_name}_{stamp}.log"
-    print("Лог:", log_path)
+    print("Лог:", log_path, flush=True)
 
     with log_path.open("w", encoding="utf-8") as log:
         process = subprocess.Popen(
@@ -43,9 +55,11 @@ def run(args: list[str], *, log_name: str | None = None) -> None:
             bufsize=1,
         )
         assert process.stdout is not None
+
         for line in process.stdout:
-            print(line, end="")
+            print(line, end="", flush=True)
             log.write(line)
+
         code = process.wait()
 
     if code != 0:
@@ -54,7 +68,7 @@ def run(args: list[str], *, log_name: str | None = None) -> None:
 
 def run_exe(args: list[str], *, log_name: str | None = None) -> None:
     print()
-    print(">", " ".join(args))
+    print(">", " ".join(args), flush=True)
 
     if log_name is None:
         subprocess.run(args, cwd=ROOT, check=True)
@@ -64,7 +78,7 @@ def run_exe(args: list[str], *, log_name: str | None = None) -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_path = log_dir / f"{log_name}_{stamp}.log"
-    print("Лог:", log_path)
+    print("Лог:", log_path, flush=True)
 
     with log_path.open("w", encoding="utf-8") as log:
         process = subprocess.Popen(
@@ -78,9 +92,11 @@ def run_exe(args: list[str], *, log_name: str | None = None) -> None:
             bufsize=1,
         )
         assert process.stdout is not None
+
         for line in process.stdout:
-            print(line, end="")
+            print(line, end="", flush=True)
             log.write(line)
+
         code = process.wait()
 
     if code != 0:
@@ -112,6 +128,7 @@ def reproduced_report(lab: str):
 
         if destination.exists():
             shutil.rmtree(destination)
+
         shutil.copytree(official, destination)
 
         print()
@@ -156,9 +173,15 @@ def run_lab1() -> None:
 
         precommit = ROOT / ".venv" / "Scripts" / "pre-commit.exe"
         if (ROOT / ".git").exists() and precommit.exists():
-            run_exe([str(precommit), "run", "--all-files"], log_name="LAB1_PRECOMMIT")
+            run_exe(
+                [str(precommit), "run", "--all-files"],
+                log_name="LAB1_PRECOMMIT",
+            )
         else:
-            run(["scripts/precommit_checks.py", "--all"], log_name="LAB1_CHECKS")
+            run(
+                ["scripts/precommit_checks.py", "--all"],
+                log_name="LAB1_CHECKS",
+            )
 
     print("Оригинал: reports/LAB1")
     print("Новый прогон: demo_output/LAB1")
@@ -252,24 +275,128 @@ def all_tests() -> None:
     )
 
 
-def start_mlflow() -> None:
+def port_is_open(port: int) -> bool:
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
+            return True
+    except OSError:
+        return False
+
+
+def start_mlflow(
+    port: int = 5000,
+    *,
+    open_browser: bool = True,
+) -> subprocess.Popen[str] | None:
     mlflow_exe = ROOT / ".venv" / "Scripts" / "mlflow.exe"
     if not mlflow_exe.exists():
         raise FileNotFoundError(mlflow_exe)
 
-    subprocess.Popen(
-        [
-            str(mlflow_exe),
-            "ui",
-            "--backend-store-uri",
-            "sqlite:///mlflow.db",
-            "--port",
-            "5000",
-        ],
-        cwd=ROOT,
+    if port_is_open(port):
+        url = f"http://127.0.0.1:{port}"
+        print(f"MLflow UI уже запущен: {url}")
+        if open_browser:
+            webbrowser.open(url)
+        return None
+
+    log_dir = DEMO_OUTPUT / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / f"MLFLOW_UI_{port}.log"
+
+    command = [
+        str(mlflow_exe),
+        "server",
+        "--backend-store-uri",
+        "sqlite:///mlflow.db",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        str(port),
+        "--workers",
+        "1",
+    ]
+
+    creationflags = 0
+    popen_kwargs: dict[str, object] = {}
+
+    if os.name == "nt":
+        creationflags = (
+            subprocess.CREATE_NEW_PROCESS_GROUP
+            | subprocess.CREATE_NO_WINDOW
+        )
+    else:
+        popen_kwargs["start_new_session"] = True
+
+    log_file = log_path.open("a", encoding="utf-8")
+
+    try:
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            creationflags=creationflags,
+            **popen_kwargs,
+        )
+    finally:
+        log_file.close()
+
+    deadline = time.time() + 30.0
+
+    while time.time() < deadline:
+        if port_is_open(port):
+            url = f"http://127.0.0.1:{port}"
+            print(f"MLflow UI: {url}")
+            print(f"Лог MLflow: {log_path}")
+            if open_browser:
+                webbrowser.open(url)
+            return process
+
+        if process.poll() is not None:
+            tail = ""
+            if log_path.exists():
+                lines = log_path.read_text(
+                    encoding="utf-8",
+                    errors="replace",
+                ).splitlines()
+                tail = "\n".join(lines[-20:])
+
+            raise RuntimeError(
+                "MLflow завершился до запуска сервера.\n"
+                f"Лог: {log_path}\n{tail}"
+            )
+
+        time.sleep(0.5)
+
+    process.terminate()
+    raise RuntimeError(
+        f"MLflow не открыл порт {port} за 30 секунд. "
+        f"Смотрите лог: {log_path}"
     )
-    webbrowser.open("http://127.0.0.1:5000")
-    print("MLflow UI: http://127.0.0.1:5000")
+
+
+def mlflow_smoke_test() -> None:
+    port = 5051
+
+    if port_is_open(port):
+        raise RuntimeError(
+            f"Тестовый порт {port} уже занят. "
+            "Закройте процесс на этом порту и повторите."
+        )
+
+    process = start_mlflow(port, open_browser=False)
+
+    if process is None:
+        raise RuntimeError("MLflow smoke-test did not start its own process.")
+
+    print("[OK] MLflow one-worker smoke test passed.")
+
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
 
 
 def open_results() -> None:
@@ -278,6 +405,7 @@ def open_results() -> None:
     if os.name == "nt":
         os.startfile(ROOT / "reports")
         os.startfile(DEMO_OUTPUT)
+        print("Открыты папки reports и demo_output.")
     else:
         print("reports:", ROOT / "reports")
         print("demo_output:", DEMO_OUTPUT)
@@ -369,9 +497,12 @@ def interactive() -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke-test", action="store_true")
+    parser.add_argument("--mlflow-smoke-test", action="store_true")
     args = parser.parse_args()
 
-    if args.smoke_test:
+    if args.mlflow_smoke_test:
+        mlflow_smoke_test()
+    elif args.smoke_test:
         smoke_test()
     else:
         interactive()

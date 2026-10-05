@@ -1,5 +1,4 @@
 param(
-    [switch]$AutoSetup,
     [switch]$SmokeTest
 )
 
@@ -11,7 +10,7 @@ Set-Location $Root
 
 Write-Host ""
 Write-Host "========================================================================"
-Write-Host "ПОДГОТОВКА ОКРУЖЕНИЯ"
+Write-Host "PREPARING PYTHON ENVIRONMENT"
 Write-Host "========================================================================"
 
 $VenvPython = Join-Path $Root ".venv\Scripts\python.exe"
@@ -30,7 +29,7 @@ if (Test-Path $VenvPython) {
 
 if (-not $venvWorks) {
     if (Test-Path $VenvDir) {
-        Write-Host "Удаляется непереносимое или повреждённое .venv..."
+        Write-Host "Removing an invalid or non-portable .venv..."
         Remove-Item $VenvDir -Recurse -Force
     }
 
@@ -81,13 +80,14 @@ if (-not $venvWorks) {
 
     if (-not $BaseExe) {
         if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-            throw "Python 3.11+ не найден. Установите Python 3.13 и снова запустите RUN_DEMO.cmd."
+            throw "Python 3.11+ was not found. Install Python 3.13 and run RUN_DEMO.cmd again."
         }
 
-        Write-Host "Python не найден. Установка Python 3.13 через winget..."
+        Write-Host "Python was not found. Installing Python 3.13 with winget..."
         & winget install --id Python.Python.3.13 -e --source winget --accept-package-agreements --accept-source-agreements
+
         if ($LASTEXITCODE -ne 0) {
-            throw "winget не смог установить Python 3.13."
+            throw "winget could not install Python 3.13."
         }
 
         $Candidate = "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe"
@@ -96,56 +96,93 @@ if (-not $venvWorks) {
             $BaseArgs = @()
         }
         else {
-            throw "Python установлен, но ещё не виден текущему процессу. Закройте окно и снова запустите RUN_DEMO.cmd."
+            throw "Python was installed but is not visible yet. Close this window and run RUN_DEMO.cmd again."
         }
     }
 
-    Write-Host "Создаётся .venv..."
+    Write-Host "Creating .venv..."
     & $BaseExe @BaseArgs -m venv ".venv"
+
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось создать .venv."
+        throw "Could not create .venv."
     }
 }
 
 if (-not (Test-Path $VenvPython)) {
-    throw ".venv создано, но python.exe не найден."
+    throw ".venv exists but python.exe was not found."
 }
 
-$ReadyFile = Join-Path $VenvDir ".instructor_demo_ready"
+function Get-Sha256Hex([string]$Path) {
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    $stream = $null
 
-if (-not (Test-Path $ReadyFile)) {
-    Write-Host "Устанавливаются зависимости проекта. На первом запуске это может занять несколько минут..."
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        $hashBytes = $sha256.ComputeHash($stream)
+        return ([System.BitConverter]::ToString($hashBytes)).Replace("-", "")
+    }
+    finally {
+        if ($null -ne $stream) {
+            $stream.Dispose()
+        }
+        $sha256.Dispose()
+    }
+}
+
+$signatureParts = @()
+foreach ($file in @("pyproject.toml", "requirements-lock.txt")) {
+    $path = Join-Path $Root $file
+    if (Test-Path $path) {
+        $signatureParts += (Get-Sha256Hex $path)
+    }
+}
+
+$dependencySignature = ($signatureParts -join ":")
+$signatureFile = Join-Path $VenvDir ".instructor_demo_signature"
+$installedSignature = ""
+
+if (Test-Path $signatureFile) {
+    $installedSignature = ([System.IO.File]::ReadAllText($signatureFile)).Trim()
+}
+
+if ($installedSignature -ne $dependencySignature) {
+    Write-Host "Installing/updating project dependencies. The first run can take a few minutes..."
 
     & $VenvPython -m pip install --upgrade pip setuptools wheel
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось обновить pip/setuptools/wheel."
+        throw "Could not update pip/setuptools/wheel."
     }
 
     & $VenvPython -m pip install -e ".[test,tracking,dl,report]"
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось установить зависимости проекта."
+        throw "Could not install project dependencies."
     }
 
-    Set-Content $ReadyFile "ready" -Encoding ascii
+    [System.IO.File]::WriteAllText($signatureFile, $dependencySignature)
 }
 else {
-    Write-Host "[OK] Локальное окружение уже подготовлено."
+    Write-Host "[OK] Dependencies are already up to date."
 }
 
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+$env:PYTHONUNBUFFERED = "1"
+
 Write-Host ""
-Write-Host "Проверка библиотек..."
+Write-Host "Checking libraries..."
 & $VenvPython ".\DEMO\verify_environment.py"
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Проверка выявила отсутствующие зависимости. Выполняется восстановление..."
+    Write-Host "Dependency verification failed. Repairing the environment..."
+
     & $VenvPython -m pip install -e ".[test,tracking,dl,report]"
     if ($LASTEXITCODE -ne 0) {
-        throw "Не удалось восстановить зависимости."
+        throw "Could not repair project dependencies."
     }
 
     & $VenvPython ".\DEMO\verify_environment.py"
     if ($LASTEXITCODE -ne 0) {
-        throw "Окружение не прошло повторную проверку."
+        throw "Environment verification failed again."
     }
 }
 
