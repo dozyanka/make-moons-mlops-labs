@@ -30,6 +30,11 @@ on:
       - 'tests/test_lab4_publication.py'
       - '.github/workflows/lab4-ci.yml'
       - 'pyproject.toml'
+      - 'DEMO/**'
+      - 'defense_demo/run_all.py'
+      - 'reports/README.md'
+      - 'README.md'
+      - 'tests/test_demo_lab4_integration.py'
   pull_request:
     branches: [main]
 
@@ -49,6 +54,10 @@ jobs:
         run: python scripts/verify_lab4_data.py --check-git-index
       - name: Verify committed LAB4 report and code provenance
         run: python scripts/verify_lab4_data.py --check-published
+      - name: Check LAB4 instructor DEMO integration
+        run: |
+          python DEMO/menu.py --lab4-smoke-test
+          python -m pytest -q -p no:cacheprovider tests/test_demo_lab4_integration.py
       - name: Run LAB4 (real MLflow)
         env:
           MLFLOW_ALLOW_FILE_STORE: 'true'
