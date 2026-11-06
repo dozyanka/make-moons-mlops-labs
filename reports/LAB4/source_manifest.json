@@ -1,0 +1,20 @@
+{
+  "combined_sha256": "45be618912d3a19250e56b28c0bb2c317504d3e7649f7e7404009e9febcccd7f",
+  "files_sha256": {
+    "LAB4/CHECK_MLFLOW_STORE.ps1": "c98e2aad4e6cd24c3595d4ccd596e3a194140e9e887c9fe8fad228d5eabf888c",
+    "LAB4/NORMALIZE_COVERAGE_LOG.ps1": "ac77fd1235f16a143f3c26a60ddee2f1c797530f43b6ab1a8b5144c2140d2659",
+    "LAB4/RUN_LAB4.ps1": "63b3e78291dd7132bbfe842342fb5a146f692bf6f642c9db487b63303458bd87",
+    "configs/lab4.json": "2d86fac0edb456a010529f76544d6bd25723a792f5ca4df5f16a135568307050",
+    "defense_demo/lab4_demo.py": "672bd10dc497e898a17e01a3e35bd8a1b7850deafce7b97c3f2644e788575c02",
+    "scripts/run_lab4.py": "30bfff1d50989b812ad05e1788327dfe708ae48e4aac6e2d8f69f997a758a3ae",
+    "src/moons_lab/config.py": "fd8169557b0ef2f02e4aa556f06295c77c570b5b6b7ec4e303e333d1aab8cac6",
+    "src/moons_lab/data.py": "7f376d3ac67070104901781d376fd29f72f87523bd4d96f28c17e1e4228c516b",
+    "src/moons_lab/utils.py": "e68e436ddac0c9d5191bd7bf632fe5fe17e16e10a0019e7aaadc95b6ba826196",
+    "src/moons_lab/validator.py": "b045c37a20bdc10a872999f544e429f3ae3de7eb3d6e6b68743bc5508f15481b",
+    "tests/test_lab4_mlflow_tracking.py": "a6b1589b641d50d18d3051ff597b6a5a3a7a62d8b1ffeddbde74342c71f6680c",
+    "tests/test_lab4_runner.py": "11ed34688b823a4b77b132a92d53449e4414f5436861e0cce1bb37498a176705",
+    "tests/test_lab4_workflow.py": "7c78f6e2846792bb32af13db77404d5cf73930d946a7a153443a00f4e16b75b6",
+    "tests/test_validator.py": "086562ae738d75beb3837ed02415dbaf14b215f0c0bb1c428f3b6f72a12d5f2a"
+  },
+  "git_head_at_run": "9ec831d428a5bb0c4413f0846f58e2256b6f6c3d"
+}

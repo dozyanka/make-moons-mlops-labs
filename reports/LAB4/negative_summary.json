@@ -1,0 +1,38 @@
+{
+  "foreign_categories": {
+    "accepted": 0,
+    "rejected": 20,
+    "total": 20,
+    "unexpected_accept": 0
+  },
+  "label_flip_with_claimed_label": {
+    "accepted": 153,
+    "rejected": 3447,
+    "total": 3600,
+    "unexpected_accept": 153
+  },
+  "outliers": {
+    "accepted": 0,
+    "rejected": 1000,
+    "total": 1000,
+    "unexpected_accept": 0
+  },
+  "own_unlabeled": {
+    "accepted": 20,
+    "rejected": 0,
+    "total": 20,
+    "unexpected_accept": 0
+  },
+  "shifted_mean": {
+    "accepted": 0,
+    "rejected": 1000,
+    "total": 1000,
+    "unexpected_accept": 0
+  },
+  "wrong_feature_types": {
+    "accepted": 0,
+    "rejected": 4,
+    "total": 4,
+    "unexpected_accept": 0
+  }
+}
