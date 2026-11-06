@@ -1,0 +1,13 @@
+{
+  "patch": "05",
+  "scope": "LAB4 only, non-destructive",
+  "files_sha256": {
+    "LAB4/RUN_LAB4.ps1": "ace9ad69e5df1dfcf166fc66ebb7f817f17aa84d9c15dcc4b2ee8a7ec72e69c5",
+    "LAB4/NORMALIZE_COVERAGE_LOG.ps1": "ac77fd1235f16a143f3c26a60ddee2f1c797530f43b6ab1a8b5144c2140d2659",
+    "LAB4/CHECK_MLFLOW_STORE.ps1": "c98e2aad4e6cd24c3595d4ccd596e3a194140e9e887c9fe8fad228d5eabf888c",
+    "LAB4/README.md": "5f73cf92433fba9c8a07464bf361bef0e14b6b20f59836d9ed3fe4f62eca5308",
+    "LAB4/PATCH_05_APPLY.md": "efb4479d105b883958a7f87d0a23ec420242215f62972344d15411be960f4c62",
+    "scripts/run_lab4.py": "30bfff1d50989b812ad05e1788327dfe708ae48e4aac6e2d8f69f997a758a3ae",
+    ".github/workflows/lab4-ci.yml": "d78f93d745d9e4286635b85a683b3a11ccedb5bb234a2b6ceaac93264b5bcdff"
+  }
+}

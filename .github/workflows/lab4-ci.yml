@@ -1,0 +1,82 @@
+name: LAB4 validator
+
+on:
+  push:
+    branches: [main, lab4]
+    paths:
+      - 'configs/lab4.json'
+      - 'src/moons_lab/config.py'
+      - 'src/moons_lab/validator.py'
+      - 'scripts/run_lab4.py'
+      - 'tests/test_validator.py'
+      - 'tests/test_lab4_workflow.py'
+      - 'tests/test_lab4_mlflow_tracking.py'
+      - 'tests/test_lab4_runner.py'
+      - 'defense_demo/lab4_demo.py'
+      - 'LAB4/COVERAGE_SCOPE.md'
+      - 'LAB4/GIT_AND_REPORT.md'
+      - 'LAB4/RUN_LAB4.ps1'
+      - 'LAB4/NORMALIZE_COVERAGE_LOG.ps1'
+      - 'LAB4/CHECK_MLFLOW_STORE.ps1'
+      - 'LAB4/PATCH_05_APPLY.md'
+      - 'LAB4/PATCH_04_APPLY.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'data/**'
+      - 'reports/LAB4/**'
+      - 'scripts/verify_lab4_data.py'
+      - 'LAB4/PUBLISH_LAB4.ps1'
+      - 'LAB4/data_integrity_baseline.json'
+      - 'tests/test_lab4_publication.py'
+      - '.github/workflows/lab4-ci.yml'
+      - 'pyproject.toml'
+  pull_request:
+    branches: [main]
+
+jobs:
+  lab4:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install LAB4 dependencies
+        run: python -m pip install -e '.[tracking,test]'
+      - name: Check byte-exact datasets, joblib and index
+        run: python scripts/verify_lab4_data.py --check-git-index
+      - name: Verify committed LAB4 report and code provenance
+        run: python scripts/verify_lab4_data.py --check-published
+      - name: Run LAB4 (real MLflow)
+        env:
+          MLFLOW_ALLOW_FILE_STORE: 'true'
+        run: python scripts/run_lab4.py
+      - name: Run LAB4 tests with coverage
+        env:
+          MLFLOW_ALLOW_FILE_STORE: 'true'
+        run: |
+          python -m pytest -q tests/test_validator.py tests/test_lab4_workflow.py tests/test_lab4_mlflow_tracking.py tests/test_lab4_runner.py tests/test_lab4_publication.py \
+            --basetemp="${RUNNER_TEMP}/lab4-pytest-tmp" -o "cache_dir=${RUNNER_TEMP}/lab4-pytest-cache" \
+            --cov=moons_lab.validator --cov=moons_lab.config --cov=moons_lab.data --cov=moons_lab.utils \
+            --cov=scripts --cov=defense_demo --cov-report=
+          python -m coverage report -m --include='*/src/moons_lab/validator.py,*/src/moons_lab/config.py,*/src/moons_lab/data.py,*/src/moons_lab/utils.py,*/scripts/run_lab4.py,*/defense_demo/lab4_demo.py'
+          python -m coverage json -o reports/LAB4/coverage_details.json --include='*/src/moons_lab/validator.py,*/src/moons_lab/config.py,*/src/moons_lab/data.py,*/src/moons_lab/utils.py,*/scripts/run_lab4.py,*/defense_demo/lab4_demo.py'
+      - name: Validate independent repeated runs
+        env:
+          MLFLOW_ALLOW_FILE_STORE: 'true'
+        run: |
+          python -c "import json; j=json.load(open('reports/LAB4/repeat_verification.json')); assert j['all_pass'] and j['source_hashes_unchanged']; print('Independent full/chunks repeat PASS')"
+      - name: Validate project style and secrets
+        run: python scripts/precommit_checks.py --all
+      - name: Upload LAB4 machine-readable checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab4-checks
+          path: |
+            reports/LAB4/*.csv
+            reports/LAB4/*.json
+            reports/LAB4/*.log
+            reports/LAB4/*.md
+            reports/LAB4/*.npz
+          if-no-files-found: warn

@@ -1,0 +1,32 @@
+{
+  "patch": "04_LAB4_Pytest_Windows_Permissions_Patch",
+  "base_patch": "03_LAB4_Verification_and_Coverage_Patch.zip",
+  "description": "Isolated pytest temp/cache/coverage workspaces to avoid Windows WinError 5; CI and documentation updates",
+  "files": [
+    {
+      "path": ".gitignore",
+      "size_bytes": 250,
+      "sha256": "64d5fce3c7074954c5dae753d3d727326d408ab7c181d375114b96306d4c539b"
+    },
+    {
+      "path": ".github/workflows/lab4-ci.yml",
+      "size_bytes": 2791,
+      "sha256": "c4e5a683808b227eed9a66dea11eb780b52721c34d1ee6b6d8b603e81f7ce698"
+    },
+    {
+      "path": "LAB4/RUN_LAB4.ps1",
+      "size_bytes": 6835,
+      "sha256": "c1d0227b87ebee2321f303a619757fc628f1fef17daf2521b267b42937047ed9"
+    },
+    {
+      "path": "LAB4/README.md",
+      "size_bytes": 8574,
+      "sha256": "e127416256c9906bfba8b19f8e39d4d287cb1410eab001d13090bdbc47ed1c75"
+    },
+    {
+      "path": "LAB4/PATCH_04_APPLY.md",
+      "size_bytes": 3659,
+      "sha256": "1ac1df38dcbbc35a1b0a17123499330ae2032bca15af9b1413c3577ad3586b80"
+    }
+  ]
+}

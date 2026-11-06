@@ -1,0 +1,47 @@
+{
+  "patch_number": 2,
+  "target": "C:/Users/shata/Desktop/make-moons-mlops-labs",
+  "files": [
+    {
+      "path": ".github/workflows/lab4-ci.yml",
+      "size": 1583,
+      "sha256": "a0b36d4dc85c4dd8c8c39435a7e90a727edcdcd625ef4395d7898a63d54f1837"
+    },
+    {
+      "path": "LAB4/LECTURE_NOTES_CHECK.md",
+      "size": 2921,
+      "sha256": "a67e8866949a98ac9181d499725f3719a040bf932161181f773e367fae39486c"
+    },
+    {
+      "path": "LAB4/OPEN_MLFLOW_UI.cmd",
+      "size": 516,
+      "sha256": "8b16699e0a6b0b5fe8b3ce86444063684105b00e7fbcdc96697c778e47b6a535"
+    },
+    {
+      "path": "LAB4/PATCH_02_APPLY.md",
+      "size": 3645,
+      "sha256": "9c23e97bf5b0975c19a705340477d3cdbef15ed544a504bd9205ac07e265950a"
+    },
+    {
+      "path": "LAB4/README.md",
+      "size": 6149,
+      "sha256": "5b717067718dd2cf06e6430e3a7a4f8e884ed4e8e8f109c326f50cffd431b1b6"
+    },
+    {
+      "path": "LAB4/RUN_LAB4.ps1",
+      "size": 2976,
+      "sha256": "1150471960f938e7ddba83505e39e9321e210728a238de43008f06d25d11d510"
+    },
+    {
+      "path": "scripts/run_lab4.py",
+      "size": 26792,
+      "sha256": "168d883777cef3d22f3a18eb92d127487c3e70d116ff966b7267978cc771afa2"
+    },
+    {
+      "path": "tests/test_lab4_mlflow_tracking.py",
+      "size": 3305,
+      "sha256": "a40780bfab10c16b117948b1e4d00ccdb53305c0bb02d71c16d75c959e34daec"
+    }
+  ],
+  "no_unrelated_labs_modified": true
+}
