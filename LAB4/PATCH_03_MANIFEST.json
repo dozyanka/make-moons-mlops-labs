@@ -44,10 +44,6 @@
       "sha256": "f3d11ad47122d36ffe381d99c630999a6023b76fca39728af6eca041ae829685",
       "size_bytes": 3840
     },
-    "LAB4/REVIEW_AND_SUBMISSION.md": {
-      "sha256": "72559f804799fb39da3aeec04c6ebbcfb1af5f4676579867506a2efae7afb64e",
-      "size_bytes": 2261
-    },
     "scripts/run_lab4.py": {
       "sha256": "556cc99e2745a557612c8ddbe09ee07ae99e008f1ed61af2df93e542cd6fe150",
       "size_bytes": 38013
