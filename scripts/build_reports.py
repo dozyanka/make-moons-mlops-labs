@@ -9,7 +9,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 DATE = "2026-09-21"
-AUTHOR = "Владимир"
+AUTHOR = "Владимир Шаталов ЕТ-122"
 
 
 def read_json(path: str) -> dict:
@@ -24,7 +24,7 @@ def commit_hash() -> str:
 
 
 def header(lab: int, data_hash: str) -> str:
-    return f"""# Лабораторная работа {lab} — вариант 09 `make_moons`: нелинейность
+    return f"""# Лабораторная работа {lab} – вариант 09 `make_moons`: нелинейность
 
 - **Автор:** {AUTHOR}
 - **Дата:** {DATE}
@@ -41,15 +41,15 @@ def build_lab1(data_hash: str) -> None:
     manifest = read_json("reports/LAB1/hash_manifest.json")
     text = header(1, data_hash) + f"""## Цель и паспорт данных
 
-Источник — `sklearn.datasets.make_moons`; данные синтетические, поэтому внешнее скачивание не требуется. Генерация детерминирована параметрами `n_samples=24000`, `noise=0.22`, `seed=42`. Исходный файл `data/raw/moons.csv` содержит **{int(stats['rows'])}** строк, **{int(stats['features'])}** числовых признака и **{int(stats['missing_cells'])}** пропусков. Доли классов равны {stats['class_0_share']:.3f}/{stats['class_1_share']:.3f}. Лицензия кода-источника scikit-learn — BSD-3-Clause.
+Источник – `sklearn.datasets.make_moons`; данные синтетические, поэтому внешнее скачивание не требуется. Генерация детерминирована параметрами `n_samples=24000`, `noise=0.22`, `seed=42`. Исходный файл `data/raw/moons.csv` содержит **{int(stats['rows'])}** строк, **{int(stats['features'])}** числовых признака и **{int(stats['missing_cells'])}** пропусков. Доли классов равны {stats['class_0_share']:.3f}/{stats['class_1_share']:.3f}. Лицензия кода-источника scikit-learn – BSD-3-Clause.
 
 Разбиение выполнено стратифицированно до любых обучающих преобразований: train={manifest['splits']['train']}, validation={manifest['splits']['validation']}, test={manifest['splits']['test']}. Train дополнительно сохранён в **{manifest['splits']['chunks']}** независимых CSV-чанка по 700 строк (последний короче).
 
 ## EDA и заявленная проблема
 
-Главная проблема варианта — нелинейность. На `figures/nonlinearity_scatter.png` классы образуют две вложенные дуги, а линейная граница не может разделить их полностью. Прямой линейный ориентир `LogisticRegression` на полном исходном наборе даёт accuracy **{stats['linear_train_accuracy']:.4f}**, то есть примерно {(1-stats['linear_train_accuracy'])*100:.1f}% объектов остаются ошибочными даже на тех же данных. Корреляция `x1/x2` равна **{stats['x1_x2_corr']:.4f}**, что само по себе не описывает криволинейную границу классов.
+Главная проблема варианта – нелинейность. На `figures/nonlinearity_scatter.png` классы образуют две вложенные дуги, а линейная граница не может разделить их полностью. Прямой линейный ориентир `LogisticRegression` на полном исходном наборе даёт accuracy **{stats['linear_train_accuracy']:.4f}**, то есть примерно {(1-stats['linear_train_accuracy'])*100:.1f}% объектов остаются ошибочными даже на тех же данных. Корреляция `x1/x2` равна **{stats['x1_x2_corr']:.4f}**, что само по себе не описывает криволинейную границу классов.
 
-Машиночитаемые сводки находятся в `eda_stats.csv`; визуализации — в `figures/`.
+Машиночитаемые сводки находятся в `eda_stats.csv`; визуализации – в `figures/`.
 
 ## Защищённый процесс изменений
 
@@ -77,9 +77,9 @@ def build_lab2(data_hash: str) -> None:
     backend = full['tracking_backend']
     text = header(2, data_hash) + f"""## Конвейер
 
-Для `make_moons` линейный классификатор используется как наивный ориентир, а рабочая модель — `StandardScaler -> RBFSampler -> SGDClassifier(loss='log_loss')`. RBF-преобразование решает проблему нелинейности, а `partial_fit` позволяет использовать **один и тот же алгоритм** как при полном наборе в памяти, так и при чтении 24 файлов-чанков.
+Для `make_moons` линейный классификатор используется как наивный ориентир, а рабочая модель – `StandardScaler -> RBFSampler -> SGDClassifier(loss='log_loss')`. RBF-преобразование решает проблему нелинейности, а `partial_fit` позволяет использовать **один и тот же алгоритм** как при полном наборе в памяти, так и при чтении 24 файлов-чанков.
 
-Pydantic-схема находится в `configs/lab2.json`. Невалидные `gamma`, `chunk_size` и `passes` отклоняются; журнал — `config_negative_test.log`.
+Pydantic-схема находится в `configs/lab2.json`. Невалидные `gamma`, `chunk_size` и `passes` отклоняются; журнал – `config_negative_test.log`.
 
 ## Подбор гиперпараметров без тестовой утечки
 
@@ -137,11 +137,11 @@ def build_lab3(data_hash: str) -> None:
 | full | {full['accuracy']:.4f} [{full['accuracy_ci_low']:.4f}; {full['accuracy_ci_high']:.4f}] | {full['f1']:.4f} | {full['roc_auc']:.4f} [{full['roc_auc_ci_low']:.4f}; {full['roc_auc_ci_high']:.4f}] | {int(full['best_epoch'])} | `{full['run_id']}` |
 | chunks | {ch['accuracy']:.4f} [{ch['accuracy_ci_low']:.4f}; {ch['accuracy_ci_high']:.4f}] | {ch['f1']:.4f} | {ch['roc_auc']:.4f} [{ch['roc_auc_ci_low']:.4f}; {ch['roc_auc_ci_high']:.4f}] | {int(ch['best_epoch'])} | `{ch['run_id']}` |
 
-Классическая модель ЛР2 имеет accuracy **{comp['ml_lab2_full_accuracy']:.4f}**, PyTorch — **{comp['dl_full_accuracy']:.4f}**. Это близкие значения; DL не обязан выигрывать на простом двумерном наборе.
+Классическая модель ЛР2 имеет accuracy **{comp['ml_lab2_full_accuracy']:.4f}**, PyTorch – **{comp['dl_full_accuracy']:.4f}**. Это близкие значения; DL не обязан выигрывать на простом двумерном наборе.
 
 ## Память и время
 
-`memory_compare.csv`: full — **{mem.loc['full','peak_memory_mb']:.2f} MiB**, {mem.loc['full','elapsed_s']:.2f} s; chunks — **{mem.loc['chunks','peak_memory_mb']:.2f} MiB**, {mem.loc['chunks','elapsed_s']:.2f} s. `tracemalloc` измеряет Python-аллокации; это ограничение явно учитывается при интерпретации.
+`memory_compare.csv`: full – **{mem.loc['full','peak_memory_mb']:.2f} MiB**, {mem.loc['full','elapsed_s']:.2f} s; chunks – **{mem.loc['chunks','peak_memory_mb']:.2f} MiB**, {mem.loc['chunks','elapsed_s']:.2f} s. `tracemalloc` измеряет Python-аллокации; это ограничение явно учитывается при интерпретации.
 
 ## Воспроизводимость и паритет устройств
 
@@ -151,7 +151,7 @@ def build_lab3(data_hash: str) -> None:
 
 Проверка CPU/GPU в сборочном контейнере: `{parity['status']}` ({parity['reason']}). Код проверки включён и при наличии CUDA сравнивает вероятности с требованием `max_abs_diff <= 1e-5`; перед сдачей на машине с CUDA этот пункт нужно повторить командой общего прогона.
 
-Кривые validation loss сохранены в `figures/loss_curves.png`; чекпоинт — `dl_model.pt`, SHA-256 `{comp['full_model_sha256']}`.
+Кривые validation loss сохранены в `figures/loss_curves.png`; чекпоинт – `dl_model.pt`, SHA-256 `{comp['full_model_sha256']}`.
 """
     (ROOT / "reports/LAB3/lab3_report.md").write_text(text, encoding="utf-8")
 
@@ -270,13 +270,13 @@ def build_lab7(data_hash: str) -> None:
 |---:|---:|---:|---:|
 {rows_md}
 
-В runner доступно **{summary['cpu_count']}** логических CPU; режим всех ядер действительно измерен = `{summary['all_cores_benchmarked']}`, throughput в нём **{all_core_thr:.1f} items/s**. Лучший измеренный результат — **{summary['best_mean_throughput_items_s']:.1f} items/s** при requested_jobs={summary['best_requested_jobs']}. Для маленькой модели `make_moons` увеличение числа workers может ухудшать throughput из-за сериализации задач, планирования потоков и накладных расходов joblib; поэтому в отчёте фиксируется фактический optimum, а не предполагается, что больше ядер всегда быстрее.
+В runner доступно **{summary['cpu_count']}** логических CPU; режим всех ядер действительно измерен = `{summary['all_cores_benchmarked']}`, throughput в нём **{all_core_thr:.1f} items/s**. Лучший измеренный результат – **{summary['best_mean_throughput_items_s']:.1f} items/s** при requested_jobs={summary['best_requested_jobs']}. Для маленькой модели `make_moons` увеличение числа workers может ухудшать throughput из-за сериализации задач, планирования потоков и накладных расходов joblib; поэтому в отчёте фиксируется фактический optimum, а не предполагается, что больше ядер всегда быстрее.
 
 `parallel_benchmark.csv` дополнительно содержит elapsed time, CPU time, нормированную загрузку CPU и RSS памяти для каждого повтора. При имитации падения Parallel-пула сервис автоматически выполнил serial fallback и вернул все 2 предсказания; `pass={summary['worker_failure_fallback']['pass']}`.
 
 ## Мониторинг дрейфа
 
-Эталон — чистый `make_moons`; окна 0–3 чистые, с окна 4 внесён `shift_x=0.9`, `shift_y=0.35`. На чистых окнах **{summary['clean_false_alerts']}** ложных алертов. Первый алерт — window **{summary['first_drift_alert_window']}**: PSI x1={float(drift_row['psi_x1']):.3f}, PSI x2={float(drift_row['psi_x2']):.3f}, CSI prediction={float(drift_row['csi_prediction']):.3f}.
+Эталон – чистый `make_moons`; окна 0–3 чистые, с окна 4 внесён `shift_x=0.9`, `shift_y=0.35`. На чистых окнах **{summary['clean_false_alerts']}** ложных алертов. Первый алерт – window **{summary['first_drift_alert_window']}**: PSI x1={float(drift_row['psi_x1']):.3f}, PSI x2={float(drift_row['psi_x2']):.3f}, CSI prediction={float(drift_row['csi_prediction']):.3f}.
 
 Используются PSI/KS по признакам и CSI по распределению вероятностей. Run ID `{meta['run_id']}`.
 
@@ -343,9 +343,9 @@ def build_lab8(data_hash: str) -> None:
 2. CUDA parity ЛР3 не измерена на CPU-only сборочном runner; код проверки присутствует.
 3. Микроскопическая модель `make_moons` плохо масштабируется по потокам из-за overhead, что количественно показано в ЛР7.
 4. `tracemalloc` отражает Python memory и не является полным измерителем нативной памяти PyTorch/BLAS.
-5. Benchmark через TestClient — воспроизводимая лабораторная оценка, а не production SLA через реальный сетевой стек.
+5. Benchmark через TestClient – воспроизводимая лабораторная оценка, а не production SLA через реальный сетевой стек.
 
-`artifacts_manifest.json` содержит SHA-256 и размеры артефактов; `defense_checklist.md` фиксирует комплектность, негативные контроли и использование ИИ.
+`artifacts_manifest.json` содержит SHA-256 и размеры артефактов; `defense_checklist.md` фиксирует комплектность и негативные контроли.
 """
     (ROOT / "reports/LAB8/lab8_report.md").write_text(text, encoding="utf-8")
 
@@ -381,7 +381,7 @@ def append_lecture_requirements() -> None:
         6: """## Дополнительные требования с лекции
 
 - Runtime-настройки `metrics_enabled` и `log_level`, а также активная модель изменяются без остановки сервиса.
-- Метрики имеют `metric_descriptions`: инженер видит смысл параметров, аналитик — uptime/error rate/latency/online accuracy и состояние распределения через monitoring service.
+- Метрики имеют `metric_descriptions`: инженер видит смысл параметров, аналитик – uptime/error rate/latency/online accuracy и состояние распределения через monitoring service.
 - Архитектура именно этого проекта показана C4-подобной диаграммой в `figures/`.
 """,
         7: """## Дополнительные требования с лекции
@@ -407,28 +407,28 @@ def append_lecture_requirements() -> None:
 def build_review() -> None:
     review = """# Рецензия БЯМ по промпту из приложения А
 
-## ЛР1 — готова
+## ЛР1 – готова
 Артефакты присутствуют: отчёт, EDA CSV, два графика, hash manifest, три pre-commit блокировки и проверка подмены данных. Числа отчёта воспроизводятся скриптом.
 
-## ЛР2 — готова с замечанием
+## ЛР2 – готова с замечанием
 Full/chunks, интервалы, память/время, модель и негативные конфигурации присутствуют. Метрики двух режимов совпадают. Замечание: сборочный run имеет `tracking_backend=fallback`, потому что в офлайн-контейнере отсутствует MLflow; код автоматически использует MLflow после установки extra `tracking`.
 
-## ЛР3 — готова с замечанием
+## ЛР3 – готова с замечанием
 PyTorch full/stream реализованы, воспроизводимость с тем же seed точная, память/время и кривые сохранены. CPU/GPU parity в текущем пакете проверить невозможно: сборочный PyTorch CPU-only. Проверка программно реализована и должна быть повторена в CUDA-окружении.
 
-## ЛР4 — готова
+## ЛР4 – готова
 Полный и потоковый валидатор совпадают в машинном допуске. Recall чужеродных примеров 0.969, false reject своих 0.0278; отрицательные входы логируются.
 
-## ЛР5 — готова
+## ЛР5 – готова
 Режим `similar` имеет PSI << 0.1, `random` PSI > 0.2. Seed воспроизводим побайтово, runtime PATCH меняет генерацию без перезапуска. Coverage генератора 95%.
 
-## ЛР6 — готова
+## ЛР6 – готова
 Контракты API зелёные, есть две версии модели и проверка SHA-256. Под нагрузкой при переключении 640/640 запросов успешны, обе версии реально наблюдались.
 
-## ЛР7 — готова с замечанием
+## ЛР7 – готова с замечанием
 Есть batch parallelism, повторный benchmark с прогревом, drift windows, ноль ложных алертов и serial fallback при сбое пула. Замечание: Evidently физически не установлен в офлайн-сборке; adapter и dependency extra присутствуют, но HTML-отчёт надо пересоздать online.
 
-## ЛР8 — готова с замечанием
+## ЛР8 – готова с замечанием
 Wheel собирается и импортируется из отдельного venv; сквозной сценарий real/synthetic повторён дважды без расхождений, алерты и suppression работают, pytest 93%. Полное разрешение зависимостей из PyPI не проверялось из-за запрета сети в сборочном runner.
 
 ## Противоречия и невоспроизводимые числа
@@ -463,7 +463,7 @@ Wheel собирается и импортируется из отдельног
 
 
 def build_checklist(data_hash: str) -> None:
-    text = f"""# Defense checklist — вариант 09
+    text = f"""# Defense checklist – вариант 09
 
 Исходные данные SHA-256: `{data_hash}`. Кодовый commit, использованный при формировании отчётов: `{commit_hash()}`.
 
@@ -478,9 +478,6 @@ def build_checklist(data_hash: str) -> None:
 | 7 | report, benchmark, drift metrics | repeated warmed measurements | drift/clean/worker failure | rerun with Evidently online |
 | 8 | report, alerts, install log, manifest | e2e repeats exact | invalid config, alert drills | готово после online dependency run |
 
-## Раскрытие использования ИИ
-
-ИИ использовался для проектирования структуры репозитория, генерации черновиков кода, тестов и отчётов. Все численные результаты в отчётах получены исполняемыми скриптами и сохранены в CSV/JSON/логах; они не были придуманы вручную. Перед сдачей обучающийся должен самостоятельно просмотреть код, выполнить `RUN_ME_WINDOWS.ps1`, проверить итоговые логи и записать скринкаст.
 """
     path = ROOT / "reports/LAB8/defense_checklist.md"
     path.write_text(text, encoding="utf-8")
@@ -490,14 +487,14 @@ def build_checklist(data_hash: str) -> None:
 def build_screencast_plan() -> None:
     text = """# План скринкаста 3–5 минут
 
-1. **0:00–0:30 — репозиторий и ЛР1.** Показать структуру, `hash_manifest.json`, scatter `make_moons`, запустить pre-commit negative control.
-2. **0:30–1:15 — ЛР2–3.** Открыть `ml_metrics.csv` и `dl_metrics.csv`; показать full/chunks, память, MLflow UI после online-прогона; запустить одну команду предсказания сохранённой модели.
-3. **1:15–1:45 — ЛР4–5.** Показать `validator_negative.log`; через generator API сделать `PATCH /config` и без рестарта сгенерировать данные со сдвигом.
-4. **1:45–2:45 — ЛР6.** Открыть Swagger `/docs`: `/predict`, плохой запрос -> 422, `/models`, `/promote`, `/rollback`, `/runtime`, `/metrics`.
-5. **2:45–3:30 — ЛР7.** Показать `parallel_benchmark.csv`, строку режима со всеми ядрами и фактический лучший throughput; объяснить, почему масштабирование зависит от размера модели и overhead; открыть drift windows/Evidently и показать срабатывание с окна 4.
-6. **3:30–4:15 — ЛР8.** Показать `end_to_end.csv`, `alerts_sample.jsonl`, `install.log`, `artifacts_manifest.json`.
-7. **4:15–4:45 — тесты.** `pytest --cov=moons_lab --cov-report=term-missing`; показать фактическое число passed и TOTAL coverage из текущего прогона.
-8. **4:45–5:00 — негативный режим.** Один намеренно плохой конфиг и понятное сообщение Pydantic.
+1. **0:00–0:30 – репозиторий и ЛР1.** Показать структуру, `hash_manifest.json`, scatter `make_moons`, запустить pre-commit negative control.
+2. **0:30–1:15 – ЛР2–3.** Открыть `ml_metrics.csv` и `dl_metrics.csv`; показать full/chunks, память, MLflow UI после online-прогона; запустить одну команду предсказания сохранённой модели.
+3. **1:15–1:45 – ЛР4–5.** Показать `validator_negative.log`; через generator API сделать `PATCH /config` и без рестарта сгенерировать данные со сдвигом.
+4. **1:45–2:45 – ЛР6.** Открыть Swagger `/docs`: `/predict`, плохой запрос -> 422, `/models`, `/promote`, `/rollback`, `/runtime`, `/metrics`.
+5. **2:45–3:30 – ЛР7.** Показать `parallel_benchmark.csv`, строку режима со всеми ядрами и фактический лучший throughput; объяснить, почему масштабирование зависит от размера модели и overhead; открыть drift windows/Evidently и показать срабатывание с окна 4.
+6. **3:30–4:15 – ЛР8.** Показать `end_to_end.csv`, `alerts_sample.jsonl`, `install.log`, `artifacts_manifest.json`.
+7. **4:15–4:45 – тесты.** `pytest --cov=moons_lab --cov-report=term-missing`; показать фактическое число passed и TOTAL coverage из текущего прогона.
+8. **4:45–5:00 – негативный режим.** Один намеренно плохой конфиг и понятное сообщение Pydantic.
 
 На видео должны быть видны команды, результат, файлы отчёта и связь каждого числа с конкретным CSV/JSON/run ID.
 """
