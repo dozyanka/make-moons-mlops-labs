@@ -1,0 +1,7 @@
+case,status,reason
+incorrect_feature_order,REJECTED,Value error; features must be exactly ['x1'; 'x2'] in this order
+unsupported_distance_method,REJECTED,Input should be 'class_mahalanobis'
+invalid_confidence,REJECTED,Input should be greater than or equal to 0.5
+invalid_false_reject_rate,REJECTED,Input should be less than 0.5
+invalid_chunk_size,REJECTED,Input should be greater than or equal to 50
+invalid_cov_regularization,REJECTED,Input should be greater than 0

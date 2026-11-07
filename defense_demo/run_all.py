@@ -22,10 +22,11 @@ def main():
     run("defense_demo/lab3_demo.py", "--mode", "full")
     run("defense_demo/lab3_demo.py", "--mode", "streaming")
     run("defense_demo/stream_memory_demo.py")
+    run("defense_demo/lab4_demo.py")
 
     print()
     print("=" * 72)
-    print("ALL LIVE DEFENSE DEMOS PASSED")
+    print("ALL LAB1–LAB4 LIVE DEFENSE DEMOS PASSED")
     print("=" * 72)
     print("Results: defense_demo/results/")
 

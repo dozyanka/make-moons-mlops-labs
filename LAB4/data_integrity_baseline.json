@@ -1,0 +1,124 @@
+{
+  "format_version": 1,
+  "source": "uploaded user desktop snapshot before LAB4 patches",
+  "policy": "byte exact: do not normalize CSV, do not regenerate LAB1-3 data",
+  "files": {
+    "data/chunks/train_chunk_000.csv": {
+      "sha256": "665afca66cb38e6c3dcd44c80926ca2fc6df6066ffb30082f5e54ef3a7ecbd5e",
+      "bytes": 20767
+    },
+    "data/chunks/train_chunk_001.csv": {
+      "sha256": "ce31caad9ca0991f5237f96d54ba01e6f5bad93b7626d9ef8f5eccc46aa9d718",
+      "bytes": 20751
+    },
+    "data/chunks/train_chunk_002.csv": {
+      "sha256": "46a3f3c67c21391786618bc5d902fbbb0df6640dda1d02d1ed31bac2288c66ab",
+      "bytes": 20779
+    },
+    "data/chunks/train_chunk_003.csv": {
+      "sha256": "dbb68b5dd1e27753b01030762a14159c1fa23e191b04418a0645344351d845af",
+      "bytes": 20738
+    },
+    "data/chunks/train_chunk_004.csv": {
+      "sha256": "1af70273817351f0cff105e7d858a8bfd7e66098105a0926bb8d2e63c39d54e5",
+      "bytes": 20754
+    },
+    "data/chunks/train_chunk_005.csv": {
+      "sha256": "632bc44985b463e0880e8199b6d33e6a26a349187e32c28c65374f5e8759f9df",
+      "bytes": 20752
+    },
+    "data/chunks/train_chunk_006.csv": {
+      "sha256": "35fa246b719256a9e092a3702de83d4e0d3113eacdbb628f47dcb10c5fc1f6e4",
+      "bytes": 20765
+    },
+    "data/chunks/train_chunk_007.csv": {
+      "sha256": "6aa5e0e509e17720c66929320bb5d131524e6a4969a46a95e592c5a894ad2977",
+      "bytes": 20757
+    },
+    "data/chunks/train_chunk_008.csv": {
+      "sha256": "2f0d664714b613cb213927b78c6fe7a2e7229482f258444de8b45db23344e257",
+      "bytes": 20744
+    },
+    "data/chunks/train_chunk_009.csv": {
+      "sha256": "e18967f5e9f500cf029870589a436a831711a97cb217a53db7c64b04962021be",
+      "bytes": 20746
+    },
+    "data/chunks/train_chunk_010.csv": {
+      "sha256": "57d505022307a28792cd298e15075708bfdd285e90da6dff155f885c9fc04fd0",
+      "bytes": 20755
+    },
+    "data/chunks/train_chunk_011.csv": {
+      "sha256": "c903b030c2721d0ebe5ab595d6f6890bd0efd6b3d320b495a3db49b17f639ec0",
+      "bytes": 20747
+    },
+    "data/chunks/train_chunk_012.csv": {
+      "sha256": "92085316a38f463e3c801db7250dcdd9e2d3b7fa109e4eba6e23d556b59020f0",
+      "bytes": 20770
+    },
+    "data/chunks/train_chunk_013.csv": {
+      "sha256": "39e54f991101f52773f75ad7a6310f4fa84dc348238626a3d0be5aadfde2785e",
+      "bytes": 20756
+    },
+    "data/chunks/train_chunk_014.csv": {
+      "sha256": "e99b6989eb3f0b1e94f2e7837e406b1971600a54ee00e3f1e2c5a3c3622deb2b",
+      "bytes": 20756
+    },
+    "data/chunks/train_chunk_015.csv": {
+      "sha256": "ae3e7d17fb72b25d8bc2b57d1daaa220c4899623e6ab88d256653547ae348f7d",
+      "bytes": 20776
+    },
+    "data/chunks/train_chunk_016.csv": {
+      "sha256": "a428d187a190af36803ee321dfac007c5859eab7aa20c997ada1cd0d77d48f48",
+      "bytes": 20745
+    },
+    "data/chunks/train_chunk_017.csv": {
+      "sha256": "b58a9e3b383e5ca8f624156fa3d8e720a1943628e88061dd17dc38d9f32cc1a7",
+      "bytes": 20752
+    },
+    "data/chunks/train_chunk_018.csv": {
+      "sha256": "3281d87a40d48b67e25c73ec5b94d92810908e21f05565c44486f5c9cd329846",
+      "bytes": 20777
+    },
+    "data/chunks/train_chunk_019.csv": {
+      "sha256": "6e84a28ee95765b19ad7f9d3ccce0a930f1f2d1b5e04f2a8f032d3e25aa1affb",
+      "bytes": 20752
+    },
+    "data/chunks/train_chunk_020.csv": {
+      "sha256": "be7b3bd5d2b269e367737482932dc6744f07994d2bc31a277e467c0fa5f53566",
+      "bytes": 20755
+    },
+    "data/chunks/train_chunk_021.csv": {
+      "sha256": "22c762cf0ba9936b8ddcc23df21626f8cb47fc41029bf1c58c4deb7ea3f259de",
+      "bytes": 20768
+    },
+    "data/chunks/train_chunk_022.csv": {
+      "sha256": "4f206e8ab214a9ca5d9ead665fcac87482ad2059b15d9bbbc5b4b812d6338b34",
+      "bytes": 20741
+    },
+    "data/chunks/train_chunk_023.csv": {
+      "sha256": "e8cf94317919addfa5a296f9df7e90bea67cb183c5f7bd524c5152c2a123cd5b",
+      "bytes": 20782
+    },
+    "data/processed/test.csv": {
+      "sha256": "923a607f7a02eaee3097ea105b6190c0063f738f825e69f635b0d9ff206516f7",
+      "bytes": 106760
+    },
+    "data/processed/train.csv": {
+      "sha256": "28e06fb3d84afe4337ace065a5950078eb19f41c64371bc00611ca3cb1643adf",
+      "bytes": 497978
+    },
+    "data/processed/validation.csv": {
+      "sha256": "fe30ff68f807407c6d78c4bf04304880e7397fcc38f936a066e6df74ba123df5",
+      "bytes": 106766
+    },
+    "data/raw/moons.csv": {
+      "sha256": "dd38bd033f2300777fb0420e4c7bf895946435fa3b76c4d495a69e120b54be91",
+      "bytes": 711486
+    }
+  },
+  "working_model": {
+    "path": "reports/LAB2/ml_model.joblib",
+    "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+    "bytes": 5957
+  }
+}

@@ -1,6 +1,14 @@
+# Repository text uses LF. Data are hashed as bytes and MUST NOT be normalized.
 * text=auto eol=lf
 *.ps1 text eol=crlf
 *.png binary
 *.joblib binary
 *.pt binary
 *.npz binary
+# Preserve historical Windows CSV bytes (CRLF) in Git, Windows and Linux.
+data/raw/*.csv -text whitespace=cr-at-eol
+data/processed/*.csv -text whitespace=cr-at-eol
+data/chunks/*.csv -text whitespace=cr-at-eol
+# PowerShell source is fingerprinted bytewise in LAB4/source_manifest.json.
+# Keep script bytes exactly as delivered by patches.
+LAB4/*.ps1 -text

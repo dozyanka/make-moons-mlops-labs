@@ -246,11 +246,89 @@ def run_lab3() -> None:
     print("Сохранённая CPU/GPU parity: reports/LAB3/device_parity.csv")
 
 
+
+def run_lab4() -> None:
+    """Run LAB4 from instructor DEMO, preserving published reports/LAB4."""
+    print("\n" + "=" * 72)
+    print("ЛР4 — ВОСПРОИЗВЕДЕНИЕ (FULL + CHUNKS, MLFLOW И PYTEST)")
+    print("=" * 72)
+    launcher = ROOT / "LAB4" / "RUN_LAB4.ps1"
+    if not launcher.is_file():
+        raise FileNotFoundError(launcher)
+
+    # Match LAB1-3 behavior: generated results go to demo_output/LAB4,
+    # and all original published reports are restored even on failure.
+    with reproduced_report("LAB4"):
+        if os.name == "nt":
+            run_exe(
+                [
+                    "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                    "-File", str(launcher), "-SkipInstall",
+                ],
+                log_name="LAB4",
+            )
+        else:
+            run(["scripts/run_lab4.py"], log_name="LAB4")
+            run(
+                [
+                    "-m", "pytest", "-q", "tests/test_validator.py",
+                    "tests/test_lab4_workflow.py", "tests/test_lab4_mlflow_tracking.py",
+                    "tests/test_lab4_runner.py", "tests/test_lab4_publication.py",
+                ],
+                log_name="LAB4_TESTS",
+            )
+
+    print("Оригинал: reports/LAB4 (сохранён без изменения)")
+    print("Новый прогон: demo_output/LAB4")
+    print("Логи: demo_output/logs/LAB4_*.log")
+
+
+def lab4_quick_demo() -> None:
+    """Show five saved-model accept/reject cases without retraining."""
+    params = ROOT / "reports" / "LAB4" / "validator_params.npz"
+    if not params.is_file():
+        raise FileNotFoundError(
+            f"Нет {params}. Сначала выполните ЛР4 через пункт 10."
+        )
+    run(["defense_demo/lab4_demo.py"], log_name="LAB4_QUICK_DEMO")
+
+
+def lab4_smoke_test() -> None:
+    """Check the LAB4 instructor integration without MLflow or retraining."""
+    required = [
+        ROOT / "LAB4" / "RUN_LAB4.ps1",
+        ROOT / "LAB4" / "OPEN_MLFLOW_UI.cmd",
+        ROOT / "scripts" / "run_lab4.py",
+        ROOT / "defense_demo" / "lab4_demo.py",
+        ROOT / "reports" / "LAB4" / "lab4_report.md",
+        ROOT / "reports" / "LAB4" / "validator_params.npz",
+        ROOT / "reports" / "README.md",
+        ROOT / "DEMO" / "README.md",
+    ]
+    missing = [str(item.relative_to(ROOT)) for item in required if not item.is_file()]
+    if missing:
+        raise RuntimeError("LAB4 instructor DEMO missing: " + ", ".join(missing))
+    print("[OK] LAB4 DEMO: launcher, model, report and documentation available")
+
+
+def open_lab4_report() -> None:
+    report = ROOT / "reports" / "LAB4" / "lab4_report.md"
+    if not report.is_file():
+        raise FileNotFoundError(report)
+    print("ЛР4: отчёт", report)
+    if os.name == "nt":
+        os.startfile(report)
+    else:
+        print("Откройте этот файл в редакторе Markdown.")
+
+
 def quick_demo() -> None:
     print("\n" + "=" * 72)
     print("БЫСТРАЯ ДЕМОНСТРАЦИЯ ГОТОВЫХ МОДЕЛЕЙ")
     print("=" * 72)
-    prepare_data()
+    # Checked-in dataset and saved model should be used as-is, not regenerated.
+    if not (ROOT / "data" / "processed" / "train.csv").is_file():
+        prepare_data()
     run(["defense_demo/run_all.py"], log_name="QUICK_DEMO")
 
 
@@ -287,17 +365,23 @@ def start_mlflow(
     port: int = 5000,
     *,
     open_browser: bool = True,
+    file_backend: bool = False,
 ) -> subprocess.Popen[str] | None:
     mlflow_exe = ROOT / ".venv" / "Scripts" / "mlflow.exe"
     if not mlflow_exe.exists():
         raise FileNotFoundError(mlflow_exe)
 
     if port_is_open(port):
-        url = f"http://127.0.0.1:{port}"
-        print(f"MLflow UI уже запущен: {url}")
-        if open_browser:
-            webbrowser.open(url)
-        return None
+        if file_backend:
+            # Do not accidentally open LAB1-3 SQLite UI or an unrelated server.
+            print(f"Порт {port} занят; для ЛР4 выбираем свободный локальный порт.")
+            port = get_free_local_port()
+        else:
+            url = f"http://127.0.0.1:{port}"
+            print(f"MLflow UI уже запущен: {url}")
+            if open_browser:
+                webbrowser.open(url)
+            return None
 
     log_dir = DEMO_OUTPUT / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -307,7 +391,7 @@ def start_mlflow(
         str(mlflow_exe),
         "server",
         "--backend-store-uri",
-        "sqlite:///mlflow.db",
+        str(ROOT / "mlruns") if file_backend else "sqlite:///mlflow.db",
         "--host",
         "127.0.0.1",
         "--port",
@@ -328,11 +412,16 @@ def start_mlflow(
         popen_kwargs["start_new_session"] = True
 
     log_file = log_path.open("a", encoding="utf-8")
+    child_env = os.environ.copy()
+    if file_backend:
+        # MLflow 3.16+ requires an explicit opt-in for filesystem tracking.
+        child_env["MLFLOW_ALLOW_FILE_STORE"] = "true"
 
     try:
         process = subprocess.Popen(
             command,
             cwd=ROOT,
+            env=child_env,
             stdout=log_file,
             stderr=subprocess.STDOUT,
             creationflags=creationflags,
@@ -346,7 +435,7 @@ def start_mlflow(
     while time.time() < deadline:
         if port_is_open(port):
             url = f"http://127.0.0.1:{port}"
-            print(f"MLflow UI: {url}")
+            print(f"MLflow UI ({'ЛР4 / mlruns' if file_backend else 'ЛР1–3 / SQLite'}): {url}")
             print(f"Лог MLflow: {log_path}")
             if open_browser:
                 webbrowser.open(url)
@@ -486,6 +575,10 @@ def show_menu() -> None:
     print(" 7. Запустить тесты ЛР1–ЛР3")
     print(" 8. Запустить MLflow UI")
     print(" 9. Открыть оригинальные и новые результаты")
+    print("10. Запустить ЛР4 (Full/Chunks + MLflow + тесты, отдельный отчёт)")
+    print("11. Быстрая демонстрация валидатора ЛР4")
+    print("12. Запустить MLflow UI для ЛР4 (файловый backend)")
+    print("13. Открыть отчёт ЛР4")
     print()
     print(" 0. Выход")
     print()
@@ -518,6 +611,14 @@ def interactive() -> None:
                 start_mlflow()
             elif choice == "9":
                 open_results()
+            elif choice == "10":
+                run_lab4()
+            elif choice == "11":
+                lab4_quick_demo()
+            elif choice == "12":
+                start_mlflow(port=5001, file_backend=True)
+            elif choice == "13":
+                open_lab4_report()
             elif choice == "0":
                 return
             else:
@@ -534,9 +635,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke-test", action="store_true")
     parser.add_argument("--mlflow-smoke-test", action="store_true")
+    parser.add_argument("--lab4-smoke-test", action="store_true")
     args = parser.parse_args()
 
-    if args.mlflow_smoke_test:
+    if args.lab4_smoke_test:
+        lab4_smoke_test()
+    elif args.mlflow_smoke_test:
         mlflow_smoke_test()
     elif args.smoke_test:
         smoke_test()
