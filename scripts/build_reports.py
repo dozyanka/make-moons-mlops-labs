@@ -345,7 +345,7 @@ def build_lab8(data_hash: str) -> None:
 4. `tracemalloc` отражает Python memory и не является полным измерителем нативной памяти PyTorch/BLAS.
 5. Benchmark через TestClient – воспроизводимая лабораторная оценка, а не production SLA через реальный сетевой стек.
 
-`artifacts_manifest.json` содержит SHA-256 и размеры артефактов; `defense_checklist.md` фиксирует комплектность и негативные контроли.
+`artifacts_manifest.json` содержит SHA-256 и размеры артефактов; `reports/LAB8/defense_checklist.md` фиксирует комплектность и негативные контроли.
 """
     (ROOT / "reports/LAB8/lab8_report.md").write_text(text, encoding="utf-8")
 
@@ -481,24 +481,8 @@ def build_checklist(data_hash: str) -> None:
 """
     path = ROOT / "reports/LAB8/defense_checklist.md"
     path.write_text(text, encoding="utf-8")
-    (ROOT / "defense_checklist.md").write_text(text, encoding="utf-8")
 
 
-def build_screencast_plan() -> None:
-    text = """# План скринкаста 3–5 минут
-
-1. **0:00–0:30 – репозиторий и ЛР1.** Показать структуру, `hash_manifest.json`, scatter `make_moons`, запустить pre-commit negative control.
-2. **0:30–1:15 – ЛР2–3.** Открыть `ml_metrics.csv` и `dl_metrics.csv`; показать full/chunks, память, MLflow UI после online-прогона; запустить одну команду предсказания сохранённой модели.
-3. **1:15–1:45 – ЛР4–5.** Показать `validator_negative.log`; через generator API сделать `PATCH /config` и без рестарта сгенерировать данные со сдвигом.
-4. **1:45–2:45 – ЛР6.** Открыть Swagger `/docs`: `/predict`, плохой запрос -> 422, `/models`, `/promote`, `/rollback`, `/runtime`, `/metrics`.
-5. **2:45–3:30 – ЛР7.** Показать `parallel_benchmark.csv`, строку режима со всеми ядрами и фактический лучший throughput; объяснить, почему масштабирование зависит от размера модели и overhead; открыть drift windows/Evidently и показать срабатывание с окна 4.
-6. **3:30–4:15 – ЛР8.** Показать `end_to_end.csv`, `alerts_sample.jsonl`, `install.log`, `artifacts_manifest.json`.
-7. **4:15–4:45 – тесты.** `pytest --cov=moons_lab --cov-report=term-missing`; показать фактическое число passed и TOTAL coverage из текущего прогона.
-8. **4:45–5:00 – негативный режим.** Один намеренно плохой конфиг и понятное сообщение Pydantic.
-
-На видео должны быть видны команды, результат, файлы отчёта и связь каждого числа с конкретным CSV/JSON/run ID.
-"""
-    (ROOT / "reports/SCREENCAST_PLAN.md").write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -514,7 +498,6 @@ def main() -> None:
     append_lecture_requirements()
     build_review()
     build_checklist(data_hash)
-    build_screencast_plan()
     print("reports rebuilt")
 
 

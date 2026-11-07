@@ -38,8 +38,3 @@ python .\defense_demo\lab3_demo.py --mode full
 python .\defense_demo\lab3_demo.py --mode streaming
 python .\defense_demo\stream_memory_demo.py
 ```
-
-## Что показывать преподавателю
-
-Сначала запускается соответствующий demo. Затем открывается файл
-`notes/LAB{N}_POINTS.md`, где требования задания разобраны пункт за пунктом.

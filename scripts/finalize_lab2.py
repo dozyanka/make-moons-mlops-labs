@@ -402,112 +402,6 @@ def build_docx(
     doc.save(LAB2 / "lab2_report.docx")
 
 
-def build_defense(metrics: pd.DataFrame, comparison: dict) -> None:
-    full = metrics[metrics["mode"] == "full"].iloc[0]
-    chunks = metrics[metrics["mode"] == "chunks"].iloc[0]
-    baseline = comparison.get("linear_baseline_test", {})
-
-    text = f"""# Защита ЛР2
-
-## Что сказать
-
-В ЛР2 одна и та же нелинейная классическая ML-модель обучается двумя способами: на полном train-наборе и через 24 сохранённых чанка.
-
-Pipeline: StandardScaler → RBFSampler → SGDClassifier.
-
-`gamma` выбирается только по validation. Лучшее gamma: {comparison.get("best_gamma", "")}.
-
-Линейный baseline accuracy: {float(baseline.get("accuracy", 0.0)):.4f}.
-
-Нелинейная модель accuracy: {float(full["accuracy"]):.4f}.
-
-Это показывает, что для make_moons нелинейное представление работает заметно лучше линейного baseline.
-
-## Что показать
-
-1. `data/chunks/` — 24 CSV-файла.
-2. `hyperparam_search.csv` — выбор gamma по validation.
-3. `ml_metrics.csv` — full vs chunks, accuracy/F1/ROC-AUC, bootstrap CI, память, время.
-4. `ml_model.joblib` и `ml_model_chunk.joblib`.
-5. `model_manifest.json` — SHA-256 моделей.
-6. `config_negative_test.log`.
-7. `leakage_negative_test.log`.
-8. `pytest_coverage.log`.
-9. MLflow UI.
-
-## MLflow
-
-```powershell
-mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
-```
-
-Открыть `http://127.0.0.1:5000`.
-
-Full run ID: {full["run_id"]}
-
-Chunks run ID: {chunks["run_id"]}
-
-## Главный результат
-
-Full:
-- accuracy {float(full["accuracy"]):.4f}
-- F1 {float(full["f1"]):.4f}
-- ROC-AUC {float(full["roc_auc"]):.4f}
-- memory {float(full["peak_memory_mb"]):.4f} MiB
-- time {float(full["elapsed_s"]):.4f} s
-
-Chunks:
-- accuracy {float(chunks["accuracy"]):.4f}
-- F1 {float(chunks["f1"]):.4f}
-- ROC-AUC {float(chunks["roc_auc"]):.4f}
-- memory {float(chunks["peak_memory_mb"]):.4f} MiB
-- time {float(chunks["elapsed_s"]):.4f} s
-
-В этом детерминированном прогоне full и chunks дали одинаковые predictions.
-Разница заключается в способе подачи train-данных и профиле ресурсов.
-"""
-    (LAB2 / "DEFENSE.md").write_text(text, encoding="utf-8")
-
-
-def build_screencast(metrics: pd.DataFrame, comparison: dict) -> None:
-    full = metrics[metrics["mode"] == "full"].iloc[0]
-    chunks = metrics[metrics["mode"] == "chunks"].iloc[0]
-
-    text = f"""# Скринкаст ЛР2 — 3–5 минут
-
-## 0:00–0:30
-GitHub: ветка/PR ЛР2, цель full vs chunks.
-
-## 0:30–1:00
-Показать `data/chunks`: 24 файла.
-
-## 1:00–1:30
-Показать `hyperparam_search.csv`, объяснить выбор gamma={comparison.get("best_gamma", "")} только по validation.
-
-## 1:30–2:15
-Показать `ml_metrics.csv`.
-
-Full accuracy: {float(full["accuracy"]):.4f}.
-Chunks accuracy: {float(chunks["accuracy"]):.4f}.
-
-Сравнить память и время.
-
-## 2:15–2:45
-Показать обе joblib-модели и `model_manifest.json`.
-
-## 2:45–3:15
-Показать `config_negative_test.log` и `leakage_negative_test.log`.
-
-## 3:15–3:45
-Открыть MLflow UI и показать full/chunks run.
-
-## 3:45–4:10
-Показать `pytest_coverage.log` и зелёный GitHub Actions.
-
-## 4:10–4:30
-Открыть `lab2_report.docx`.
-"""
-    (LAB2 / "SCREENCAST.md").write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -522,8 +416,6 @@ def main() -> None:
     (LAB2 / "lab2_report.md").write_text(md, encoding="utf-8")
 
     build_docx(metrics, comparison, manifest)
-    build_defense(metrics, comparison)
-    build_screencast(metrics, comparison)
 
     print("Lab 2 final package generated.")
     print("Report:", LAB2 / "lab2_report.docx")

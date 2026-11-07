@@ -343,7 +343,6 @@ def _format_report(
 - Дата формирования: {datetime.now(timezone.utc).date().isoformat()} (UTC).
 - Git HEAD в момент запуска: `{commit}`.
 - SHA-256 содержимого кода ЛР4: `{code_fingerprint}` (`source_manifest.json`).
-- Для итогового GitHub-отчёта сначала фиксируется код отдельным коммитом, потом результаты перегенерируются и прикладываются следующим коммитом; см. `LAB4/GIT_AND_REPORT.md`.
 - Рабочая ML-модель: `reports/LAB2/ml_model.joblib`; SHA-256 `{integrity['model']}`.
 - Обучение/калибровка/тест: SHA-256 `{integrity['train']}` / `{integrity['validation']}` / `{integrity['test']}`.
 - Код вычислений: `scripts/run_lab4.py`, `src/moons_lab/validator.py`; таблица исходных чисел `validator_metrics.csv`.
