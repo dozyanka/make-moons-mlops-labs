@@ -165,7 +165,7 @@ python .\scripts\run_lab3.py
 - NumPy-параметры `.npz`, SHA-256, четыре MLflow-прогона (первичные и независимые повторы);
 - pytest, негативные сценарии и сохранённые результаты.
 
-**Отчёт и результаты:** [`reports/LAB4/`](reports/LAB4/) и [указатель артефактов](reports/LAB4/README.md). **Обзор всех отчётов:** [`reports/README.md`](reports/README.md).
+**Отчёт и результаты:** [`reports/LAB4/`](reports/LAB4/) и [указатель артефактов](reports/LAB4/README.md). **Обзор всех отчётов:** [`reports/`](reports/).
 
 **Отдельный запуск Windows:** `LAB4/RUN_LAB4.cmd`. **Из общего меню DEMO:** пункт **10** — полный повтор с тестами, пункт **11** — пять примеров отказа/принятия, пункт **12** — MLflow ЛР4, пункт **13** — отчёт. Повтор из DEMO сохраняет новые результаты в `demo_output/LAB4` и восстанавливает исходные опубликованные файлы.
 
@@ -208,3 +208,9 @@ python -m pytest -q
 Подробная инструкция для автоматической проверки ЛР1-ЛР3 находится в:
 
 `DEMO/README.md`
+
+## LAB4: Validator and instructor demo
+
+On Windows, run `DEMO/RUN.cmd` (or `RUN_DEMO.cmd`) to open the instructor menu for LAB1-LAB4. LAB4 actions 10-13 cover the complete run, five input checks, MLflow experiments, and report viewing.
+
+The LAB4 results are in [`reports/LAB4/`](reports/LAB4/), with the main report at [`reports/LAB4/lab4_report.md`](reports/LAB4/lab4_report.md). For instructions, see [`DEMO/README.md`](DEMO/README.md).

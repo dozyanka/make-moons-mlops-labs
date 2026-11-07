@@ -699,8 +699,6 @@ def main() -> None:
         manifest,
         env,
     )
-    build_defense(metrics, memory, comparison, env)
-    build_screencast(metrics, memory, comparison)
 
     print("Lab 3 final package generated.")
     print("DOCX:", LAB3 / "lab3_report.docx")
