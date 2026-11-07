@@ -378,106 +378,6 @@ def build_docx(
     document.save(REPORT_DIR / "lab1_report.docx")
 
 
-def build_defense(
-    manifest: dict,
-    metrics: dict[str, float],
-) -> None:
-    text = rf"""# Защита ЛР1
-
-## Короткое вступление
-
-У меня вариант 09 — make_moons. Основная проблема — нелинейность.
-
-Внешний CSV для этого варианта не скачивается: make_moons является встроенным генератором scikit-learn. Я фиксирую параметры генерации, сохраняю raw CSV и его SHA-256.
-
-## Основные числа
-
-- объектов: 24000;
-- train: {manifest["splits"]["train"]};
-- validation: {manifest["splits"]["validation"]};
-- test: {manifest["splits"]["test"]};
-- чанков: {manifest["splits"]["chunks"]};
-- классы: 50 % / 50 %;
-- corr(x1,x2): {metrics["x1_x2_corr"]:.4f};
-- accuracy линейного ориентира: {metrics["linear_train_accuracy"]:.4f}.
-
-## Порядок демонстрации
-
-1. GitHub: репозиторий, последние коммиты, Actions, Protect main.
-2. `hash_manifest.json`: источник, параметры, размер, SHA-256.
-3. `eda_stats.csv` и `schema.csv`.
-4. `nonlinearity_scatter.png`: два полумесяца и линейная граница.
-5. Остальные графики: баланс, распределения, корреляции, confusion matrix.
-6. `precommit_block.log`: три заблокированных git commit.
-7. `hash_negative_test.log`: подмена данных обнаружена.
-8. `reproducibility.log`: повторная генерация дала тот же SHA-256.
-9. `tests.log`: 3 passed.
-10. `lab1_report.docx`.
-
-## Что говорить про главный график
-
-Два класса образуют два полумесяца. Одна прямая граница не может полностью разделить такую геометрию. Поэтому заявленная проблема варианта — нелинейность — видна непосредственно на данных.
-
-Accuracy 0.8679 — это не итоговая оценка ML-модели, а диагностический линейный ориентир EDA.
-
-## Команды на защите
-
-```powershell
-git log --oneline -5
-git status
-Get-Content .\reports\LAB1\hash_manifest.json
-Get-Content .\reports\LAB1\eda_stats.csv
-Get-Content .\reports\LAB1\precommit_block.log
-Get-Content .\reports\LAB1\hash_negative_test.log
-Get-Content .\reports\LAB1\reproducibility.log
-python -m pytest .\tests\test_data.py .\tests\test_eda.py -q
-explorer .\reports\LAB1\figures
-```
-"""
-    (REPORT_DIR / "DEFENSE.md").write_text(text, encoding="utf-8")
-
-
-def build_screencast(
-    manifest: dict,
-    metrics: dict[str, float],
-) -> None:
-    text = rf"""# Скринкаст ЛР1 — план на 3–5 минут
-
-## 0:00–0:30
-Открыть GitHub. Назвать вариант 09, make_moons и проблему нелинейности.
-
-## 0:30–1:00
-Показать `hash_manifest.json`: 24000 объектов, seed 42, noise 0.22, SHA-256.
-
-## 1:00–1:40
-Показать `eda_stats.csv` и `schema.csv`: пропусков 0, дубликатов 0, классы 50/50.
-
-## 1:40–2:30
-Показать `nonlinearity_scatter.png`.
-Объяснить два полумесяца и линейную границу.
-Linear accuracy: {metrics["linear_train_accuracy"]:.4f}.
-
-Быстро показать остальные четыре графика.
-
-## 2:30–3:10
-Показать `precommit_block.log`: три реальные попытки commit заблокированы.
-
-## 3:10–3:35
-Показать `hash_negative_test.log` и `reproducibility.log`.
-
-## 3:35–4:00
-Запустить:
-`python -m pytest .\\tests\\test_data.py .\\tests\\test_eda.py -q`
-
-Показать `3 passed`.
-
-## 4:00–4:20
-Показать зелёные GitHub Actions и активный `Protect main`.
-
-## 4:20–4:35
-Открыть `lab1_report.docx`.
-"""
-    (REPORT_DIR / "SCREENCAST.md").write_text(text, encoding="utf-8")
 
 
 def main() -> None:
@@ -493,15 +393,10 @@ def main() -> None:
     (REPORT_DIR / "lab1_report.md").write_text(markdown, encoding="utf-8")
 
     build_docx(manifest, metrics, commit)
-    build_defense(manifest, metrics)
-    build_screencast(manifest, metrics)
 
     print("Final Lab 1 package generated.")
     print("DOCX:", REPORT_DIR / "lab1_report.docx")
-    print("Defense:", REPORT_DIR / "DEFENSE.md")
-    print("Screencast:", REPORT_DIR / "SCREENCAST.md")
 
 
 if __name__ == "__main__":
     main()
-

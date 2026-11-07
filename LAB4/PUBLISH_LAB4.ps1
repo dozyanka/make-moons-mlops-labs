@@ -114,7 +114,7 @@ try {
     Write-Host 'Creating lab4 branch (main remains unchanged)...'
     Invoke-Git @('switch', '-c', 'lab4')
     $codePaths = @(
-        '.gitattributes', '.gitignore', 'README.md', 'defense_checklist.md',
+        '.gitattributes', '.gitignore', 'README.md',
         'pyproject.toml', 'LAB4', 'configs/lab4.json',
         '.github/workflows/lab4-ci.yml',
         'src/moons_lab/config.py', 'src/moons_lab/data.py',
