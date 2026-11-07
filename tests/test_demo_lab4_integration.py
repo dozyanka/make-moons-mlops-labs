@@ -109,11 +109,11 @@ def test_menu_exposes_lab4_choices(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_readme_has_report_navigation() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    overview = (ROOT / "reports/README.md").read_text(encoding="utf-8")
+    report = ROOT / "reports/LAB4/lab4_report.md"
     detail = (ROOT / "reports/LAB4/README.md").read_text(encoding="utf-8")
     assert "DEMO/RUN.cmd" in readme
     assert "reports/LAB4/" in readme
-    assert "LAB4/lab4_report.md" in overview
+    assert report.is_file()
     assert "validator_params.npz" in detail
 
 

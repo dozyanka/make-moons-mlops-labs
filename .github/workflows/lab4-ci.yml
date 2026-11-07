@@ -32,7 +32,6 @@ on:
       - 'pyproject.toml'
       - 'DEMO/**'
       - 'defense_demo/run_all.py'
-      - 'reports/README.md'
       - 'README.md'
       - 'tests/test_demo_lab4_integration.py'
   pull_request:
