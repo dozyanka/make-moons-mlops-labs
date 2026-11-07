@@ -329,18 +329,20 @@ def _format_report(
     code_fingerprint: str,
 ) -> None:
     full, chunks = rows
+
     def fm(value: object, digits: int = 6) -> str:
         return f"{float(value):.{digits}f}"
+
     commit = git_head()
     text = f"""# Лабораторная работа 4. Пайплайн модели-валидатора
 
 ## Паспорт
 
-- Вариант: **09 — make_moons, нелинейность**.
-- Автор: **Владимир**.
-- Дата формирования: **{datetime.now(timezone.utc).date().isoformat()} (UTC)**.
-- Git HEAD в момент запуска (может предшествовать ещё не закоммиченному патчу): `{commit}`.
-- SHA-256 содержимого кода ЛР4 (не зависит от коммита): `{code_fingerprint}` (`source_manifest.json`).
+- Вариант: 09 – make_moons, нелинейность.
+- Автор: Владимир Шаталов ЕТ-122.
+- Дата формирования: {datetime.now(timezone.utc).date().isoformat()} (UTC).
+- Git HEAD в момент запуска: `{commit}`.
+- SHA-256 содержимого кода ЛР4: `{code_fingerprint}` (`source_manifest.json`).
 - Для итогового GitHub-отчёта сначала фиксируется код отдельным коммитом, потом результаты перегенерируются и прикладываются следующим коммитом; см. `LAB4/GIT_AND_REPORT.md`.
 - Рабочая ML-модель: `reports/LAB2/ml_model.joblib`; SHA-256 `{integrity['model']}`.
 - Обучение/калибровка/тест: SHA-256 `{integrity['train']}` / `{integrity['validation']}` / `{integrity['test']}`.
@@ -348,11 +350,11 @@ def _format_report(
 
 ## Задача и схема
 
-Рабочая модель ЛР2 уже классифицирует две переплетённые луны. **Валидатор не предсказывает класс**: он решает, можно ли доверять ответу существующей ML-модели при данном входе. Признаки `x1`, `x2` — числовые, порядок фиксирован `['x1', 'x2']`. Метод: минимальное расстояние Махаланобиса до **двух** распределений классов с регуляризацией ковариаций `{cfg.covariance_regularization}` (`configs/lab4.json`).
+Рабочая модель ЛР2 уже классифицирует две переплетённые луны. Валидатор определяет, можно ли доверять ответу существующей ML-модели при данном входе. Признаки `x1`, `x2` – числовые, порядок фиксирован `['x1', 'x2']`. Метод: минимальное расстояние Махаланобиса до двух распределений классов с регуляризацией ковариаций `{cfg.covariance_regularization}` (`configs/lab4.json`).
 
-Отказ, если **расстояние > T** ИЛИ уверенность рабочей модели `max(p, 1-p) < {cfg.confidence_threshold}`. Если указан *заявленный* класс, несогласие класса с предсказанием — дополнительный отказ. Чужие текстовые категории отклоняются раньше, на уровне схемы. Данное правило не заменяет контроль точности предсказания по истинным меткам.
+Отказ, если расстояние > T или максимальная предсказанная вероятность принадлежности к классу `max(p, 1-p) < {cfg.confidence_threshold}`. Если указан заявленный класс, несогласие класса с предсказанием – дополнительный отказ.
 
-На `train` оцениваются статистики, на `validation` **единожды** выбирается `T` с учётом допустимой доли ложных отказов `{cfg.target_false_reject_rate:.2%}` и порога предсказанной вероятности класса, на `test` без настройки измеряется качество. Объявленные критерии **до теста**: recall отказа числовых OOD ≥ `{cfg.min_ood_recall:.0%}`, false reject на `test` ≤ `{cfg.max_test_false_reject_rate:.0%}`. Настройки — pydantic `Lab4Config`.
+На `train` оцениваются статистики, на `validation` единожды выбирается `T` с учётом допустимой доли ложных отказов {cfg.target_false_reject_rate:.2%} и порога предсказанной вероятности класса. На test качество оценивается без дополнительной настройки. Заранее установленные критерии: полнота отказов на числовых чужеродных данных (OOD) ≥ {cfg.min_ood_recall:.0%}, доля ложных отказов на test ≤ {cfg.max_test_false_reject_rate:.0%}. Настройки задаются моделью Pydantic Lab4Config.
 
 ## Сравнение full и chunks
 
@@ -368,7 +370,7 @@ def _format_report(
 | Время обучения, с | {fm(full['elapsed_s'])} | {fm(chunks['elapsed_s'])} |
 | ID прогона | `{full['run_id']}` | `{chunks['run_id']}` |
 
-*Источник всех величин таблицы: `validator_metrics.csv`, строится `scripts/run_lab4.py`, Run IDs указаны в строках. Память/время измеряют только накопление статистик train, а не загрузку ML-модели и оценку на test; `tracemalloc` учитывает управляемые Python-аллокации, не весь RSS. Чанки физически читаются по одному CSV из `data/chunks/`, каждый ≤ `{cfg.chunk_size}` строк.*
+Источник всех величин таблицы: `validator_metrics.csv`, строится `scripts/run_lab4.py`, Run IDs указаны в строках. Память/время измеряют накопление статистик train. Чанки читаются по одному CSV из `data/chunks/`, каждый ≤ `{cfg.chunk_size}` строк.
 
 ### Согласованность статистик
 
@@ -378,7 +380,7 @@ def _format_report(
 - Разница порогов: `{comparisons['threshold_abs_diff']:.12g}`.
 - Допуск: `{cfg.stats_atol}`; итог: **{comparisons['stats_within_tolerance']}**.
 
-*Источник: `comparison.json`/`scripts/run_lab4.py`; проверяются также идентичность решений и повтор сохранения NumPy.*
+Источник: `comparison.json`/`scripts/run_lab4.py`.
 
 ## Негативные контроли
 
@@ -389,11 +391,11 @@ def _format_report(
 | Чужие категории | {negativity['foreign_categories_reject_rate']:.4f} | Схема запроса отклоняет текст в `x1` |
 | Строковое число/логическое значение/пустое поле | {negativity['wrong_feature_types_reject_rate']:.4f} | Строгая проверка типов, без приведения к float |
 | Перевёрнутые метки *при предоставленной метке* | {negativity['label_flip_with_claimed_label_reject_rate']:.4f} | Сравнение с решением рабочей модели |
-| Чистые данные, отказы (справочно) | {negativity['own_unlabeled_reject_rate']:.4f} | Контрольная подвыборка из 20 точек; общий показатель test приведён выше |
+| Чистые данные, отказы (справочно) | {negativity['own_unlabeled_reject_rate']:.4f} | Контрольная подвыборка из 20 точек; общая доля на test выше |
 
-*Источник: все строки и объяснения содержатся в `validator_negative.log`; итоги/число ошибочных приёмов в `negative_summary.json`. Для перевёрнутых заявленных меток было принято вопреки ожиданию **{negatives_summary['label_flip_with_claimed_label']['accepted']} из {negatives_summary['label_flip_with_claimed_label']['total']}**; это *ошибки детекции*, а не успешно пройденный 100% негативный контроль. Они записаны с `verdict_match=false` — **не скрыты**. Для отдельного числового примера нельзя гарантировать 100% детекцию; критерий объявлен через recall. Переворот истинной метки при отсутствии входной метки **невозможно отличить** от исходного примера: контроль проверяет лишь режим с `claimed_label`, которого обычный /predict не требует. Это принципиальное ограничение, а не обещание обнаружения скрытых меток.*
+Источник: все строки и объяснения содержатся в `validator_negative.log`; итоги/число ошибочных приёмов в `negative_summary.json`. Для перевёрнутых заявленных меток было принято вопреки ожиданию **{negatives_summary['label_flip_with_claimed_label']['accepted']} из {negatives_summary['label_flip_with_claimed_label']['total']}**. Они записаны с `verdict_match=false` (не скрыты). Для отдельного числового примера нельзя гарантировать 100% детекцию; критерий объявлен через recall.
 
-Дополнительные проверки: `config_negative_test.log` — 6 невалидных pydantic-конфигураций; `reproducibility.json` — сохранение/перезагрузка и сравнение режимов; `repeat_verification.json` — **вторые независимые вычисления** full/chunks с новыми MLflow Run IDs и проверкой SHA-256, метрик и решений; `validator_negative.log` — подробные ожидаемые и фактические решения.
+Дополнительные проверки: `config_negative_test.log` – 6 невалидных pydantic-конфигураций; `reproducibility.json` – сохранение/перезагрузка и сравнение режимов; `repeat_verification.json` – **вторые независимые вычисления** full/chunks с новыми MLflow Run IDs и проверкой SHA-256, метрик и решений; `validator_negative.log` – подробные ожидаемые и фактические решения.
 
 ## Артефакты и регистрация
 
@@ -413,9 +415,9 @@ def _format_report(
 | Максимальная разница метрик | {repeat['full']['metrics_max_abs_diff']:.12g} | {repeat['chunks']['metrics_max_abs_diff']:.12g} |
 | Решения на test совпали | {repeat['full']['decisions_equal']} | {repeat['chunks']['decisions_equal']} |
 
-*Источник: `repeat_verification.json`, вычисляется `scripts/run_lab4.py`. Режим воспроизводимости: точные SHA-256 и решения; метрики с допуском `stats_atol={cfg.stats_atol}`, статистики с тем же допуском. Время и память исключены из критерия точного совпадения, так как зависят от нагрузки ПК. **Общая проверка: {repeat['all_pass']}**.*
+Источник: `repeat_verification.json`, вычисляется `scripts/run_lab4.py`.
 
-Два режима обучаются только на train, оба отдельно калибруются на validation. Результат сравнения метрик с объявленным допуском `{cfg.stats_atol}`: **{comparisons['metrics_within_tolerance']}**. Контроль качества: **{comparisons['quality_pass']}**.
+Два режима обучаются только на train, оба отдельно калибруются на validation.
 
 ## Нумерованные выводы
 
@@ -424,15 +426,9 @@ def _format_report(
 3. ROC-AUC для full = `{fm(full['roc_auc'])}` (тот же источник/прогон).
 4. Максимальное расхождение средних full/chunks = `{comparisons['means_max_abs_diff']:.12g}` (источник: `comparison.json`).
 5. Ошибки числовых OOD при данном пороге не исключены: принятых доля `{fm(full['ood_accept_rate'])}` (источник: `validator_metrics.csv`, прогон `{full['run_id']}`).
-
-## Проверка преподавателем
-
-Открыть `LAB4/README.md`, затем запустить `LAB4/RUN_LAB4.cmd` в корне репозитория на Windows с Python 3.11+ и интернетом для зависимостей. Файл `reports/LAB4/pytest_coverage.log` генерируется launch-скриптом, тесты — в `tests/test_validator.py`, `tests/test_lab4_workflow.py`, `tests/test_lab4_mlflow_tracking.py`, `tests/test_lab4_runner.py`.
-Покрытие считается также для CLI и демо, не только для `validator.py`; неисполненные части общего `config.py`/`data.py`/`utils.py`, относящиеся к ЛР1–3 и ЛР5–8, объясняются в `LAB4/COVERAGE_SCOPE.md`.
-
 """
-    (OUT / "lab4_report.md").write_text(text, encoding="utf-8")
-
+    # One final LF; avoids `git diff --cached --check` failing with blank EOF.
+    (OUT / "lab4_report.md").write_bytes((text.rstrip("\n") + "\n").encode("utf-8"))
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Lab4 validator full/chunks experiment")

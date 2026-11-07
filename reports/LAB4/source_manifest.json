@@ -1,12 +1,12 @@
 {
-  "combined_sha256": "d14f228abccce10ef620d3592095f5e8846fdaf2aefa2d6ab8f555dd903237e8",
+  "combined_sha256": "4bbfe872589b912e71918d72d9e0c2b41153bad04c9d054f9b91d6b4f86c771b",
   "files_sha256": {
     "LAB4/CHECK_MLFLOW_STORE.ps1": "c98e2aad4e6cd24c3595d4ccd596e3a194140e9e887c9fe8fad228d5eabf888c",
     "LAB4/NORMALIZE_COVERAGE_LOG.ps1": "ac77fd1235f16a143f3c26a60ddee2f1c797530f43b6ab1a8b5144c2140d2659",
     "LAB4/RUN_LAB4.ps1": "63b3e78291dd7132bbfe842342fb5a146f692bf6f642c9db487b63303458bd87",
     "configs/lab4.json": "2d86fac0edb456a010529f76544d6bd25723a792f5ca4df5f16a135568307050",
     "defense_demo/lab4_demo.py": "672bd10dc497e898a17e01a3e35bd8a1b7850deafce7b97c3f2644e788575c02",
-    "scripts/run_lab4.py": "750b141cd74243ff6a73cc5896fd4897661ebda0d27c310a4da8951f74cc9384",
+    "scripts/run_lab4.py": "1eb633677ca31a9686b8e8131a5c78c533dccb5c58c65e428a103d022f2d4b6a",
     "src/moons_lab/config.py": "fd8169557b0ef2f02e4aa556f06295c77c570b5b6b7ec4e303e333d1aab8cac6",
     "src/moons_lab/data.py": "7f376d3ac67070104901781d376fd29f72f87523bd4d96f28c17e1e4228c516b",
     "src/moons_lab/utils.py": "e68e436ddac0c9d5191bd7bf632fe5fe17e16e10a0019e7aaadc95b6ba826196",
@@ -16,5 +16,5 @@
     "tests/test_lab4_workflow.py": "7c78f6e2846792bb32af13db77404d5cf73930d946a7a153443a00f4e16b75b6",
     "tests/test_validator.py": "086562ae738d75beb3837ed02415dbaf14b215f0c0bb1c428f3b6f72a12d5f2a"
   },
-  "git_head_at_run": "5c48973fe667ef45244b490a7b88af8b963ccfa0"
+  "git_head_at_run": "ea780f93ab32c716928392284bd1584469ef6b9c"
 }
