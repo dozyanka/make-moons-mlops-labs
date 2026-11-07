@@ -1,0 +1,102 @@
+{
+  ".github/workflows/lab4-ci.yml": {
+    "bytes": 1365,
+    "sha256": "c85233a89cf7ed523683bd7fa3c66c37fd63ceadb0ea271bbc0dc4b32e527f25"
+  },
+  "LAB4/PATCH_01_APPLY.md": {
+    "bytes": 3042,
+    "sha256": "d4b9980ad16bdf7ddde387597fd3da9eab623317bab2da8b3943b0b48de88b95"
+  },
+  "LAB4/README.md": {
+    "bytes": 5268,
+    "sha256": "9cc595b991d6b5d71e85d1191c7a1b9a87a37b697357c1a9bdd7ed7065018426"
+  },
+  "LAB4/REQUIREMENTS_AUDIT.md": {
+    "bytes": 4595,
+    "sha256": "667f0c089c2ae0d72fb79c0bbca541306a5f0cfe16e750ff03f38cc07b998b9d"
+  },
+  "LAB4/RUN_LAB4.cmd": {
+    "bytes": 218,
+    "sha256": "a52cfd47028bd339f86eb4de9cb354db10925956f7796a07874363944d6e055c"
+  },
+  "LAB4/RUN_LAB4.ps1": {
+    "bytes": 2697,
+    "sha256": "3b12668e243fbe4cd4bb4aef48ef578a774b80d8e8c1e81cc8efdfc666d37148"
+  },
+  "LAB4/SCREENCAST.md": {
+    "bytes": 1497,
+    "sha256": "c5f25b8ba0a5ade2d8c6190a60f37ab2e732b78535b657f3dece38983bcf868c"
+  },
+  "README.md": {
+    "bytes": 6830,
+    "sha256": "59a34108d068e10324722c003ef0fff2fc97afb026fac2a1c2633f3fe53736f1"
+  },
+  "configs/lab4.json": {
+    "bytes": 605,
+    "sha256": "2d86fac0edb456a010529f76544d6bd25723a792f5ca4df5f16a135568307050"
+  },
+  "defense_checklist.md": {
+    "bytes": 4308,
+    "sha256": "536552a7d7d0928507e2acf3fce2ab56079817575b14f50e68366e8497adf287"
+  },
+  "defense_demo/lab4_demo.py": {
+    "bytes": 1676,
+    "sha256": "672bd10dc497e898a17e01a3e35bd8a1b7850deafce7b97c3f2644e788575c02"
+  },
+  "defense_demo/notes/LAB4_POINTS.md": {
+    "bytes": 2107,
+    "sha256": "b63d7a563a4a38a78c2ae062da345f815a6cd79fc3d65b766df6d22491b0e7b8"
+  },
+  "reports/LAB4/comparison.json": {
+    "bytes": 620,
+    "sha256": "e52948061234734851ce8281b124baac9408467a518820ac761f597beb1761f9"
+  },
+  "reports/LAB4/config_negative_test.log": {
+    "bytes": 467,
+    "sha256": "ee703f18cd8a2e2c835e709f16cc13480940ba7b1ae62a2d7c868361283a5d4f"
+  },
+  "reports/LAB4/lab4_report.md": {
+    "bytes": 9262,
+    "sha256": "a8d9716e2c93c84f5877648fd4dc7146a4b957f49991ea150bdc4a0d8e7d134c"
+  },
+  "reports/LAB4/pytest_coverage.log": {
+    "bytes": 2426,
+    "sha256": "799c95cc509b3632e0be40fad3c6ad8fc9c1383bafbad09ab510695255a05b54"
+  },
+  "reports/LAB4/reproducibility.json": {
+    "bytes": 1506,
+    "sha256": "d3c56b9ee879901bf06be928c3cb71de685edaf009fd61a7c49f9c7b095f8037"
+  },
+  "reports/LAB4/validator_metrics.csv": {
+    "bytes": 635,
+    "sha256": "7a03cd5bb9a182ecc7e200b53617549f10c3c5ff9113ad3481e067d5416f55b6"
+  },
+  "reports/LAB4/validator_negative.log": {
+    "bytes": 1099299,
+    "sha256": "52b9d81ea2e771c81d4444cb602a2ddc24ef55d2ddbced5062dbd3c7386cbff4"
+  },
+  "reports/LAB4/validator_params.npz": {
+    "bytes": 1992,
+    "sha256": "f167ac43557384e1719fc9ff0a47965055ef2f33ec0b5c98832b0285fae58046"
+  },
+  "reports/LAB4/validator_params_chunk.npz": {
+    "bytes": 1992,
+    "sha256": "7bdb1d593165c7097427d579f84d0f2b7e6fc9843e94862e3bd32aaff65e6c98"
+  },
+  "scripts/run_lab4.py": {
+    "bytes": 26255,
+    "sha256": "567f24668a02b8c49a3ac867f6d09b76a3213f112ebb9ea7bf133563b296c239"
+  },
+  "src/moons_lab/config.py": {
+    "bytes": 5673,
+    "sha256": "fd8169557b0ef2f02e4aa556f06295c77c570b5b6b7ec4e303e333d1aab8cac6"
+  },
+  "src/moons_lab/validator.py": {
+    "bytes": 14650,
+    "sha256": "bebb71983986abb3d66c7f89a47b6e05b13577408c1f6644e4df6be49c727369"
+  },
+  "tests/test_lab4_workflow.py": {
+    "bytes": 7886,
+    "sha256": "7c78f6e2846792bb32af13db77404d5cf73930d946a7a153443a00f4e16b75b6"
+  }
+}

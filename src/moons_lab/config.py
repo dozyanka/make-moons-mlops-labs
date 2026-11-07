@@ -54,12 +54,36 @@ class Lab3Config(BaseModel):
 
 
 class Lab4Config(BaseModel):
+    """Lab 4 policy and inputs. No hidden tuning on the held-out test set."""
+
     seed: int = Field(ge=0)
-    chunk_size: int = Field(ge=50)
+    train_path: str = "data/processed/train.csv"
+    validation_path: str = "data/processed/validation.csv"
+    test_path: str = "data/processed/test.csv"
+    chunks_dir: str = "data/chunks"
+    working_model_path: str = "reports/LAB2/ml_model.joblib"
+    features: list[Literal["x1", "x2"]] = Field(default_factory=lambda: ["x1", "x2"])
+    distance_method: Literal["class_mahalanobis"] = "class_mahalanobis"
+    covariance_regularization: float = Field(default=1e-6, gt=0, le=0.1)
+    chunk_size: int = Field(ge=50, le=100000)
     target_false_reject_rate: float = Field(gt=0, lt=0.5)
+    max_test_false_reject_rate: float = Field(default=0.05, gt=0, lt=0.5)
+    min_ood_recall: float = Field(default=0.90, gt=0, le=1)
     confidence_threshold: float = Field(ge=0.5, lt=1.0)
     ood_samples: int = Field(ge=100)
     ood_shift: float = Field(gt=0)
+    stats_atol: float = Field(default=1e-9, gt=0, le=0.01)
+    negative_examples_per_type: int = Field(default=20, ge=5, le=2000)
+
+    @model_validator(mode="after")
+    def validate_lab4_features(self) -> "Lab4Config":
+        if self.features != ["x1", "x2"]:
+            raise ValueError("features must be exactly ['x1', 'x2'] in this order")
+        if self.max_test_false_reject_rate < self.target_false_reject_rate:
+            raise ValueError("max_test_false_reject_rate must be >= target_false_reject_rate")
+        if self.negative_examples_per_type > self.ood_samples // 2:
+            raise ValueError("negative_examples_per_type must fit into each OOD scenario")
+        return self
 
 
 class Lab5Config(BaseModel):

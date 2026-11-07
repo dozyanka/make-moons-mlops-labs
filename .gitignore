@@ -19,3 +19,6 @@ demo_output/
 .demo_backup/
 
 *.egg-info/
+
+# Ephemeral pytest workspaces (LAB4)
+reports/LAB4/.pytest_runtime/

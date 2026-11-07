@@ -1,0 +1,50 @@
+{
+  "all_pass": true,
+  "chunks": {
+    "counts_equal": true,
+    "decisions_equal": true,
+    "metrics_differences": {
+      "false_reject_rate": 0.0,
+      "ood_accept_rate": 0.0,
+      "rejection_precision": 0.0,
+      "rejection_recall": 0.0,
+      "roc_auc": 0.0
+    },
+    "metrics_max_abs_diff": 0.0,
+    "npz_sha256_equal": true,
+    "pass": true,
+    "primary_run_id": "d29239818fce4a1e9876d295107bab81",
+    "primary_sha256": "697a37fb37fbe925024f91b615d575622404c933cb6ab077c3f2d71de0c4120b",
+    "repeat_run_id": "b6aacc34f03e482db42b4c0052a0ef88",
+    "repeat_sha256": "697a37fb37fbe925024f91b615d575622404c933cb6ab077c3f2d71de0c4120b",
+    "statistics_max_abs_diff": 0.0,
+    "tracking_backend": "mlflow"
+  },
+  "full": {
+    "counts_equal": true,
+    "decisions_equal": true,
+    "metrics_differences": {
+      "false_reject_rate": 0.0,
+      "ood_accept_rate": 0.0,
+      "rejection_precision": 0.0,
+      "rejection_recall": 0.0,
+      "roc_auc": 0.0
+    },
+    "metrics_max_abs_diff": 0.0,
+    "npz_sha256_equal": true,
+    "pass": true,
+    "primary_run_id": "46ff6a550ac040d89741284ce811fbb3",
+    "primary_sha256": "2dc05f26c74168854f9d4c3827c8ab91beb3d10c5fe69823cc605145e1ed500d",
+    "repeat_run_id": "5c5a4bf818564432a1cec762e5bf03c0",
+    "repeat_sha256": "2dc05f26c74168854f9d4c3827c8ab91beb3d10c5fe69823cc605145e1ed500d",
+    "statistics_max_abs_diff": 0.0,
+    "tracking_backend": "mlflow"
+  },
+  "modes": [
+    "full",
+    "chunks"
+  ],
+  "seed": 42,
+  "source_hashes_unchanged": true,
+  "stats_tolerance": 1e-09
+}

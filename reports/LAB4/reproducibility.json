@@ -1,0 +1,44 @@
+{
+  "data_and_model_hashes": {
+    "model": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+    "test": "923a607f7a02eaee3097ea105b6190c0063f738f825e69f635b0d9ff206516f7",
+    "train": "28e06fb3d84afe4337ace065a5950078eb19f41c64371bc00611ca3cb1643adf",
+    "validation": "fe30ff68f807407c6d78c4bf04304880e7397fcc38f936a066e6df74ba123df5"
+  },
+  "full_and_chunk_decisions_equal": true,
+  "non_mlflow_diagnostic": false,
+  "replay": {
+    "chunks": {
+      "npz_sha256_equal_on_repeat": true,
+      "prediction_equal": true,
+      "sha256": "697a37fb37fbe925024f91b615d575622404c933cb6ab077c3f2d71de0c4120b"
+    },
+    "full": {
+      "npz_sha256_equal_on_repeat": true,
+      "prediction_equal": true,
+      "sha256": "2dc05f26c74168854f9d4c3827c8ab91beb3d10c5fe69823cc605145e1ed500d"
+    }
+  },
+  "seed": 42,
+  "statistics": {
+    "count_chunks": [
+      8400,
+      8400
+    ],
+    "count_full": [
+      8400,
+      8400
+    ],
+    "counts_equal": true,
+    "cov_max_abs_diff": 2.1094237467877974e-15,
+    "inv_cov_max_abs_diff": 6.8833827526759706e-15,
+    "means_max_abs_diff": 4.773959005888173e-15,
+    "metrics_max_abs_diff": 0.0,
+    "metrics_within_tolerance": true,
+    "quality_pass": true,
+    "stats_within_tolerance": true,
+    "threshold_abs_diff": 4.884981308350689e-15,
+    "validator_chunks_sha256": "697a37fb37fbe925024f91b615d575622404c933cb6ab077c3f2d71de0c4120b",
+    "validator_full_sha256": "2dc05f26c74168854f9d4c3827c8ab91beb3d10c5fe69823cc605145e1ed500d"
+  }
+}

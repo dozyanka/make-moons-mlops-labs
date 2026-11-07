@@ -1,8 +1,20 @@
 {
   "seed": 42,
+  "train_path": "data/processed/train.csv",
+  "validation_path": "data/processed/validation.csv",
+  "test_path": "data/processed/test.csv",
+  "chunks_dir": "data/chunks",
+  "working_model_path": "reports/LAB2/ml_model.joblib",
+  "features": ["x1", "x2"],
+  "distance_method": "class_mahalanobis",
+  "covariance_regularization": 1e-6,
   "chunk_size": 700,
   "target_false_reject_rate": 0.03,
+  "max_test_false_reject_rate": 0.05,
+  "min_ood_recall": 0.90,
   "confidence_threshold": 0.52,
   "ood_samples": 2000,
-  "ood_shift": 3.5
+  "ood_shift": 3.5,
+  "stats_atol": 1e-9,
+  "negative_examples_per_type": 20
 }

@@ -1,0 +1,25 @@
+....................................                                     [100%]
+============================== warnings summary ===============================
+tests/test_lab4_runner.py::test_inprocess_end_to_end_repeat_and_demo
+  C:\Users\shata\Desktop\make-moons-mlops-labs\.venv\Lib\site-packages\sklearn\svm\_base.py:236: FutureWarning: The `probability` parameter was deprecated in 1.9 and will be removed in version 1.11. Use `CalibratedClassifierCV(SVC(), ensemble=False)` instead of `SVC(probability=True)`
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+36 passed, 1 warning in 4.29s
+Name                         Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------
+defense_demo\lab4_demo.py       26      0      2      0   100%
+scripts\run_lab4.py            270     36     76     17    83%   74-75, 96, 101, 175, 177, 179, 181, 183, 198, 222-223, 303-307, 321, 449-453, 462, 483, 497, 504-512, 534, 551-556, 561->exit
+src\moons_lab\config.py        120     16     18      2    80%   21-26, 40-42, 85, 124-128, 153
+src\moons_lab\data.py           63     33     16      1    42%   29-34, 48-151, 173, 185-189
+src\moons_lab\utils.py          50     15      4      0    69%   19-30, 42, 46-48
+src\moons_lab\validator.py     208     16     72     14    89%   40, 42, 44, 46, 52-53, 64, 111, 163, 168, 200, 242, 247, 258, 261, 268
+------------------------------------------------------------------------
+TOTAL                          737    116    188     34    81%
+Name                         Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------
+defense_demo\lab4_demo.py       26      0      2      0   100%
+scripts\run_lab4.py            270     36     76     17    83%   74-75, 96, 101, 175, 177, 179, 181, 183, 198, 222-223, 303-307, 321, 449-453, 462, 483, 497, 504-512, 534, 551-556, 561->exit
+src\moons_lab\validator.py     208     16     72     14    89%   40, 42, 44, 46, 52-53, 64, 111, 163, 168, 200, 242, 247, 258, 261, 268
+------------------------------------------------------------------------
+TOTAL                          504     52    150     31    86%
