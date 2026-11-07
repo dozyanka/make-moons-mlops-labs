@@ -7,7 +7,7 @@
 | 1 | report, eda_stats, precommit log, hash manifest | SHA-256 сверяется | secret/large/syntax/tamper | готово |
 | 2 | report, ml_metrics, ml_model, config log | full=chunks, seed fixed | bad configs, leakage-safe split | rerun with real MLflow online |
 | 3 | report, dl_metrics, dl_model, memory compare | repeat exact, tolerance <=0.005 | bad configs, seed demo | CUDA parity rerun if GPU available |
-| 4 | report, validator metrics/params/negative log | full≈chunks, NPZ reload, SHA-256 | mean shift/outliers/categories/claimed-label-flip, bad configs | реализовано; MLflow/скринкаст проверить на ПК |
+| 4 | report, validator metrics/params/negative log | full≈chunks, NPZ reload, SHA-256 | mean shift/outliers/categories/claimed-label-flip, bad configs | DEMO 10-13 и MLflow проверены на Windows; pytest 36 passed |
 | 5 | report, synthetic metrics/config/tests | identical hash for same seed | drift knobs + bad config | ещё не проверено в текущем репозитории |
 | 6 | report, service log, registry | model SHA-256 checked | 422, bad hash, rollback | ещё не проверено в текущем репозитории |
 | 7 | report, benchmark, drift metrics | repeated warmed measurements | drift/clean/worker failure | ещё не проверено в текущем репозитории |
