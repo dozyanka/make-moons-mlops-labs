@@ -44,6 +44,7 @@ def main():
         "difference": diff,
         "pass": passed,
     }
+    RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "lab1_result.json").write_text(
         __import__("json").dumps(payload, indent=2),
         encoding="utf-8",

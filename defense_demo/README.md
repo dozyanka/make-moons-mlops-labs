@@ -5,11 +5,9 @@
 
 ## Самый простой запуск
 
-Двойной клик:
+В Windows запустите `RUN_DEMO.cmd` из корня репозитория и выберите пункт **6**.
 
-`defense_demo/RUN_ALL_DEMOS.cmd`
-
-или:
+Для прямого запуска через Python:
 
 ```powershell
 .\.venv\Scripts\python.exe .\defense_demo\run_all.py

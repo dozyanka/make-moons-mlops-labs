@@ -170,7 +170,7 @@ def _install_probe() -> str:
             lines.append(probe.stderr)
             lines.append(f"import_exit={probe.returncode}")
         lines.append("NOTE: dependency resolution from PyPI was not tested in the build container because outbound package access is disabled.")
-        lines.append("RUN_ME_WINDOWS.ps1 performs the full online install with [all] extras on the student's machine.")
+        lines.append("To validate dependency resolution online, run: python -m pip install -e \".[all]\" in a fresh venv.")
     return "\n".join(lines)
 
 
@@ -183,7 +183,7 @@ def _invalid_config_check(cfg: Lab8Config) -> str:
 
 
 def build_artifact_manifest() -> dict:
-    roots = ["configs", "src", "scripts", "tests", "reports", "models", "data", ".github", "diagrams", "docs"]
+    roots = ["configs", "src", "scripts", "tests", "reports", "models", "data", ".github", "diagrams", "DEMO", "defense_demo", "LAB4"]
     files = []
     for root_name in roots:
         root = ROOT / root_name
@@ -199,7 +199,7 @@ def build_artifact_manifest() -> dict:
                 "sha256": sha256_file(path),
                 "bytes": path.stat().st_size,
             })
-    for extra in ["README.md", "SUBMISSION_MAP.md", "LECTURE_REQUIREMENTS_MAP.md", "pyproject.toml", "requirements-lock.txt", "RUN_ME_WINDOWS.ps1", "RUN_LAB_WINDOWS.ps1", "GITHUB_SETUP.md", "defense_checklist.md", ".gitignore", ".gitattributes", ".pre-commit-config.yaml"]:
+    for extra in ["README.md", "RUN_DEMO.cmd", "pyproject.toml", "requirements-lock.txt", ".gitignore", ".gitattributes", ".pre-commit-config.yaml"]:
         path = ROOT / extra
         if path.exists():
             files.append({"path": extra, "sha256": sha256_file(path), "bytes": path.stat().st_size})
