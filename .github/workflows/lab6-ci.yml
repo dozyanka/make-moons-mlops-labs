@@ -19,8 +19,10 @@ jobs:
       - name: LAB4 source integrity remains frozen
         run: python scripts/verify_lab4_data.py --check-published
       - name: Service contracts + lab6 negatives
-        run: python -m pytest -q tests/test_service.py tests/test_lab6_service.py
+        run: python -m pytest -q tests/test_service.py tests/test_lab6_service.py tests/test_lab6_hardening.py
       - name: LAB6 runner
         run: python scripts/run_lab6.py --quick --report-dir demo_output/LAB6 --runtime-dir demo_output/LAB6_runtime
       - name: Existing LAB4 smoke/integration
         run: python -m pytest -q tests/test_lab4_workflow.py tests/test_demo_lab4_integration.py
+      - name: Real HTTP integration: Uvicorn model and monitor
+        run: python scripts/lab6_network_drill.py --requests 120 --report-dir demo_output/LAB6_network --runtime-dir demo_output/LAB6_network_runtime

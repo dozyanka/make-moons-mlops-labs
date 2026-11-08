@@ -382,6 +382,7 @@ def run_lab6() -> None:
     run(["scripts/run_lab6.py", "--report-dir", str(location),
          "--runtime-dir", str(DEMO_OUTPUT / "LAB6_runtime")], log_name="LAB6")
     run(["-m", "pytest", "-q", "tests/test_service.py", "tests/test_lab6_service.py",
+         "tests/test_lab6_hardening.py",
          "--basetemp", str(DEMO_OUTPUT / "pytest_runtime" / f"LAB6_TESTS_{uuid.uuid4().hex}")], log_name="LAB6_TESTS")
     print("Опубликованные ЛР1–5 не изменялись. Новый прогон: demo_output/LAB6")
 
@@ -403,7 +404,15 @@ def start_lab6_service(which: str) -> None:
     else:
         args = ["scripts/serve_lab6.py", "--service", "monitor", "--port", "8001"]
     print("Для остановки сервера нажми Ctrl+C.")
-    run(args)
+    try:
+        run(args)
+    except KeyboardInterrupt:
+        print("Сервер остановлен пользователем.")
+    except subprocess.CalledProcessError as exc:
+        if exc.returncode in (-1073741510, 3221225786, 130, -2):
+            print("Сервер остановлен пользователем.")
+        else:
+            raise
 
 
 def lab4_quick_demo() -> None:

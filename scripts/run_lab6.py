@@ -43,6 +43,9 @@ def contract_checks(client: TestClient, monitor: TestClient) -> pd.DataFrame:
         ("runtime", "GET", "/runtime", None, 200),
         ("runtime_patch", "PATCH", "/runtime", {"metrics_enabled": False}, 200),
         ("unknown_version", "POST", "/promote", {"version": "missing"}, 404),
+        ("stage_preparing", "PATCH", "/models/v1/status", {"status": "preparing"}, 200),
+        ("reject_preparing", "POST", "/promote", {"version": "v1"}, 409),
+        ("stage_canary", "PATCH", "/models/v1/status", {"status": "canary"}, 200),
     ]
     rows = []
     for name, method, uri, payload, expected in cases:
@@ -144,7 +147,7 @@ def main() -> None:
     report = args.report_dir.resolve()
     report.mkdir(parents=True, exist_ok=True)
     cfg: Lab6Config = load_config(6, ROOT / "configs/lab6.json")  # type: ignore[assignment]
-    registry_path = build_registry(ROOT, args.runtime_dir / "registry")
+    registry_path = build_registry(ROOT, args.runtime_dir / "registry", reset=True)  # clean test run, not production
     monitor_state = MonitorState(log_path=args.runtime_dir / "monitor_observations.jsonl")
     monitor = TestClient(create_monitor_app(monitor_state))
     sink = lambda x1, x2, p: monitor_state.add(Observation(x1=x1, x2=x2, probability=p))
@@ -262,6 +265,24 @@ Run ID: `{run_meta['run_id']}`. Backend: `{run_meta['tracking_backend']}`.
 4. Независимый монитор собирает наблюдения и строит график.
 5. Негативный тест повреждённой модели обнаруживает несовпадение SHA-256.
 """, encoding="utf-8")
+    # Append provenance to the newly generated report without changing the original
+    # published LAB1–5 artifacts.  The Git SHA names the source snapshot being run.
+    import subprocess
+    from datetime import datetime, timezone
+    git_state = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                               capture_output=True, text=True, check=False)
+    source_commit = git_state.stdout.strip() if git_state.returncode == 0 else "no-git-checkout"
+    training = ROOT / "data/processed/train.csv"
+    training_hash = sha256_file(training) if training.is_file() else "not available"
+    with (report / "lab6_report.md").open("a", encoding="utf-8") as out:
+        out.write(f"\n## 7. Воспроизводимость и уточнения после аудита\n\n"
+                  f"Дата UTC: {datetime.now(timezone.utc).isoformat()}. "
+                  f"Исходный коммит: `{source_commit}`.\n\n"
+                  f"SHA-256 `data/processed/train.csv`: `{training_hash}`.\n\n"
+                  "Проверки TestClient и сетевой Uvicorn-нагрузки являются разными "
+                  "сценариями; внешний тест: `scripts/lab6_network_drill.py`.\n\n"
+                  "Реестр сохраняет состояние между обычными запусками; "
+                  "этот лабораторный прогон явно сбрасывает только свою копию реестра.\n")
     print(contracts.to_string(index=False))
     print(load.to_string(index=False))
     print(json.dumps(drill, indent=2, ensure_ascii=False))
