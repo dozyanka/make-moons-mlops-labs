@@ -1,0 +1,72 @@
+{
+  "outputs_sha256": {
+    "drifted": "babcfd00b5a72260b450ad2637d3299563858edca824dc8433889805ba3ff187",
+    "random": "a5391f8b8f0789dc921febc60d6171cc066791a5f49683a15948974e6f1668c3",
+    "similar": "2192baf087de187ce68219022b6b6e2e00bcc828d14b491334e87cee9746d57e"
+  },
+  "presets": {
+    "drifted": {
+      "class_1_ratio": 0.7,
+      "label_flip_rate": 0.04,
+      "mode": "similar",
+      "n_samples": 12000,
+      "noise": 0.22,
+      "output_columns": [
+        "x1",
+        "x2",
+        "y"
+      ],
+      "random_range": 4.0,
+      "rotation_deg": 12.0,
+      "scale": 1.0,
+      "seasonality_amplitude": 0.15,
+      "seasonality_period": 100,
+      "seed": 77,
+      "shift_x": 0.9,
+      "shift_y": 0.35
+    },
+    "random": {
+      "class_1_ratio": 0.5,
+      "label_flip_rate": 0.0,
+      "mode": "random",
+      "n_samples": 12000,
+      "noise": 0.22,
+      "output_columns": [
+        "x1",
+        "x2",
+        "y"
+      ],
+      "random_range": 4.0,
+      "rotation_deg": 0.0,
+      "scale": 1.0,
+      "seasonality_amplitude": 0.0,
+      "seasonality_period": 100,
+      "seed": 77,
+      "shift_x": 0.0,
+      "shift_y": 0.0
+    },
+    "similar": {
+      "class_1_ratio": 0.5,
+      "label_flip_rate": 0.0,
+      "mode": "similar",
+      "n_samples": 12000,
+      "noise": 0.22,
+      "output_columns": [
+        "x1",
+        "x2",
+        "y"
+      ],
+      "random_range": 4.0,
+      "rotation_deg": 0.0,
+      "scale": 1.0,
+      "seasonality_amplitude": 0.0,
+      "seasonality_period": 100,
+      "seed": 77,
+      "shift_x": 0.0,
+      "shift_y": 0.0
+    }
+  },
+  "reference_sha256": "dd38bd033f2300777fb0420e4c7bf895946435fa3b76c4d495a69e120b54be91",
+  "source": "sklearn.datasets.make_moons",
+  "variant": 9
+}

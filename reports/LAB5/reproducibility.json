@@ -1,0 +1,15 @@
+{
+  "byte_identical_on_repeat": true,
+  "different_seed_produces_different_sha256": true,
+  "sha256": {
+    "drifted": "babcfd00b5a72260b450ad2637d3299563858edca824dc8433889805ba3ff187",
+    "random": "a5391f8b8f0789dc921febc60d6171cc066791a5f49683a15948974e6f1668c3",
+    "similar": "2192baf087de187ce68219022b6b6e2e00bcc828d14b491334e87cee9746d57e"
+  },
+  "thresholds": {
+    "random_fraction": 1.0,
+    "random_pass": true,
+    "similar_fraction": 1.0,
+    "similar_pass": true
+  }
+}
