@@ -194,7 +194,7 @@ FastAPI предоставляет `/health`, `/predict`, `/predict/batch`, `/me
 
 ## Архитектурная диаграмма
 
-Для этого варианта подготовлена дополнительная C4-подобная диаграмма `diagrams/c4_make_moons_architecture.png` и редактируемая версия `.drawio`. На ней показаны инженер/аналитик/источник запросов, FastAPI inference service, online generator, monitoring, MLflow, model registry и хранилище real/chunk/synthetic данных.
+Для этого варианта подготовлена дополнительная C4-подобная диаграмма `diagrams/c4_make_moons.drawio.png` и редактируемая версия `.drawio`. На ней показаны инженер/аналитик/источник запросов, FastAPI inference service, online generator, monitoring, MLflow, model registry и хранилище real/chunk/synthetic данных.
 """
     (ROOT / "reports/LAB6/lab6_report.md").write_text(text, encoding="utf-8")
 
