@@ -323,6 +323,40 @@ def run_lab4() -> None:
     print("Логи: demo_output/logs/LAB4_*.log")
 
 
+
+def run_lab5() -> None:
+    """LAB5 full reproducibility, PSI/KS comparison and pytest-cov.
+
+    Publish-time artifacts are read-only: every rerun goes into demo_output.
+    """
+    print("\n" + "=" * 72)
+    print("ЛР5 — ГЕНЕРАТОР СИНТЕТИЧЕСКИХ ДАННЫХ")
+    print("=" * 72)
+    location = DEMO_OUTPUT / "LAB5"
+    run(
+        [
+            "scripts/run_lab5.py",
+            "--report-dir", str(location),
+            "--data-dir", str(location / "data"),
+        ],
+        log_name="LAB5",
+    )
+    print("Оригинал: reports/LAB5")
+    print("Новый прогон: demo_output/LAB5")
+    print("Опубликованные ЛР1–4 и их SHA-256 не изменялись.")
+
+
+def open_lab5_report() -> None:
+    published = ROOT / "reports" / "LAB5" / "lab5_report.md"
+    regenerated = DEMO_OUTPUT / "LAB5" / "lab5_report.md"
+    if not published.is_file():
+        raise FileNotFoundError(published)
+    print("ЛР5 — опубликованный отчёт:", published)
+    print("ЛР5 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 14")
+    if os.name == "nt":
+        os.startfile(published)
+
+
 def lab4_quick_demo() -> None:
     """Show five saved-model accept/reject cases without retraining."""
     params = ROOT / "reports" / "LAB4" / "validator_params.npz"
@@ -619,6 +653,8 @@ def show_menu() -> None:
     print("11. Быстрая демонстрация валидатора ЛР4")
     print("12. Запустить MLflow UI для ЛР4 (файловый backend)")
     print("13. Открыть отчёт ЛР4")
+    print("14. Запустить ЛР5 (генератор, PSI/KS, pytest-cov, отчёт)")
+    print("15. Открыть отчёт ЛР5")
     print()
     print(" 0. Выход")
     print()
@@ -659,6 +695,10 @@ def interactive() -> None:
                 start_mlflow(port=5001, file_backend=True)
             elif choice == "13":
                 open_lab4_report()
+            elif choice == "14":
+                run_lab5()
+            elif choice == "15":
+                open_lab5_report()
             elif choice == "0":
                 return
             else:

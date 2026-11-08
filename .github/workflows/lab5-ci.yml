@@ -1,0 +1,40 @@
+name: Lab 5 CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lab5-and-lab4-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install project and test tools
+        run: python -m pip install -e ".[test]"
+      - name: Validate original LAB4 files and published provenance
+        run: python scripts/verify_lab4_data.py --check-git-index --check-published
+      - name: LAB5 pytest and coverage
+        run: |
+          python -m pytest -q tests/test_generator.py tests/test_lab5_workflow.py \
+            --cov=moons_lab.generator --cov-report=term-missing --cov-fail-under=80
+      - name: Reproduce LAB5 into an isolated directory
+        run: |
+          python scripts/run_lab5.py \
+            --report-dir demo_output/LAB5 \
+            --data-dir demo_output/LAB5/data
+      - name: Recheck LAB4 after LAB5 run
+        run: |
+          python scripts/verify_lab4_data.py --check-git-index --check-published
+          python DEMO/menu.py --lab4-smoke-test
+          python defense_demo/lab4_demo.py
+      - name: Ensure published artifacts remain untouched
+        run: git diff --exit-code
+      - name: Local project checks
+        run: python scripts/precommit_checks.py --all

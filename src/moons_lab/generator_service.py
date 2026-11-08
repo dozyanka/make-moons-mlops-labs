@@ -18,6 +18,8 @@ class ConfigPatch(BaseModel):
     class_1_ratio: float | None = None
     label_flip_rate: float | None = None
     random_range: float | None = None
+    seasonality_amplitude: float | None = None
+    seasonality_period: int | None = None
 
 
 class GenerateRequest(BaseModel):
