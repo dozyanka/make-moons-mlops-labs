@@ -1,0 +1,14 @@
+{
+  "active_after_rollback": "v2",
+  "expected_requests": 960,
+  "lost_or_failed": 0,
+  "promote_status": 200,
+  "rollback_status": 200,
+  "success_fraction": 1.0,
+  "successful_requests": 960,
+  "total_requests": 960,
+  "versions_observed": [
+    "v1",
+    "v2"
+  ]
+}

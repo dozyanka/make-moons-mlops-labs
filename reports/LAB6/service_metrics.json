@@ -1,0 +1,20 @@
+{
+  "active_version": "v2",
+  "avg_request_latency_ms": 6.422293030068987,
+  "batch_fallbacks": 0,
+  "error_count": 0,
+  "error_rate": 0.0,
+  "labeled_count": 0,
+  "metric_descriptions": {
+    "avg_request_latency_ms": "средняя задержка API-запроса",
+    "error_rate": "доля запросов, завершившихся ошибкой",
+    "online_accuracy_if_labeled": "accuracy только по запросам, где передан y_true",
+    "uptime_s": "время работы процесса сервиса"
+  },
+  "metrics_enabled": true,
+  "online_accuracy_if_labeled": 0.0,
+  "p95_request_latency_ms": 9.367190024931915,
+  "prediction_count": 1162,
+  "request_count": 1162,
+  "uptime_s": 13.618835926055908
+}

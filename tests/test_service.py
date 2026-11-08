@@ -14,8 +14,8 @@ def _registry_copy(tmp_path: Path) -> Path:
     root = Path.cwd()
     v1 = tmp_path / "v1.joblib"
     v2 = tmp_path / "v2.joblib"
-    shutil.copy2(root / "models/registry/model_v1.joblib", v1)
-    shutil.copy2(root / "models/registry/model_v2.joblib", v2)
+    shutil.copy2(root / "reports/LAB2/linear_baseline.joblib", v1)
+    shutil.copy2(root / "reports/LAB2/ml_model.joblib", v2)
     payload = {
         "active": "v2",
         "versions": {

@@ -2,7 +2,7 @@
   "host": "127.0.0.1",
   "port": 8000,
   "registry_path": "models/registry/registry.json",
-  "load_test_requests": 200,
+  "load_test_requests": 100,
   "metrics_enabled": true,
   "log_level": "INFO"
 }
