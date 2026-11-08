@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -12,7 +13,11 @@ from moons_lab.data import prepare_data
 
 def main() -> None:
     cfg = load_config(1)
-    manifest = prepare_data(cfg)
+    manifest_path = (
+        os.environ.get("MOONS_DEMO_MANIFEST_PATH")
+        or "reports/LAB1/hash_manifest.json"
+    )
+    manifest = prepare_data(cfg, manifest_path=manifest_path)
     print(manifest)
 
 

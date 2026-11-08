@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import numpy as np
@@ -11,7 +12,10 @@ from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "defense_demo"
 MODELS = DEMO / "models"
-RESULTS = DEMO / "results"
+RESULTS = Path(
+    os.environ.get("MOONS_DEMO_RESULTS_DIR")
+    or ROOT / "demo_output" / "defense_results"
+)
 
 
 def find_csv(split: str) -> Path:
