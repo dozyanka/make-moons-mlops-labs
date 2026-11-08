@@ -48,6 +48,20 @@ def _with_project_pytest_temp(args: list[str], *, log_name: str | None) -> list[
     return [*args, f"--basetemp={workspace}"]
 
 
+def _demo_subprocess_env() -> dict[str, str]:
+    """Make the active venv's `python` available to nested CLI tools.
+
+    The Windows launcher executes DEMO/menu.py using an absolute python.exe
+    path without activating .venv. The local pre-commit hooks use `python`
+    (language: system), which otherwise may fail with Windows error 9009.
+    """
+    env = os.environ.copy()
+    previous = env.get("PATH", "")
+    python_dir = str(PYTHON.parent)
+    env["PATH"] = python_dir + (os.pathsep + previous if previous else "")
+    return env
+
+
 def run(args: list[str], *, log_name: str | None = None) -> None:
     args = _with_project_pytest_temp(args, log_name=log_name)
     cmd = [str(PYTHON), *args]
@@ -55,7 +69,7 @@ def run(args: list[str], *, log_name: str | None = None) -> None:
     print(">", " ".join(cmd), flush=True)
 
     if log_name is None:
-        subprocess.run(cmd, cwd=ROOT, check=True)
+        subprocess.run(cmd, cwd=ROOT, env=_demo_subprocess_env(), check=True)
         return
 
     log_dir = DEMO_OUTPUT / "logs"
@@ -68,6 +82,7 @@ def run(args: list[str], *, log_name: str | None = None) -> None:
         process = subprocess.Popen(
             cmd,
             cwd=ROOT,
+            env=_demo_subprocess_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -92,7 +107,7 @@ def run_exe(args: list[str], *, log_name: str | None = None) -> None:
     print(">", " ".join(args), flush=True)
 
     if log_name is None:
-        subprocess.run(args, cwd=ROOT, check=True)
+        subprocess.run(args, cwd=ROOT, env=_demo_subprocess_env(), check=True)
         return
 
     log_dir = DEMO_OUTPUT / "logs"
@@ -105,6 +120,7 @@ def run_exe(args: list[str], *, log_name: str | None = None) -> None:
         process = subprocess.Popen(
             args,
             cwd=ROOT,
+            env=_demo_subprocess_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
