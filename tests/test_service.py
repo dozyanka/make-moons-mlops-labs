@@ -71,4 +71,10 @@ def test_service_contract_and_batch_fallback(tmp_path):
         response = client.post("/predict/batch", json={"items": [{"x1": 0.1, "x2": 0.2}] * 3, "n_jobs": 2})
     assert response.status_code == 200
     assert response.json()["count"] == 3
+    # With metrics disabled the fallback must not change the metrics counters.
+    assert client.get("/metrics").json()["batch_fallbacks"] == 0
+    client.patch("/runtime", json={"metrics_enabled": True})
+    with patch("moons_lab.service.Parallel", BrokenParallel):
+        second = client.post("/predict/batch", json={"items": [{"x1": .1, "x2": .2}] * 3, "n_jobs": 2})
+    assert second.status_code == 200
     assert client.get("/metrics").json()["batch_fallbacks"] == 1

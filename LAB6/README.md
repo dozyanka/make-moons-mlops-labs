@@ -15,7 +15,7 @@
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/run_lab6.py --report-dir demo_output/LAB6 --runtime-dir demo_output/LAB6_runtime
-.\.venv\Scripts\python.exe -m pytest -q tests/test_service.py tests/test_lab6_service.py
+.\.venv\Scripts\python.exe -m pytest -q tests/test_service.py tests/test_lab6_service.py tests/test_lab6_hardening.py
 ```
 
 Прогон выполняет контрактные проверки, **не менее 100 запросов к каждому основному адресу**, одновременные предсказания при promote/rollback, проверку повреждённой модели, проверку отдельного мониторинга и сохранение отчётов. `TestClient` — внутри процесса; настоящие сетевые серверы запускаются ниже.
@@ -39,7 +39,25 @@
 Для отката: `POST /rollback` без тела. Продвижение версии:
 `POST /promote` c `{"version":"v1","reason":"demonstration"}`.
 
-Реестр версий пересоздаётся только в изолированной папке `demo_output/LAB6_runtime/registry/`. Исходные артефакты ЛР1–5 и контрольные SHA-256 ЛР4 не изменяются.
+**Сохранение версий:** модельный сервер сохраняет `registry.json` и журнал переключений между перезапусками. Первичная регистрация использует модели ЛР2; существующий реестр сверяется с исходными SHA-256 и не перезаписывается. Для **осознанного** сброса на v2 при демонстрации разрешён `--reset-registry`. Пункт 16 отдельно создаёт чистую тестовую копию через `reset=True`; он не изменяет рабочий реестр другого процесса.
+
+Статусы: `preparing`, `canary`, `production`, `retired`. Пример подготовки v1:
+
+```powershell
+Invoke-RestMethod -Method Patch -Uri http://127.0.0.1:8000/models/v1/status -ContentType application/json -Body '{"status":"preparing"}'
+Invoke-RestMethod -Method Patch -Uri http://127.0.0.1:8000/models/v1/status -ContentType application/json -Body '{"status":"canary"}'
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/promote -ContentType application/json -Body '{"version":"v1"}'
+```
+
+Общее HTTP-наблюдение: `GET /metrics` модельного сервиса учитывает ошибки валидации 422; `PATCH /runtime` с `metrics_enabled=false` приостанавливает **все** счётчики, кроме текущего времени работы. Сервис мониторинга получает `POST /ingest` и `POST /ingest/service` и предоставляет `/metrics` с задержкой и частотой ошибок.
+
+**Реальный сетевой нагрузочный тест** с двумя отдельными Uvicorn-процессами:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/lab6_network_drill.py --requests 480
+```
+
+Результат: `demo_output/LAB6_network/network_drill.json`. Сетевой тест независим от `TestClient`; выполненность проверяется по JSON, а не по числу Swagger-скриншотов. Исходные артефакты ЛР1–5 и контрольные SHA-256 ЛР4 не изменяются.
 
 ## Файлы
 
