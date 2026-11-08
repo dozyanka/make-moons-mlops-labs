@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 import webbrowser
 from datetime import datetime
 from pathlib import Path
@@ -28,7 +29,27 @@ except AttributeError:
     pass
 
 
+def _with_project_pytest_temp(args: list[str], *, log_name: str | None) -> list[str]:
+    """Keep instructor pytest fixtures out of Windows's protected system Temp.
+
+    All DEMO pytest routes (LAB1/2/3, combined tests, non-Windows LAB4)
+    use the same run() wrapper, so no menu option is left unprotected.
+    A unique workspace prevents stale or locked pytest directories on reruns.
+    """
+    if args[:2] != ["-m", "pytest"]:
+        return args
+    if any(arg == "--basetemp" or arg.startswith("--basetemp=") for arg in args):
+        return args
+
+    parent = DEMO_OUTPUT / "pytest_runtime"
+    parent.mkdir(parents=True, exist_ok=True)
+    label = log_name or "PYTEST"
+    workspace = parent / f"{label}_{uuid.uuid4().hex}"
+    return [*args, f"--basetemp={workspace}"]
+
+
 def run(args: list[str], *, log_name: str | None = None) -> None:
+    args = _with_project_pytest_temp(args, log_name=log_name)
     cmd = [str(PYTHON), *args]
     print()
     print(">", " ".join(cmd), flush=True)
