@@ -43,6 +43,7 @@ def main():
         )
 
     out = pd.DataFrame(result_rows)
+    RESULTS.mkdir(parents=True, exist_ok=True)
     out.to_csv(
         RESULTS / "stream_memory_scaling.csv",
         index=False,

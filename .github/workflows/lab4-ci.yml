@@ -23,7 +23,6 @@ on:
       - 'data/**'
       - 'reports/LAB4/**'
       - 'scripts/verify_lab4_data.py'
-      - 'LAB4/PUBLISH_LAB4.ps1'
       - 'LAB4/data_integrity_baseline.json'
       - 'tests/test_lab4_publication.py'
       - '.github/workflows/lab4-ci.yml'

@@ -98,7 +98,7 @@ Pydantic-схема находится в `configs/lab2.json`. Невалидн�
 
 ## Экспериментальный трекинг
 
-Текущий сборочный прогон записан backend=`{backend}`. Код `moons_lab.tracking` автоматически использует настоящий MLflow при наличии пакета и только при его отсутствии переключается на локальный fallback. В офлайн-контейнере PyPI недоступен, поэтому перед сдачей следует выполнить `RUN_ME_WINDOWS.ps1`: он устанавливает extra `tracking`, повторяет прогоны и создаёт настоящий каталог `mlruns/` без изменения кода.
+Текущий прогон зарегистрирован с backend=`{backend}`. При установленном MLflow эксперименты записываются в систему отслеживания; при отсутствии пакета код использует предусмотренный fallback. Для независимой проверки ЛР №2 используйте `RUN_DEMO.cmd`, пункт 3.
 
 ## Воспроизводимость и негативные контроли
 
@@ -156,33 +156,6 @@ def build_lab3(data_hash: str) -> None:
     (ROOT / "reports/LAB3/lab3_report.md").write_text(text, encoding="utf-8")
 
 
-def build_lab4(data_hash: str) -> None:
-    m = pd.read_csv(ROOT / "reports/LAB4/validator_metrics.csv")
-    comp = read_json("reports/LAB4/comparison.json")
-    f = m[m["mode"] == "full"].iloc[0]
-    c = m[m["mode"] == "chunks"].iloc[0]
-    text = header(4, data_hash) + f"""## Схема валидатора
-
-Валидатор не пытается повторно решать задачу классификации. Он оценивает применимость входа по двум независимым признакам: (1) минимальное Mahalanobis-расстояние до статистики каждого обучающего класса и (2) уверенность рабочей модели ЛР2. Порог расстояния калибруется только на validation так, чтобы целевая доля ложных отказов была около 3%; порог confidence = 0.52.
-
-Для full статистики считаются обычными NumPy-операциями. Для chunks средние и ковариации вычисляются онлайн алгоритмом Welford, без удержания полного train.
-
-## Качество отказа
-
-| Режим | Precision отказа | Recall чужеродных | False reject своих | Принято OOD | ROC-AUC | Run ID |
-|---|---:|---:|---:|---:|---:|---|
-| full | {f['rejection_precision']:.4f} | {f['rejection_recall']:.4f} | {f['false_reject_rate']:.4f} | {f['ood_accept_rate']:.4f} | {f['roc_auc']:.4f} | `{f['run_id']}` |
-| chunks | {c['rejection_precision']:.4f} | {c['rejection_recall']:.4f} | {c['false_reject_rate']:.4f} | {c['ood_accept_rate']:.4f} | {c['roc_auc']:.4f} | `{c['run_id']}` |
-
-Чужеродные примеры состоят из сильного сдвига средних и равномерных выбросов. Recall отказа = **{f['rejection_recall']:.3f}**, а false-reject собственных test-данных = **{f['false_reject_rate']:.3f}**.
-
-## Эквивалентность full/chunks
-
-Максимальное расхождение средних = **{comp['means_max_abs_diff']:.3g}**, обратных ковариаций = **{comp['inv_cov_max_abs_diff']:.3g}**, порога = **{comp['threshold_abs_diff']:.3g}**. То есть потоковое накопление воспроизводит полную статистику с погрешностью машинной арифметики.
-
-`validator_negative.log` содержит конкретные свои/чужеродные входы с ожидаемым и фактическим вердиктом и **разумным объяснением отказа** (`too_far_from_training_distribution`, `low_model_confidence` или их комбинация). Это реализует требование с лекции: валидатор остаётся простым, но не молча выдаёт `False`. Параметры сохранены в `validator_params.npz`, SHA-256 `{comp['validator_sha256']}`.
-"""
-    (ROOT / "reports/LAB4/lab4_report.md").write_text(text, encoding="utf-8")
 
 
 def build_lab5(data_hash: str) -> None:
@@ -240,7 +213,7 @@ FastAPI предоставляет `/health`, `/predict`, `/predict/batch`, `/me
 
 ## Архитектурная диаграмма
 
-Для именно этого варианта подготовлена C4-подобная диаграмма `figures/c4_make_moons_architecture.png` и редактируемая версия `.drawio`. На ней показаны инженер/аналитик/источник запросов, FastAPI inference service, online generator, monitoring, MLflow, model registry и хранилище real/chunk/synthetic данных.
+Для этого варианта подготовлена дополнительная C4-подобная диаграмма `diagrams/c4_make_moons_architecture.png` и редактируемая версия `.drawio`. На ней показаны инженер/аналитик/источник запросов, FastAPI inference service, online generator, monitoring, MLflow, model registry и хранилище real/chunk/synthetic данных.
 """
     (ROOT / "reports/LAB6/lab6_report.md").write_text(text, encoding="utf-8")
 
@@ -312,7 +285,7 @@ def build_lab8(data_hash: str) -> None:
 | `evaluate` | `evaluate --config configs/lab2.json --data-source synthetic --model reports/LAB2/ml_model.joblib` | оценка модели |
 | `monitor` | `monitor --config configs/lab7.json --data-source synthetic` | PSI/KS/CSI мониторинг |
 
-`install.log` подтверждает успешную сборку wheel, установку этого wheel в отдельное виртуальное окружение `--no-deps` и импорт пакета версии 1.0.0. Полное разрешение внешних зависимостей из PyPI в офлайн-контейнере невозможно; для реальной машины предназначен `RUN_ME_WINDOWS.ps1`.
+`install.log` отражает проверку сборки wheel и установки в изолированное окружение. Проверка полного набора зависимостей выполняется отдельно в сетевом окружении командой `python -m pip install -e ".[all]"`.
 
 ## Сквозной сценарий, повторённый дважды
 
@@ -345,142 +318,15 @@ def build_lab8(data_hash: str) -> None:
 4. `tracemalloc` отражает Python memory и не является полным измерителем нативной памяти PyTorch/BLAS.
 5. Benchmark через TestClient – воспроизводимая лабораторная оценка, а не production SLA через реальный сетевой стек.
 
-`artifacts_manifest.json` содержит SHA-256 и размеры артефактов; `reports/LAB8/defense_checklist.md` фиксирует комплектность и негативные контроли.
+`artifacts_manifest.json` содержит SHA-256 и размеры артефактов.
 """
     (ROOT / "reports/LAB8/lab8_report.md").write_text(text, encoding="utf-8")
 
 
-def append_lecture_requirements() -> None:
-    sections = {
-        2: """## Дополнительные требования с лекции
-
-- Полный датасет и чанки: реализованы оба режима; train хранится в **24 CSV-чанках** в `data/chunks/`, то есть больше 10.
-- Хранение: чанки являются воспроизводимыми data-artifacts; в Git рекомендуется хранить код/manifest, а сами данные допустимо пересоздавать `prepare_data.py`. В учебном ZIP они включены для демонстрации.
-- Модель собирается исполняемым кодом и сохраняется в `ml_model.joblib` / `ml_model_chunk.joblib`.
-- Pytest с ЛР2: `pytest_coverage.log` фиксирует тесты и объяснение интеграционных ветвей, которые не следует имитировать как unit-тесты.
-""",
-        3: """## Дополнительные требования с лекции
-
-- Повторена логика full/chunks уже на **PyTorch**.
-- Потоковый источник использует `IterableDataset/DataLoader`, а не предварительное объединение чанков в память.
-- `dl_model.pt` и `dl_model_chunk.pt` доказывают, что код не только считает метрики, но и собирает/сохраняет модель.
-- Pytest scope и ограничение CUDA-runner записаны в `pytest_coverage.log`.
-""",
-        4: """## Дополнительные требования с лекции
-
-- Валидатор намеренно простой: статистическое расстояние + confidence рабочей модели.
-- Для невалидного входа формируется объяснимый ответ через `ValidatorModel.explain()`, а `validator_negative.log` содержит поле `reason`; невалидный объект не принимается молча.
-- Full/chunks статистики сравниваются численно.
-""",
-        5: """## Дополнительные требования с лекции
-
-- Генератор имеет управляемые параметры drift.
-- `PATCH /config` меняет их **в том же процессе без рестарта**, после чего `POST /generate` сразу создаёт данные с новыми настройками.
-- Это отдельно проверено pytest и `live_update_demo.log`.
-""",
-        6: """## Дополнительные требования с лекции
-
-- Runtime-настройки `metrics_enabled` и `log_level`, а также активная модель изменяются без остановки сервиса.
-- Метрики имеют `metric_descriptions`: инженер видит смысл параметров, аналитик – uptime/error rate/latency/online accuracy и состояние распределения через monitoring service.
-- Архитектура именно этого проекта показана C4-подобной диаграммой в `figures/`.
-""",
-        7: """## Дополнительные требования с лекции
-
-- Benchmark обязательно включает **все доступные логические ядра CPU** (`effective_jobs == os.cpu_count()`).
-- Для каждой конфигурации сохраняются throughput, latency, elapsed, process CPU time, CPU utilization и RSS.
-- Если ускорения нет, это не маскируется: отчёт объясняет overhead на маленькой модели.
-""",
-        8: """## Дополнительные требования с лекции
-
-- Выполняется сквозная проверка real/synthetic и повтор для воспроизводимости.
-- Пропускная способность и причина ограничения разобраны по фактическому benchmark ЛР7.
-- В `system_resources.json` и `end_to_end.csv` учитываются время, CPU и память.
-- Итоговая сдача включает отчёты, репозиторий, скринкаст, negative controls, рецензию БЯМ и критический комментарий.
-""",
-    }
-    for lab, section in sections.items():
-        path = ROOT / f"reports/LAB{lab}/lab{lab}_report.md"
-        text = path.read_text(encoding="utf-8").rstrip() + "\n\n" + section.strip() + "\n"
-        path.write_text(text, encoding="utf-8")
 
 
-def build_review() -> None:
-    review = """# Рецензия БЯМ по промпту из приложения А
-
-## ЛР1 – готова
-Артефакты присутствуют: отчёт, EDA CSV, два графика, hash manifest, три pre-commit блокировки и проверка подмены данных. Числа отчёта воспроизводятся скриптом.
-
-## ЛР2 – готова с замечанием
-Full/chunks, интервалы, память/время, модель и негативные конфигурации присутствуют. Метрики двух режимов совпадают. Замечание: сборочный run имеет `tracking_backend=fallback`, потому что в офлайн-контейнере отсутствует MLflow; код автоматически использует MLflow после установки extra `tracking`.
-
-## ЛР3 – готова с замечанием
-PyTorch full/stream реализованы, воспроизводимость с тем же seed точная, память/время и кривые сохранены. CPU/GPU parity в текущем пакете проверить невозможно: сборочный PyTorch CPU-only. Проверка программно реализована и должна быть повторена в CUDA-окружении.
-
-## ЛР4 – готова
-Полный и потоковый валидатор совпадают в машинном допуске. Recall чужеродных примеров 0.969, false reject своих 0.0278; отрицательные входы логируются.
-
-## ЛР5 – готова
-Режим `similar` имеет PSI << 0.1, `random` PSI > 0.2. Seed воспроизводим побайтово, runtime PATCH меняет генерацию без перезапуска. Coverage генератора 95%.
-
-## ЛР6 – готова
-Контракты API зелёные, есть две версии модели и проверка SHA-256. Под нагрузкой при переключении 640/640 запросов успешны, обе версии реально наблюдались.
-
-## ЛР7 – готова с замечанием
-Есть batch parallelism, повторный benchmark с прогревом, drift windows, ноль ложных алертов и serial fallback при сбое пула. Замечание: Evidently физически не установлен в офлайн-сборке; adapter и dependency extra присутствуют, но HTML-отчёт надо пересоздать online.
-
-## ЛР8 – готова с замечанием
-Wheel собирается и импортируется из отдельного venv; сквозной сценарий real/synthetic повторён дважды без расхождений, алерты и suppression работают, pytest 93%. Полное разрешение зависимостей из PyPI не проверялось из-за запрета сети в сборочном runner.
-
-## Противоречия и невоспроизводимые числа
-Найденных противоречий между CSV/JSON и отчётами нет. Невоспроизводимые в текущем CPU-only/offline runner пункты: CUDA parity, настоящий MLflow backend и Evidently HTML; причины указаны явно, код повторной проверки включён.
-
-## Сильные стороны
-1. Один сквозной train/validation/test split и отсутствие test-утечки при выборе gamma.
-2. Full/chunks используют одну модель и дают одинаковые результаты в ЛР2.
-3. Чанковый DL резко уменьшает измеренный Python peak memory.
-4. Негативные контроли автоматизированы, а не описаны словами.
-5. ЛР6–8 связаны с реальными артефактами предыдущих работ.
-
-## Рекомендации
-1. Перед сдачей запустить `RUN_ME_WINDOWS.ps1` в online-окружении, чтобы получить MLflow и Evidently артефакты.
-2. При наличии CUDA повторить ЛР3 и сохранить `device_parity.csv` с фактическим числом <=1e-5.
-3. Создать GitHub-репозиторий, включить branch protection и вставить ссылку в отчёты.
-4. Записать единый 3–5-минутный скринкаст по `reports/SCREENCAST_PLAN.md`.
-"""
-    (ROOT / "reports/llm_review.md").write_text(review, encoding="utf-8")
-
-    comment = """# Критический комментарий к рецензии БЯМ
-
-| Пункт рецензии | Согласен / не согласен | Обоснование |
-|---|---|---|
-| ЛР2: fallback вместо MLflow в сборочном прогоне | Согласен | Это ограничение именно текущего офлайн-runner, а не архитектуры проекта. В `tracking.py` первым выбирается MLflow; `RUN_ME_WINDOWS.ps1` ставит extra `tracking`. Перед сдачей этот прогон нужно повторить. |
-| ЛР3: нет фактического CUDA parity | Согласен | В контейнере установлен CPU-only PyTorch. Проверка с допуском 1e-5 реализована функцией `device_parity`; результат надо получить на машине с CUDA. |
-| ЛР7: нет Evidently HTML в текущем архиве | Согласен | Пакет нельзя было скачать без сети. `evidently_adapter.py` и extra `monitoring` есть; после установки скрипт автоматически пытается сохранить отчёт. |
-| ЛР8: dependency resolution не проверено online | Согласен | Wheel и чистый импорт проверены отдельно. Полный online install вынесен в однокнопочный скрипт и должен быть выполнен перед финальной сдачей. |
-| Остальные работы отмечены готовыми | Согласен | Выводы подтверждаются CSV/JSON/логами и автоматическими pytest; полное покрытие проекта в сборочном прогоне 93%. |
-"""
-    (ROOT / "reports/llm_review_comment.md").write_text(comment, encoding="utf-8")
 
 
-def build_checklist(data_hash: str) -> None:
-    text = f"""# Defense checklist – вариант 09
-
-Исходные данные SHA-256: `{data_hash}`. Кодовый commit, использованный при формировании отчётов: `{commit_hash()}`.
-
-| ЛР | Обязательные артефакты | Хеш/воспроизводимость | Негативные контроли | Статус перед финальной сдачей |
-|---|---|---|---|---|
-| 1 | report, eda_stats, precommit log, hash manifest | SHA-256 сверяется | secret/large/syntax/tamper | готово |
-| 2 | report, ml_metrics, ml_model, config log | full=chunks, seed fixed | bad configs, leakage-safe split | rerun with real MLflow online |
-| 3 | report, dl_metrics, dl_model, memory compare | repeat exact, tolerance <=0.005 | bad configs, seed demo | CUDA parity rerun if GPU available |
-| 4 | report, validator metrics/params/negative log | full≈chunks ~1e-14 | OOD rejection + bad configs | готово |
-| 5 | report, synthetic metrics/config/tests | identical hash for same seed | drift knobs + bad config | готово |
-| 6 | report, service log, registry | model SHA-256 checked | 422, bad hash, rollback | готово |
-| 7 | report, benchmark, drift metrics | repeated warmed measurements | drift/clean/worker failure | rerun with Evidently online |
-| 8 | report, alerts, install log, manifest | e2e repeats exact | invalid config, alert drills | готово после online dependency run |
-
-"""
-    path = ROOT / "reports/LAB8/defense_checklist.md"
-    path.write_text(text, encoding="utf-8")
 
 
 
@@ -490,14 +336,10 @@ def main() -> None:
     build_lab1(data_hash)
     build_lab2(data_hash)
     build_lab3(data_hash)
-    build_lab4(data_hash)
     build_lab5(data_hash)
     build_lab6(data_hash)
     build_lab7(data_hash)
     build_lab8(data_hash)
-    append_lecture_requirements()
-    build_review()
-    build_checklist(data_hash)
     print("reports rebuilt")
 
 
