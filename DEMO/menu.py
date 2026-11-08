@@ -59,6 +59,9 @@ def _demo_subprocess_env() -> dict[str, str]:
     previous = env.get("PATH", "")
     python_dir = str(PYTHON.parent)
     env["PATH"] = python_dir + (os.pathsep + previous if previous else "")
+    # DEMO runtime files are never written over published Git artifacts.
+    env["MOONS_DEMO_RESULTS_DIR"] = str(DEMO_OUTPUT / "defense_results")
+    env["MOONS_DEMO_MANIFEST_PATH"] = str(DEMO_OUTPUT / "data" / "hash_manifest.json")
     return env
 
 

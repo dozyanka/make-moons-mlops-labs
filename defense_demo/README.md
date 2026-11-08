@@ -36,3 +36,10 @@ python .\defense_demo\lab3_demo.py --mode full
 python .\defense_demo\lab3_demo.py --mode streaming
 python .\defense_demo\stream_memory_demo.py
 ```
+
+## Куда записываются результаты
+
+Новые JSON/CSV записываются в `demo_output/defense_results/` — как при запуске
+через пункт 6 DEMO, так и при непосредственном запуске `run_all.py`.
+Файлы в `defense_demo/results/` — опубликованные эталонные результаты,
+демонстрации их не перезаписывают. Каталог `demo_output/` исключён из Git.

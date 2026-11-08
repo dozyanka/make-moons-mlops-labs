@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 
 
+from common import RESULTS
+
 HERE = Path(__file__).resolve().parent
 
 
@@ -28,7 +30,7 @@ def main():
     print("=" * 72)
     print("ALL LAB1–LAB4 LIVE DEFENSE DEMOS PASSED")
     print("=" * 72)
-    print("Results: defense_demo/results/")
+    print("Results:", RESULTS)
 
 
 if __name__ == "__main__":
