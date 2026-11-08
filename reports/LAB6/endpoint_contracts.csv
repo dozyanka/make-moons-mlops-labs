@@ -1,0 +1,17 @@
+case,method,path,expected_status,actual_status,pass
+health,GET,/health,200,200,True
+predict_valid,POST,/predict,200,200,True
+predict_missing,POST,/predict,422,422,True
+predict_wrong_type,POST,/predict,422,422,True
+predict_numeric_string,POST,/predict,422,422,True
+predict_out_of_range,POST,/predict,422,422,True
+predict_nonfinite,POST,/predict,422,422,True
+predict_extra,POST,/predict,422,422,True
+batch,POST,/predict/batch,200,200,True
+metrics,GET,/metrics,200,200,True
+models,GET,/models,200,200,True
+runtime,GET,/runtime,200,200,True
+runtime_patch,PATCH,/runtime,200,200,True
+unknown_version,POST,/promote,404,404,True
+monitor_health,GET,monitor:/health,200,200,True
+monitor_metrics,GET,monitor:/metrics,200,200,True

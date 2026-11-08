@@ -38,7 +38,18 @@ def _with_project_pytest_temp(args: list[str], *, log_name: str | None) -> list[
     """
     if args[:2] != ["-m", "pytest"]:
         return args
-    if any(arg == "--basetemp" or arg.startswith("--basetemp=") for arg in args):
+    # pytest does not always create parent directories of an explicit --basetemp.
+    # On Windows, that produces 13 setup errors (WinError 3), before tests run.
+    for index, arg in enumerate(args):
+        if arg == "--basetemp" and index + 1 < len(args):
+            target = Path(args[index + 1])
+        elif arg.startswith("--basetemp="):
+            target = Path(arg.split("=", 1)[1])
+        else:
+            continue
+        if not target.is_absolute():
+            target = ROOT / target
+        target.parent.mkdir(parents=True, exist_ok=True)
         return args
 
     parent = DEMO_OUTPUT / "pytest_runtime"
@@ -59,6 +70,11 @@ def _demo_subprocess_env() -> dict[str, str]:
     previous = env.get("PATH", "")
     python_dir = str(PYTHON.parent)
     env["PATH"] = python_dir + (os.pathsep + previous if previous else "")
+    # A git worktree may use a venv installed from another checkout.  Prefer
+    # THIS checkout's source code, including modules introduced by LAB6.
+    src_dir = str(ROOT / "src")
+    prior_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = src_dir + (os.pathsep + prior_pythonpath if prior_pythonpath else "")
     # DEMO runtime files are never written over published Git artifacts.
     env["MOONS_DEMO_RESULTS_DIR"] = str(DEMO_OUTPUT / "defense_results")
     env["MOONS_DEMO_MANIFEST_PATH"] = str(DEMO_OUTPUT / "data" / "hash_manifest.json")
@@ -355,6 +371,39 @@ def open_lab5_report() -> None:
     print("ЛР5 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 14")
     if os.name == "nt":
         os.startfile(published)
+
+
+def run_lab6() -> None:
+    """Reproduce LAB6 into ignored demo_output, never overwrite published reports."""
+    print("\n" + "=" * 72)
+    print("ЛР6 — FastAPI, РЕЕСТР ВЕРСИЙ, PROMOTE/ROLLBACK, МОНИТОРИНГ")
+    print("=" * 72)
+    location = DEMO_OUTPUT / "LAB6"
+    run(["scripts/run_lab6.py", "--report-dir", str(location),
+         "--runtime-dir", str(DEMO_OUTPUT / "LAB6_runtime")], log_name="LAB6")
+    run(["-m", "pytest", "-q", "tests/test_service.py", "tests/test_lab6_service.py",
+         "--basetemp", str(DEMO_OUTPUT / "pytest_runtime" / f"LAB6_TESTS_{uuid.uuid4().hex}")], log_name="LAB6_TESTS")
+    print("Опубликованные ЛР1–5 не изменялись. Новый прогон: demo_output/LAB6")
+
+
+def open_lab6_report() -> None:
+    published = ROOT / "reports" / "LAB6" / "lab6_report.md"
+    regenerated = DEMO_OUTPUT / "LAB6" / "lab6_report.md"
+    print("ЛР6 — опубликованный отчёт:", published)
+    print("ЛР6 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 16")
+    if os.name == "nt" and published.is_file():
+        os.startfile(published)
+
+
+def start_lab6_service(which: str) -> None:
+    if which == "model":
+        print("Запусти мониторинг отдельно пунктом 18, если нужен сбор наблюдений.")
+        args = ["scripts/serve_lab6.py", "--service", "model", "--port", "8000",
+                "--monitor-url", "http://127.0.0.1:8001"]
+    else:
+        args = ["scripts/serve_lab6.py", "--service", "monitor", "--port", "8001"]
+    print("Для остановки сервера нажми Ctrl+C.")
+    run(args)
 
 
 def lab4_quick_demo() -> None:
@@ -655,6 +704,10 @@ def show_menu() -> None:
     print("13. Открыть отчёт ЛР4")
     print("14. Запустить ЛР5 (генератор, PSI/KS, pytest-cov, отчёт)")
     print("15. Открыть отчёт ЛР5")
+    print("16. Запустить ЛР6 (контракты, нагрузка, переключение, мониторинг)")
+    print("17. FastAPI ЛР6 — запустить ML API (порт 8000)")
+    print("18. FastAPI ЛР6 — запустить мониторинг (порт 8001)")
+    print("19. Открыть отчёт ЛР6")
     print()
     print(" 0. Выход")
     print()
@@ -699,6 +752,14 @@ def interactive() -> None:
                 run_lab5()
             elif choice == "15":
                 open_lab5_report()
+            elif choice == "16":
+                run_lab6()
+            elif choice == "17":
+                start_lab6_service("model")
+            elif choice == "18":
+                start_lab6_service("monitor")
+            elif choice == "19":
+                open_lab6_report()
             elif choice == "0":
                 return
             else:

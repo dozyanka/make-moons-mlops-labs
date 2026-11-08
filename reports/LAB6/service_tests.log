@@ -1,0 +1,10 @@
+contracts=16/16
+load_requests=1100
+load_errors=0
+promote_rollback_success=True
+drill_requests=960
+drill_errors=0
+drill_fraction=1.000000
+versions_observed=['v1', 'v2']
+monitor_records=1162
+PASS: corrupted candidate refused (SHA-256 mismatch)

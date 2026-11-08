@@ -1,0 +1,751 @@
+{
+  "active": "v2",
+  "history": [
+    {
+      "action": "initial_registration",
+      "from": null,
+      "reason": "baseline",
+      "to": "v1"
+    },
+    {
+      "action": "promote",
+      "from": "v1",
+      "reason": "better accuracy on LAB2 test",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.882431+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.885888+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.889453+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.893245+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.896740+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.899922+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.903903+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.907643+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.911345+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.914847+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.918335+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.922124+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.925760+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.929490+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.933102+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.937416+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.940931+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.944700+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.948417+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.951992+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.955578+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.959222+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.962721+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.966674+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.970239+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.973977+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.977157+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.980772+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.984600+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.988357+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.991920+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.995407+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:34.999113+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.002549+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.006218+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.010055+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.013909+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.017882+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.021422+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.025038+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.028756+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.032813+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.036144+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.039630+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.043271+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.047475+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.051168+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.055011+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.058671+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.062344+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.066570+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.070384+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.074181+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.078384+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.082204+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.085469+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.089287+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.093217+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.097137+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.100855+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.105024+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.109093+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.112948+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.116696+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.120266+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.124100+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.127754+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.131643+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.135697+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.139604+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.143375+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.147198+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.151393+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.155205+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.159010+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.163438+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.167480+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.171707+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.175457+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.179143+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.182697+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.186301+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.189877+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.193466+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.197243+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.201081+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.204883+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.208864+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.212867+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.216740+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.220784+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.224361+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.228121+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.232134+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.235944+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.240022+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.244133+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.248512+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "rollback",
+      "from": "v2",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.252214+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:35.256262+00:00",
+      "to": "v2"
+    },
+    {
+      "action": "promote",
+      "from": "v2",
+      "reason": "switch under load",
+      "time": "2026-11-08T19:57:42.800497+00:00",
+      "to": "v1"
+    },
+    {
+      "action": "rollback",
+      "from": "v1",
+      "reason": "API rollback",
+      "time": "2026-11-08T19:57:42.902684+00:00",
+      "to": "v2"
+    }
+  ],
+  "versions": {
+    "v1": {
+      "description": "Linear LogisticRegression baseline",
+      "metrics": {
+        "test_accuracy": 0.8730555555555556
+      },
+      "path": "model_v1.joblib",
+      "sha256": "66d6deb6c892b5e46d6bdd4ec8342a4840a23b242ca58c981218a4cec482f679",
+      "status": "retired"
+    },
+    "v2": {
+      "description": "StandardScaler + RBFSampler + SGDClassifier",
+      "metrics": {
+        "test_accuracy": 0.9552777777777778
+      },
+      "path": "model_v2.joblib",
+      "sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+      "status": "production"
+    }
+  }
+}

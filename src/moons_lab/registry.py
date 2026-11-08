@@ -33,9 +33,13 @@ class ModelRegistry:
         temp.write_text(json.dumps(self._payload, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
         temp.replace(self.path)
 
+    def _model_path(self, item: dict) -> Path:
+        path = Path(item["path"])
+        return path if path.is_absolute() else self.path.parent / path
+
     def _verify_all(self) -> None:
         for version, item in self._payload["versions"].items():
-            model_path = Path(item["path"])
+            model_path = self._model_path(item)
             if not model_path.exists():
                 raise FileNotFoundError(f"model {version} missing: {model_path}")
             actual = sha256_file(model_path)
@@ -56,12 +60,13 @@ class ModelRegistry:
             version = version or self._payload["active"]
             if version not in self._payload["versions"]:
                 raise KeyError(version)
+            item = self._payload["versions"][version]
+            model_path = self._model_path(item)
+            actual = sha256_file(model_path)
+            if actual != item["sha256"]:
+                self._cache.pop(version, None)
+                raise ValueError(f"hash mismatch for model {version}")
             if version not in self._cache:
-                item = self._payload["versions"][version]
-                model_path = Path(item["path"])
-                actual = sha256_file(model_path)
-                if actual != item["sha256"]:
-                    raise ValueError(f"hash mismatch for model {version}")
                 self._cache[version] = joblib.load(model_path)
             return version, self._cache[version]
 
@@ -72,6 +77,8 @@ class ModelRegistry:
             previous = self._payload["active"]
             if previous == version:
                 return self.snapshot()
+            # Verify and preload candidate before changing the active pointer.
+            self.get_model(version)
             self._payload["versions"][previous]["status"] = "retired"
             self._payload["versions"][version]["status"] = "production"
             self._payload["active"] = version
@@ -94,6 +101,8 @@ class ModelRegistry:
                     raise RuntimeError("no rollback target")
                 target = other[0]
             previous = current
+            # Corrupted retired model must never replace the working one.
+            self.get_model(target)
             self._payload["versions"][previous]["status"] = "retired"
             self._payload["versions"][target]["status"] = "production"
             self._payload["active"] = target

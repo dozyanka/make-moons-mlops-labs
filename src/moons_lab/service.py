@@ -5,13 +5,14 @@ import os
 import threading
 import time
 from dataclasses import dataclass, field
+from collections import deque
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Callable
 
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from joblib import Parallel, delayed
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from .registry import ModelRegistry
 
@@ -19,9 +20,18 @@ LOGGER = logging.getLogger("moons_lab.service")
 
 
 class PredictRequest(BaseModel):
-    x1: float = Field(ge=-20, le=20)
-    x2: float = Field(ge=-20, le=20)
+    model_config = ConfigDict(extra="forbid")
+    x1: float = Field(ge=-20, le=20, allow_inf_nan=False)
+    x2: float = Field(ge=-20, le=20, allow_inf_nan=False)
     y_true: int | None = Field(default=None, ge=0, le=1)
+
+    @field_validator("x1", "x2", mode="before")
+    @classmethod
+    def numeric_only(cls, value):
+        # Refuse strings and booleans rather than silently coercing values.
+        if isinstance(value, (bool, str)):
+            raise ValueError("features must be finite numeric values")
+        return value
 
 
 class BatchPredictRequest(BaseModel):
@@ -51,12 +61,14 @@ class ServiceState:
     labeled_count: int = 0
     metrics_enabled: bool = True
     log_level: str = "INFO"
+    latency_history_ms: deque = field(default_factory=lambda: deque(maxlen=20000))
     lock: threading.RLock = field(default_factory=threading.RLock)
 
     def record(self, elapsed: float, *, error: bool = False, predictions: int = 0, correct: int = 0, labeled: int = 0) -> None:
         with self.lock:
             self.request_count += 1
             self.latency_sum_s += elapsed
+            self.latency_history_ms.append(elapsed * 1000)
             self.error_count += int(error)
             self.prediction_count += predictions
             self.correct_with_label += correct
@@ -65,6 +77,7 @@ class ServiceState:
     def metrics(self, active_version: str) -> dict:
         with self.lock:
             avg_ms = 1000 * self.latency_sum_s / max(self.request_count, 1)
+            p95_ms = float(np.quantile(list(self.latency_history_ms), .95)) if self.latency_history_ms else 0.0
             return {
                 "uptime_s": time.time() - self.started_at,
                 "request_count": self.request_count,
@@ -72,6 +85,7 @@ class ServiceState:
                 "error_count": self.error_count,
                 "error_rate": self.error_count / max(self.request_count, 1),
                 "avg_request_latency_ms": avg_ms,
+                "p95_request_latency_ms": p95_ms,
                 "online_accuracy_if_labeled": self.correct_with_label / max(self.labeled_count, 1),
                 "labeled_count": self.labeled_count,
                 "batch_fallbacks": self.batch_fallbacks,
@@ -94,7 +108,8 @@ def _positive_probability(model, x: np.ndarray) -> np.ndarray:
     return raw.astype(float)
 
 
-def create_app(registry_path: str | Path, *, state: ServiceState | None = None) -> FastAPI:
+def create_app(registry_path: str | Path, *, state: ServiceState | None = None,
+               monitor_sink: Callable[[float, float, float], None] | None = None) -> FastAPI:
     registry = ModelRegistry(registry_path)
     state = state or ServiceState()
     app = FastAPI(title="make_moons model service")
@@ -128,13 +143,21 @@ def create_app(registry_path: str | Path, *, state: ServiceState | None = None) 
         start = time.perf_counter()
         try:
             result = one_prediction(item)
+            if monitor_sink is not None:
+                try:
+                    monitor_sink(item.x1, item.x2, result["probability"])
+                except Exception:
+                    LOGGER.warning("monitor sink failed; prediction continues", exc_info=True)
             correct = int(item.y_true is not None and result["prediction"] == item.y_true)
             labeled = int(item.y_true is not None)
             state.record(time.perf_counter() - start, predictions=1, correct=correct, labeled=labeled)
             return result
+        except (ValueError, KeyError) as exc:
+            state.record(time.perf_counter() - start, error=True)
+            raise HTTPException(status_code=409, detail="model unavailable or hash mismatch") from exc
         except Exception as exc:
             state.record(time.perf_counter() - start, error=True)
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+            raise HTTPException(status_code=500, detail="prediction failed") from exc
 
     @app.post("/predict/batch")
     def predict_batch(request: BatchPredictRequest) -> dict:
@@ -160,6 +183,12 @@ def create_app(registry_path: str | Path, *, state: ServiceState | None = None) 
                 with state.lock:
                     state.batch_fallbacks += 1
                 results = block_predictions(request.items)
+            if monitor_sink is not None:
+                for item, result in zip(request.items, results):
+                    try:
+                        monitor_sink(item.x1, item.x2, result["probability"])
+                    except Exception:
+                        LOGGER.warning("monitor sink failed; batch continues", exc_info=True)
             correct = sum(
                 int(item.y_true is not None and result["prediction"] == item.y_true)
                 for item, result in zip(request.items, results)
@@ -172,9 +201,12 @@ def create_app(registry_path: str | Path, *, state: ServiceState | None = None) 
                 labeled=labeled,
             )
             return {"count": len(results), "n_jobs": n_jobs, "results": results}
+        except (ValueError, KeyError) as exc:
+            state.record(time.perf_counter() - start, error=True)
+            raise HTTPException(status_code=409, detail="model unavailable or hash mismatch") from exc
         except Exception as exc:
             state.record(time.perf_counter() - start, error=True)
-            raise HTTPException(status_code=500, detail=str(exc)) from exc
+            raise HTTPException(status_code=500, detail="prediction failed") from exc
 
     @app.get("/metrics")
     def metrics() -> dict:
@@ -190,10 +222,15 @@ def create_app(registry_path: str | Path, *, state: ServiceState | None = None) 
             return registry.promote(request.version, request.reason)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=f"unknown model version: {request.version}") from exc
+        except (ValueError, FileNotFoundError) as exc:
+            raise HTTPException(status_code=409, detail="candidate model hash mismatch or unavailable") from exc
 
     @app.post("/rollback")
     def rollback() -> dict:
-        return registry.rollback("API rollback")
+        try:
+            return registry.rollback("API rollback")
+        except (ValueError, FileNotFoundError, RuntimeError) as exc:
+            raise HTTPException(status_code=409, detail="rollback target unavailable or hash mismatch") from exc
 
     @app.get("/runtime")
     def runtime() -> dict:
