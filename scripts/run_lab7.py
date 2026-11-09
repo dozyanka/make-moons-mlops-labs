@@ -24,7 +24,7 @@ from fastapi.testclient import TestClient
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from moons_lab.config import Lab7Config, load_config
+from moons_lab.lab7_config import Lab7Config, load_lab7_config
 from moons_lab.data import load_xy
 from moons_lab.evidently_adapter import evaluate_evidently_window, evidently_available
 from moons_lab.generator import GeneratorSettings, generate_dataframe
@@ -223,7 +223,7 @@ def main() -> None:
     args = parser.parse_args()
     if not evidently_available():
         raise RuntimeError("Evidently is mandatory for LAB7; install with pip install -e '.[monitoring]'")
-    cfg: Lab7Config = load_config(7, ROOT / "configs/lab7.json")  # type: ignore[assignment]
+    cfg: Lab7Config = load_lab7_config( ROOT / "configs/lab7.json")  # type: ignore[assignment]
     if args.quick:
         cfg = cfg.model_copy(update={"benchmark_batch_size": 300, "benchmark_repeats": 2,
                                      "reference_size": 1000, "window_size": 400,

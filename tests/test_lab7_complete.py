@@ -10,7 +10,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
-from moons_lab.config import Lab7Config, load_config
+from moons_lab.lab7_config import Lab7Config, load_lab7_config
 from moons_lab.evidently_adapter import evaluate_evidently_window
 from moons_lab.generator import GeneratorSettings, generate_dataframe
 from moons_lab.lab6_bootstrap import build_registry
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def config(**changes) -> Lab7Config:
-    base = load_config(7, ROOT / "configs/lab7.json").model_dump()
+    base = load_lab7_config( ROOT / "configs/lab7.json").model_dump()
     base.update({"window_size": 300, "window_step": 150, "reference_size": 700,
                  "n_windows": 6, "drift_start_window": 3})
     base.update(changes)

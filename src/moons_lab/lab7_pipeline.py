@@ -12,7 +12,7 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-from .config import Lab7Config
+from .lab7_config import Lab7Config
 from .drift import compute_drift
 from .generator import GeneratorSettings, generate_dataframe
 
