@@ -9,6 +9,8 @@ on:
       - 'configs/lab8_full.json'
       - 'DEMO/menu.py'
       - '.github/workflows/lab8-ci.yml'
+      - '.gitattributes'
+      - 'reports/LAB8/**'
   push:
     paths:
       - 'src/moons_lab/lab8_*'
@@ -18,6 +20,8 @@ on:
       - 'configs/lab8_full.json'
       - 'DEMO/menu.py'
       - '.github/workflows/lab8-ci.yml'
+      - '.gitattributes'
+      - 'reports/LAB8/**'
   workflow_dispatch:
 
 jobs:
@@ -49,3 +53,10 @@ jobs:
             --runtime-dir "$RUNNER_TEMP/lab8_runtime"
       - name: Full-run evidence is separate
         run: echo "Full wall-clock drills >=55min must be run on target machine and reviewed separately."
+      - name: Verify full evidence if recorded (read-only SHA and acceptance audit)
+        run: |
+          if [ -f reports/LAB8/summary.json ]; then
+            python scripts/lab8_verify_full.py --report-dir reports/LAB8
+          else
+            echo 'Full evidence not yet published; quick smoke only.'
+          fi

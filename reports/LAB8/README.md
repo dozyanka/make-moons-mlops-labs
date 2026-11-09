@@ -5,3 +5,14 @@
 используйте отдельный PR после успешного полного прогона на Windows.
 
 Для результатов коротких проверок используется только `demo_output/LAB8`.
+
+
+После патча №52 сюда публикуются реальные доказательства полного прогона:
+`summary.json`, `lab8_report.md`, `end_to_end.csv`, `install.log`,
+`alerts_sample.jsonl`, `stream_windows.csv`, `faults.json`,
+`incidents_log.jsonl`, `artifacts_manifest.json`, `full_run.log`,
+CSV запросов, ресурсы и графики по этапам.
+
+Независимая проверка `scripts/lab8_verify_full.py` проверяет количества
+строк, реальные временные метки, p95, интервал CPU/RAM, окна дрейфа,
+алерты, C1–C5 и SHA-256. Отчёты запрещено считать пройденными без PASS.

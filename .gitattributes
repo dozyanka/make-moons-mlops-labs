@@ -12,3 +12,9 @@ data/chunks/*.csv -text whitespace=cr-at-eol
 # PowerShell source is fingerprinted bytewise in LAB4/source_manifest.json.
 # Keep script bytes exactly as delivered by patches.
 LAB4/*.ps1 -text
+
+# Generated Evidently dashboards: keep files for review, omit from language percentages.
+reports/LAB7/*.html linguist-generated
+
+# LAB8 acceptance evidence is hashed as raw Windows bytes; never normalize CSV/JSON/log.
+reports/LAB8/** -text whitespace=cr-at-eol

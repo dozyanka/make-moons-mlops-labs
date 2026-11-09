@@ -304,3 +304,83 @@ def test_lab8_keepalive_reuses_connection_and_no_remote_hosts():
         server.shutdown()
         server.server_close()
         thread.join(timeout=4)
+
+
+def test_lab8_drift_latches_one_active_alert_per_phase(tmp_path):
+    rng = np.random.default_rng(172)
+    x = rng.normal(size=(1000, 2))
+    proba = np.full(1000, 0.4)
+    guard = StreamGuard(x, proba, window=100, step=50, threshold=.2,
+                        alert_path=tmp_path / "alerts.jsonl",
+                        checkpoint=tmp_path / "state.json", cooldown=0)
+    guard.rebase(proba, "drift")
+    far = rng.normal(size=(2000, 2)) + np.array([7, 0])
+    events = guard.add(far, np.full(len(far), .4))
+    assert sum(e["alert"] for e in events) == 1
+    guard.save()
+    other = StreamGuard(x, proba, window=100, step=50, threshold=.2,
+                        alert_path=tmp_path / "alerts.jsonl",
+                        checkpoint=tmp_path / "state.json", cooldown=0)
+    other.restore()
+    assert other.phase_alert_latched
+    assert not any(e["alert"] for e in other.add(far, np.full(len(far), .4)))
+    other.rebase(proba, "new_drift")
+    assert sum(e["alert"] for e in other.add(far, np.full(len(far), .4))) == 1
+    alerts = [json.loads(line) for line in (tmp_path / "alerts.jsonl").read_text().splitlines()]
+    assert len(alerts) == 2
+
+
+def test_full_manifest_counts_each_report_file_once(tmp_path):
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "source.py").write_bytes(b"print(1)\n")
+    (tmp_path / ".gitattributes").write_bytes(b"reports/LAB7/*.html linguist-generated\n")
+    folder = tmp_path / "reports" / "LAB8"
+    folder.mkdir(parents=True)
+    (folder / "summary.json").write_bytes(b"{}")
+    # Editable pip installations and runtime generation leave ignored paths on disk:
+    # none may leak into the immutable GitHub evidence manifest.
+    pkginfo = tmp_path / "src" / "make_moons.egg-info"
+    pkginfo.mkdir()
+    (pkginfo / "PKG-INFO").write_bytes(b"volatile pip metadata")
+    generated = tmp_path / "data" / "runtime_synthetic"
+    generated.mkdir(parents=True)
+    (generated / "chunk.csv").write_bytes(b"runtime data")
+    pytest_cache = tmp_path / "reports" / "LAB4" / ".pytest_runtime"
+    pytest_cache.mkdir(parents=True)
+    (pytest_cache / "garbage.json").write_bytes(b"ignored")
+    manifest = hash_manifest(tmp_path, folder / "artifacts_manifest.json")
+    assert {v["path"] for v in manifest["items"]} == {"src/source.py", ".gitattributes"}
+    assert {v["path"] for v in manifest["runtime_evidence"]} == {"reports/LAB8/summary.json"}
+    assert manifest["count"] == 3
+
+
+def test_final_evidence_verifier_refuses_smoke_and_tampered_manifest(tmp_path):
+    import sys
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    from lab8_verify_full import EvidenceError, verify_full, verify_manifest
+    r = tmp_path / "reports" / "LAB8"
+    r.mkdir(parents=True)
+    (r / "summary.json").write_text(json.dumps({"evidence_mode": "SMOKE_ONLY", "all_pass": True}), encoding="utf-8")
+    with pytest.raises(EvidenceError, match="SMOKE_ONLY"):
+        verify_full(tmp_path, r)
+    files = tmp_path / "src"
+    files.mkdir()
+    artifacts = []
+    for idx in range(21):
+        path = files / f"file_{idx}.py"
+        path.write_bytes(f"assert {idx} == {idx}\n".encode())
+        artifacts.append({"path": path.relative_to(tmp_path).as_posix(),
+                          "bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    attrs = tmp_path / ".gitattributes"
+    attrs.write_bytes(b"reports/LAB7/*.html linguist-generated\n")
+    artifacts.append({"path": ".gitattributes", "bytes": attrs.stat().st_size,
+                      "sha256": hashlib.sha256(attrs.read_bytes()).hexdigest()})
+    runtime = [{"path": "reports/LAB8/summary.json", "bytes": (r / "summary.json").stat().st_size,
+                "sha256": hashlib.sha256((r / "summary.json").read_bytes()).hexdigest()}]
+    (r / "artifacts_manifest.json").write_text(json.dumps({"items": artifacts, "runtime_evidence": runtime,
+                                                             "count": len(artifacts) + len(runtime)}))
+    assert verify_manifest(tmp_path, r) == len(artifacts) + len(runtime)
+    (files / "file_3.py").write_text("CHANGED", encoding="utf-8")
+    with pytest.raises(EvidenceError, match="size mismatch|SHA mismatch"):
+        verify_manifest(tmp_path, r)

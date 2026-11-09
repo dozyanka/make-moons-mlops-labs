@@ -89,3 +89,31 @@ the untouched LAB6 HTTP route and optimized LAB8 route with the same transport,
 pace and batch shape for a separate, reproducible diagnostic. The runtime still
 records failures, time and actual stage durations and never substitutes smoke
 evidence for >=600s/10000-request stage trials.
+
+
+## Завершение ЛР8 и публикация доказательств (патч №52)
+
+Полный сценарий выполняется только на целевом компьютере Windows после
+публикации коммита **кода** в PR #36. Отчёт пишется в `reports/LAB8/`,
+runtime-артефакты — в `demo_output/LAB8_full_runtime/`.
+
+Установщик №52 выполняет `--preview`, затем `--finish`: он запускает
+**реальные ≥300 с разогрева и пять этапов ≥600 с/10 000 запросов**, проверяет
+сохранённые CSV и графики, C1–C5, алерты, новый чистый venv и SHA-256,
+после чего отдельным коммитом добавляет доказательства **только при PASS**.
+При FAIL журнал остаётся локально, ложного `SUCCESS` и merge не будет.
+
+Независимая перепроверка (после завершённого `--full`):
+
+```powershell
+.\.venv\Scripts\python.exe scripts/lab8_verify_full.py --report-dir reports/LAB8
+```
+
+Перед защитой вручную добавить скринкасты, рецензию БЯМ,
+критический комментарий и заполнить `defense_checklist.md`.
+
+Графики Evidently в `reports/LAB7/*.html` не меняются: `.gitattributes` помечает
+их `linguist-generated`, чтобы GitHub не учитывал отчётные HTML в процентах языков.
+
+Артефакты `reports/LAB8/**` помечены `-text whitespace=cr-at-eol` в `.gitattributes`, поэтому SHA-256
+совпадает после Windows → Git → Linux CI без скрытого преобразования CRLF/LF.

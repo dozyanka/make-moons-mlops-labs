@@ -327,6 +327,15 @@ def full_drills(report: Path, runtime: Path, cfg: Lab8FullConfig, quick: bool) -
                 summary["validator_threshold_pass"] = observed_gate_rate >= cfg.validator_drift_reject_min and abs(observed_gate_rate - rate) <= .05
                 summary["pass"] &= summary["validator_threshold_pass"]
             reports.append(summary)
+            # Durable per-stage state in case Windows restarts mid-way through 55+ minutes.
+            # This is progress, NOT proof of a complete and accepted run.
+            progress = {"status": "IN_PROGRESS", "mode": "SMOKE_ONLY" if quick else "full",
+                        "stages_completed": [r["stage"] for r in reports],
+                        "stage_results": reports, "updated_utc": utc()}
+            progress_path = report / "progress.json"
+            temp = progress_path.with_suffix(".new")
+            temp.write_text(json.dumps(progress, indent=2), encoding="utf-8")
+            temp.replace(progress_path)
             print(json.dumps(summary, indent=2, default=str), flush=True)
         stream.export_csv(report / "stream_windows.csv")
         stream.save()
@@ -335,8 +344,11 @@ def full_drills(report: Path, runtime: Path, cfg: Lab8FullConfig, quick: bool) -
         (report / "faults.json").write_text(json.dumps(faults, indent=2), encoding="utf-8")
         clean = [r for r in stream.rows if r["phase"] in {"warmup", "clean_ml_sequential", "clean_dl_parallel", "clean_dl_variable_rps", "rollback_under_load", "rollback_after"}]
         false_alerts = sum(bool(r["alert"]) for r in clean)
+        drift_alerts = sum(bool(r["alert"]) for r in stream.rows
+                           if r["phase"] == "drift_dl_sequential")
         drill = {"stage_results": reports, "faults": faults,
                  "false_alerts_on_clean": false_alerts,
+                 "drift_alert_count": drift_alerts,
                  "first_drift_window": first_drift_window,
                  "first_alert_window": first_alert_window,
                  "drift_delay_windows": (first_alert_window - first_drift_window)
@@ -345,6 +357,7 @@ def full_drills(report: Path, runtime: Path, cfg: Lab8FullConfig, quick: bool) -
                  "faults_pass": all(item["pass"] for item in faults)}
         drill["all_pass"] = (drill["valid_duration"] and drill["faults_pass"] and
                               false_alerts <= cfg.max_clean_alerts and
+                              drill["drift_alert_count"] == 1 and
                               drill["drift_delay_windows"] is not None and
                               drill["drift_delay_windows"] <= cfg.detection_deadline_windows)
         return drill
@@ -369,7 +382,13 @@ def write_report(report: Path, cfg: Lab8FullConfig, e2e_data: pd.DataFrame,
              "**Исходные модели:** опубликованные LAB2, LAB3 и валидатор LAB4; данные LAB5.",
              "", "## Сквозная проверка real / synthetic", "",
              "Дважды выполнены детерминированные прогоны; источник: `end_to_end.csv`.", "",
-             "## Семь CLI-команд", "",
+             "", "## Результаты real / synthetic", "",
+             "| Источник | Повтор | Строк | ML accuracy | DL accuracy | Валидатор: принято |",
+             "|---|---:|---:|---:|---:|---:|",
+             *[f"| {r.source} | {r.repeat} | {r.rows} | {r.ml_accuracy:.4f} | "
+               f"{r.dl_accuracy:.4f} | {r.validator_accept_rate:.4f} |"
+               for r in e2e_data.itertuples(index=False)],
+             "", "## Семь CLI-команд", "",
              "`train_ml`, `train_dl`, `train_validator`, `generate`, `serve`, `evaluate`, `monitor` — `pyproject.toml`.",
              "", "## Нагрузочные этапы", "",
              "Числа ниже получены по реальному HTTP на двух Uvicorn-процессах, не через TestClient.",
@@ -399,9 +418,15 @@ def write_report(report: Path, cfg: Lab8FullConfig, e2e_data: pd.DataFrame,
                   "4. Остановка исполнителя — C2 проверяет настоящий процесс и fallback.",
                   "5. Остановка потока — C4 возобновляет буфер с контрольной точки.",
                   "", "## Методика измерений", "",
-                  "Все запросы отправляются через urllib к реальному TCP-порту; задержка — от отправки до получения ответа.",
+                  "Запросы измеряются поверх постоянного HTTP/1.1 соединения к 127.0.0.1; "
+                  "каждый замер включает отправку JSON и получение полного HTTP-ответа.",
                   "Система CPU/RSS измеряется независимым потоком через psutil каждые <=2 с; CSV и графики по этапам.",
                   "Число запросов и время оцениваются по монотонным часам; в quick доказательство времени отсутствует.",
+                  "", "## Алерты", "",
+                  f"Ложных алертов на чистом потоке: {result['false_alerts_on_clean']}; "
+                  f"активных дрейфовых алертов: {result['drift_alert_count']}; "
+                  f"задержка детекции: {result['drift_delay_windows']} окон. "
+                  "См. `alerts_sample.jsonl` и `stream_windows.csv`.",
                   "", "## Итоговый вердикт", "", f"`all_pass={result['all_pass']}`. Для сдачи полный прогон обязателен; quick — не доказательство."])
     (report / "lab8_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -462,6 +487,14 @@ def main():
         "- [ ] C1–C5: журналы инцидентов и скринкасты\n"
         "- [ ] Отчёты, критическая рецензия БЯМ, раскрытие использования ИИ\n"
         "- [ ] Преподаватель: поле приёмки __________________\n", encoding="utf-8")
+    (report / "artifacts_manifest.json").write_text(
+        json.dumps(hash_manifest(ROOT, report / "artifacts_manifest.json"), indent=2), encoding="utf-8")
+    (report / "progress.json").write_text(
+        json.dumps({"status": "ACCEPTED" if result["all_pass"] and args.full else "FINISHED_NOT_ACCEPTED",
+                    "mode": result["evidence_mode"], "updated_utc": utc(),
+                    "stages_completed": [r["stage"] for r in result["stage_results"]]}, indent=2),
+        encoding="utf-8")
+    # The progress file was rewritten after the manifest; refresh its SHA-256.
     (report / "artifacts_manifest.json").write_text(
         json.dumps(hash_manifest(ROOT, report / "artifacts_manifest.json"), indent=2), encoding="utf-8")
     print(json.dumps({"summary": str(report / "summary.json"), "mode": result["evidence_mode"],

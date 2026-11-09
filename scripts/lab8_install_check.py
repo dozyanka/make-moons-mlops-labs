@@ -51,6 +51,8 @@ def main() -> int:
                     if not exe.is_file():
                         raise RuntimeError(f"missing CLI entry point: {exe}")
                 transcript.append("seven CLI entrypoints present")
+                # Full dependency provenance is not established by import-only checks.
+                run([str(py), "-m", "pip", "freeze", "--all"])
         transcript.append("RESULT: PASS" if not args.quick else "RESULT: SMOKE_ONLY")
     except Exception as exc:
         transcript.append("RESULT: FAIL: " + repr(exc))

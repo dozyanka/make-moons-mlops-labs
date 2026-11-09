@@ -41,6 +41,8 @@ class StreamGuard:
         self.degraded = False
         self.phase = "initial"
         self.gaps: list[dict] = []
+        # One active incident per metric and phase, not one alert every cooldown.
+        self.phase_alert_latched = False
 
     def add(self, x: np.ndarray, probabilities: np.ndarray) -> list[dict]:
         x = np.asarray(x, dtype=float).reshape(-1, 2)
@@ -61,7 +63,11 @@ class StreamGuard:
                 ks2 = ks_stat(self.reference[:, 1], values[:, 1])
                 self.window_index += 1
                 value = max(*vals, csi)
-                alert = self.alerts.evaluate(self.rule, value)
+                alert = None
+                if value > self.threshold and not self.phase_alert_latched:
+                    alert = self.alerts.evaluate(self.rule, value)
+                    if alert is not None:
+                        self.phase_alert_latched = True
                 row = {"window": self.window_index, "phase": self.phase, "processed": self.processed,
                        "psi_x1": vals[0], "psi_x2": vals[1], "ks_x1": ks1, "ks_x2": ks2, "csi": csi,
                        "metric": value, "alert": alert is not None,
@@ -78,6 +84,9 @@ class StreamGuard:
             raise ValueError("reference prediction count mismatch")
         self.ref_p = p
         self.phase = phase
+        self.phase_alert_latched = False
+        # A new phase starts a new incident, even if an older phase alerted just now.
+        self.alerts = AlertManager(self.alerts.path, cooldown_seconds=self.alerts.cooldown_seconds)
         self.queue.clear()
         self.next_boundary = self.processed + self.window
 
@@ -95,7 +104,8 @@ class StreamGuard:
     def save(self) -> None:
         obj = {"processed": self.processed, "next_boundary": self.next_boundary,
                "window_index": self.window_index, "phase": self.phase, "buffer": list(self.queue),
-               "gaps": self.gaps, "degraded": self.degraded}
+               "gaps": self.gaps, "degraded": self.degraded,
+               "phase_alert_latched": self.phase_alert_latched}
         self.checkpoint.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.checkpoint.with_suffix(".new")
         tmp.write_text(json.dumps(obj), encoding="utf-8")
@@ -110,6 +120,7 @@ class StreamGuard:
         self.queue = deque((tuple(v) for v in obj["buffer"]), maxlen=self.window)
         self.gaps = list(obj["gaps"])
         self.degraded = bool(obj["degraded"])
+        self.phase_alert_latched = bool(obj.get("phase_alert_latched", False))
 
     def export_csv(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -123,14 +134,24 @@ class StreamGuard:
 def hash_manifest(root: Path, report: Path) -> dict:
     """Immutable snapshot; volatile caches and the manifest itself are omitted."""
     excluded = {".git", ".venv", "demo_output", "mlruns", "mlartifacts", "__pycache__", ".pytest_cache",
-                ".gitignore", "data/runtime_synthetic"}
+                "data/runtime_synthetic"}
+    root_entries = {"pyproject.toml", "README.md", "RUN_DEMO.cmd", ".gitattributes",
+                    ".gitignore", ".pre-commit-config.yaml"}
+    folders = {"reports", "data", "configs", "src", "scripts", "tests", "diagrams",
+               "DEMO", "defense_demo", ".github", *(f"LAB{n}" for n in range(1, 9))}
     entries = []
     for p in root.rglob("*"):
-        if not p.is_file() or p == report or any(x in excluded for x in p.relative_to(root).parts):
+        rel_parts = p.relative_to(root).parts
+        if (not p.is_file() or p == report or any(x in excluded for x in rel_parts) or
+                any(part.endswith(".egg-info") or part == ".pytest_runtime" for part in rel_parts) or
+                rel_parts[:2] == ("data", "runtime_synthetic")):
             continue
         if p.name in {"mlflow.db", ".coverage"} or p.suffix in {".pyc", ".tmp"}:
             continue
-        if p.relative_to(root).parts[0] not in {"reports", "data", "configs", "src", "scripts", "tests", "LAB4", "LAB5", "LAB6", "LAB7", "LAB8", "diagrams", "DEMO", "defense_demo", ".github"} and p.name not in {"pyproject.toml", "README.md", "RUN_DEMO.cmd"}:
+        # Evidence in the report directory is catalogued once below, not twice.
+        if p.parent.resolve() == report.parent.resolve():
+            continue
+        if rel_parts[0] not in folders and not (len(rel_parts) == 1 and p.name in root_entries):
             continue
         rel = p.relative_to(root).as_posix()
         entries.append({"path": rel, "bytes": p.stat().st_size,
