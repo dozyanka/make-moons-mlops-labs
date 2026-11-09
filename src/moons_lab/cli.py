@@ -159,6 +159,8 @@ def train_validator_entry() -> None:
 
 def generate_entry() -> None:
     parser = _common_parser("Generate controlled synthetic data")
+    parser.add_argument("--data-source", choices=["real", "synthetic"], default="synthetic",
+                        help="real: sample existing train.csv; synthetic: LAB5 generator")
     parser.add_argument("--mode", choices=["similar", "random"], default="similar")
     parser.add_argument("--output", default="data/synthetic/generated.csv")
     parser.add_argument("--n", type=int, default=None)
@@ -172,16 +174,25 @@ def generate_entry() -> None:
         noise=cfg.similar_noise,
         random_range=cfg.random_range,
     )
-    df = generate_dataframe(settings)
+    if args.data_source == "real":
+        source = pd.read_csv("data/processed/train.csv")
+        df = source.sample(n=settings.n_samples, replace=len(source) < settings.n_samples,
+                           random_state=settings.seed).reset_index(drop=True)
+    else:
+        df = generate_dataframe(settings)
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(args.output, index=False, float_format="%.10f")
 
 
 def serve_entry() -> None:
     parser = _common_parser("Serve model through FastAPI")
+    parser.add_argument("--data-source", choices=["real", "synthetic"], default="real",
+                        help="API serves registered model; origin of inference inputs is client-controlled")
     args = parser.parse_args()
     cfg = load_config(6, args.config)
-    uvicorn.run(create_app(cfg.registry_path), host=cfg.host, port=cfg.port)
+    app = create_app(cfg.registry_path)
+    app.state.data_source = args.data_source
+    uvicorn.run(app, host=cfg.host, port=cfg.port)
 
 
 def evaluate_entry() -> None:

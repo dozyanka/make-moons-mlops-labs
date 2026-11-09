@@ -401,6 +401,27 @@ def run_lab7() -> None:
     print("Опубликованные ЛР1–6 не изменялись. Новый прогон:", destination)
 
 
+def run_lab8(quick: bool) -> None:
+    """LAB8 on genuine HTTP servers; quick is NEVER a substitute for full evidence."""
+    args = ["scripts/run_lab8.py", "--quick" if quick else "--full",
+            "--report-dir", str(DEMO_OUTPUT / "LAB8"),
+            "--runtime-dir", str(DEMO_OUTPUT / "LAB8_runtime")]
+    if not quick:
+        print("ЛР8: реальный длительный прогон; все данные и ошибки будут сохранены")
+        args.append("--install-check")
+    run(args, log_name="LAB8_QUICK" if quick else "LAB8_FULL")
+    run(["-m", "pytest", "-q", "tests/test_lab8_full.py",
+         "--cov=moons_lab.lab8_config", "--cov=moons_lab.lab8_observability",
+         "--cov=moons_lab.lab8_live", "--cov-report=term-missing"], log_name="LAB8_TESTS")
+
+
+def open_lab8_report() -> None:
+    path = DEMO_OUTPUT / "LAB8" / "lab8_report.md"
+    print("ЛР8 — фактический отчёт:", path if path.exists() else "сначала запусти пункт 22/23")
+    if os.name == "nt" and path.exists():
+        os.startfile(path)
+
+
 def open_lab7_report() -> None:
     published = ROOT / "reports" / "LAB7" / "lab7_report.md"
     regenerated = DEMO_OUTPUT / "LAB7" / "lab7_report.md"
@@ -742,6 +763,9 @@ def show_menu() -> None:
     print("19. Открыть отчёт ЛР6")
     print("20. Запустить ЛР7 (joblib + Evidently + pytest)")
     print("21. Открыть отчёт ЛР7")
+    print("22. ЛР8: короткая техническая проверка (НЕ сдача)")
+    print("23. ЛР8: полный прогон с настоящей нагрузкой и C1–C5")
+    print("24. Открыть фактический отчёт ЛР8")
     print()
     print(" 0. Выход")
     print()
@@ -798,6 +822,12 @@ def interactive() -> None:
                 run_lab7()
             elif choice == "21":
                 open_lab7_report()
+            elif choice == "22":
+                run_lab8(quick=True)
+            elif choice == "23":
+                run_lab8(quick=False)
+            elif choice == "24":
+                open_lab8_report()
             elif choice == "0":
                 return
             else:
