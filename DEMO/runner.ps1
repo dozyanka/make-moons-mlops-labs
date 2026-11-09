@@ -153,7 +153,7 @@ if ($installedSignature -ne $dependencySignature) {
         throw "Could not update pip/setuptools/wheel."
     }
 
-    & $VenvPython -m pip install -e ".[test,tracking,dl,report]"
+    & $VenvPython -m pip install -e ".[test,tracking,dl,report,monitoring]"
     if ($LASTEXITCODE -ne 0) {
         throw "Could not install project dependencies."
     }
@@ -175,7 +175,7 @@ Write-Host "Checking libraries..."
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Dependency verification failed. Repairing the environment..."
 
-    & $VenvPython -m pip install -e ".[test,tracking,dl,report]"
+    & $VenvPython -m pip install -e ".[test,tracking,dl,report,monitoring]"
     if ($LASTEXITCODE -ne 0) {
         throw "Could not repair project dependencies."
     }

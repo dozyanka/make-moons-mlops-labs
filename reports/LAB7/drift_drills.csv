@@ -1,0 +1,4 @@
+scenario,first_drift_window,first_alert_window,detection_delay_windows,deadline_windows,false_alerts,accepted
+clean,,,,,0,True
+mean_shift,4.0,4.0,0.0,2.0,0,True
+class_ratio_shift,4.0,4.0,0.0,2.0,0,True

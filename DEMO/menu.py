@@ -387,6 +387,29 @@ def run_lab6() -> None:
     print("Опубликованные ЛР1–5 не изменялись. Новый прогон: demo_output/LAB6")
 
 
+def run_lab7() -> None:
+    """Reproduce LAB7 without overwriting the published evidence."""
+    print("\n" + "=" * 72)
+    print("ЛР7 — ПАРАЛЛЕЛЬНЫЙ ИНФЕРЕНС И ОКОННЫЙ ДРЕЙФ (EVIDENTLY)")
+    print("=" * 72)
+    destination = DEMO_OUTPUT / "LAB7"
+    run(["scripts/run_lab7.py", "--report-dir", str(destination),
+         "--runtime-dir", str(DEMO_OUTPUT / "LAB7_runtime")], log_name="LAB7")
+    run(["-m", "pytest", "-q", "tests/test_lab7_complete.py", "tests/test_drift.py",
+         "--cov=moons_lab.lab7_pipeline", "--cov=moons_lab.drift",
+         "--cov=moons_lab.evidently_adapter", "--cov-report=term-missing"], log_name="LAB7_TESTS")
+    print("Опубликованные ЛР1–6 не изменялись. Новый прогон:", destination)
+
+
+def open_lab7_report() -> None:
+    published = ROOT / "reports" / "LAB7" / "lab7_report.md"
+    regenerated = DEMO_OUTPUT / "LAB7" / "lab7_report.md"
+    print("ЛР7 — опубликованный отчёт:", published)
+    print("ЛР7 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 20")
+    if os.name == "nt" and published.is_file():
+        os.startfile(published)
+
+
 def open_lab6_report() -> None:
     published = ROOT / "reports" / "LAB6" / "lab6_report.md"
     regenerated = DEMO_OUTPUT / "LAB6" / "lab6_report.md"
@@ -717,6 +740,8 @@ def show_menu() -> None:
     print("17. FastAPI ЛР6 — запустить ML API (порт 8000)")
     print("18. FastAPI ЛР6 — запустить мониторинг (порт 8001)")
     print("19. Открыть отчёт ЛР6")
+    print("20. Запустить ЛР7 (joblib + Evidently + pytest)")
+    print("21. Открыть отчёт ЛР7")
     print()
     print(" 0. Выход")
     print()
@@ -769,6 +794,10 @@ def interactive() -> None:
                 start_lab6_service("monitor")
             elif choice == "19":
                 open_lab6_report()
+            elif choice == "20":
+                run_lab7()
+            elif choice == "21":
+                open_lab7_report()
             elif choice == "0":
                 return
             else:

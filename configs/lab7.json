@@ -3,11 +3,16 @@
   "benchmark_batch_size": 6000,
   "benchmark_repeats": 4,
   "jobs": [1, 2, 4],
+  "reference_size": 5000,
   "window_size": 1000,
+  "window_step": 500,
   "n_windows": 8,
   "drift_start_window": 4,
   "drift_shift_x": 0.9,
   "drift_shift_y": 0.35,
+  "drift_class_ratio": 0.9,
   "psi_alert_threshold": 0.2,
-  "csi_alert_threshold": 0.15
+  "csi_alert_threshold": 0.15,
+  "detection_deadline_windows": 2,
+  "max_clean_false_alerts": 1
 }

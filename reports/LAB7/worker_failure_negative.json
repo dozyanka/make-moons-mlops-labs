@@ -1,0 +1,8 @@
+{
+  "batch_status": 200,
+  "fallback_counter_delta": 1,
+  "fault": "simulated joblib Parallel exception",
+  "health_during_fault": 200,
+  "pass": true,
+  "predictions": 2
+}
