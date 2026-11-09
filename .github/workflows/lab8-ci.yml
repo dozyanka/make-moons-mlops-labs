@@ -53,10 +53,38 @@ jobs:
             --runtime-dir "$RUNNER_TEMP/lab8_runtime"
       - name: Full-run evidence is separate
         run: echo "Full wall-clock drills >=55min must be run on target machine and reviewed separately."
-      - name: Verify full evidence if recorded (read-only SHA and acceptance audit)
+      - name: "Verify sealed full evidence across PR #36 squash merge"
+        shell: bash
         run: |
-          if [ -f reports/LAB8/summary.json ]; then
-            python scripts/lab8_verify_full.py --report-dir reports/LAB8
-          else
+          set -euo pipefail
+          if [ ! -f reports/LAB8/summary.json ]; then
             echo 'Full evidence not yet published; quick smoke only.'
+            exit 0
           fi
+          # Squash merges do not preserve PR commit ancestry. Do NOT rewrite
+          # the original run SHA, source manifest or full-run evidence.
+          original_ref='refs/remotes/origin/lab8-original-pr36'
+          expected_original='f0dbbc537270ab036156c65a9ed14ad6d6b83ba6'
+          git fetch --no-tags origin "+refs/pull/36/head:${original_ref}"
+          actual_original="$(git rev-parse "${original_ref}")"
+          if [ "${actual_original}" != "${expected_original}" ]; then
+            echo "LAB8 provenance FAIL: unexpected original PR #36 head: ${actual_original}"
+            exit 1
+          fi
+          # The published application, every evidence file, and the SHA-256
+          # manifest must remain identical to the independently audited PR.
+          # Only this CI YAML file may differ after the squash merge.
+          if ! git diff --quiet "${actual_original}" HEAD -- . \
+              ':(exclude).github/workflows/lab8-ci.yml'; then
+            echo 'LAB8 provenance FAIL: merged code/evidence differs from audited PR #36'
+            git diff --name-status "${actual_original}" HEAD -- . \
+              ':(exclude).github/workflows/lab8-ci.yml'
+            exit 1
+          fi
+          audit_worktree="${RUNNER_TEMP}/lab8-original-pr36-audit"
+          git worktree add --detach "${audit_worktree}" "${actual_original}"
+          (
+            cd "${audit_worktree}"
+            python scripts/lab8_verify_full.py --report-dir reports/LAB8
+          )
+          echo 'LAB8 PASS: original ancestry, full-run metrics, SHA-256 manifest and identical merged source/evidence'
