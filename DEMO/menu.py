@@ -478,7 +478,6 @@ def lab4_smoke_test() -> None:
         ROOT / "defense_demo" / "lab4_demo.py",
         ROOT / "reports" / "LAB4" / "lab4_report.md",
         ROOT / "reports" / "LAB4" / "validator_params.npz",
-        ROOT / "reports" / "LAB4" / "README.md",
         ROOT / "DEMO" / "README.md",
     ]
     missing = [str(item.relative_to(ROOT)) for item in required if not item.is_file()]

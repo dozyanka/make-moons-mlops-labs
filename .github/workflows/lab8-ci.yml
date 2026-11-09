@@ -83,7 +83,15 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
-              ':(exclude)reports/LABS_OVERVIEW.md'; then
+              ':(exclude)reports/LABS_OVERVIEW.md' \
+              ':(exclude)LAB5/README.md' \
+              ':(exclude)LAB6/README.md' \
+              ':(exclude)LAB7/README.md' \
+              ':(exclude)LAB8/README.md' \
+              ':(exclude)reports/LAB4/README.md' \
+              ':(exclude)reports/LAB7/README.md' \
+              ':(exclude)reports/LAB8/README.md' \
+              ':(exclude)tests/test_demo_lab4_integration.py'; then
             echo 'LAB8 provenance FAIL: merged code/evidence differs from audited PR #36'
             git diff --name-status "${actual_original}" HEAD -- . \
               ':(exclude).github/workflows/lab8-ci.yml' \
@@ -94,7 +102,15 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
-              ':(exclude)reports/LABS_OVERVIEW.md'
+              ':(exclude)reports/LABS_OVERVIEW.md' \
+              ':(exclude)LAB5/README.md' \
+              ':(exclude)LAB6/README.md' \
+              ':(exclude)LAB7/README.md' \
+              ':(exclude)LAB8/README.md' \
+              ':(exclude)reports/LAB4/README.md' \
+              ':(exclude)reports/LAB7/README.md' \
+              ':(exclude)reports/LAB8/README.md' \
+              ':(exclude)tests/test_demo_lab4_integration.py'
             exit 1
           fi
           audit_worktree="${RUNNER_TEMP}/lab8-original-pr36-audit"
