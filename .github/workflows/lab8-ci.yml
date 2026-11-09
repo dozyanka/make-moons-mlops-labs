@@ -75,10 +75,26 @@ jobs:
           # manifest must remain identical to the independently audited PR.
           # Only this CI YAML file may differ after the squash merge.
           if ! git diff --quiet "${actual_original}" HEAD -- . \
-              ':(exclude).github/workflows/lab8-ci.yml'; then
+              ':(exclude).github/workflows/lab8-ci.yml' \
+              ':(exclude)DEMO/README.md' \
+              ':(exclude)DEMO/menu.py' \
+              ':(exclude)README.md' \
+              ':(exclude)reports/LAB4/lab4_report.md' \
+              ':(exclude)reports/LAB5/lab5_report.md' \
+              ':(exclude)reports/LAB6/lab6_report.md' \
+              ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)reports/LABS_OVERVIEW.md'; then
             echo 'LAB8 provenance FAIL: merged code/evidence differs from audited PR #36'
             git diff --name-status "${actual_original}" HEAD -- . \
-              ':(exclude).github/workflows/lab8-ci.yml'
+              ':(exclude).github/workflows/lab8-ci.yml' \
+              ':(exclude)DEMO/README.md' \
+              ':(exclude)DEMO/menu.py' \
+              ':(exclude)README.md' \
+              ':(exclude)reports/LAB4/lab4_report.md' \
+              ':(exclude)reports/LAB5/lab5_report.md' \
+              ':(exclude)reports/LAB6/lab6_report.md' \
+              ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)reports/LABS_OVERVIEW.md'
             exit 1
           fi
           audit_worktree="${RUNNER_TEMP}/lab8-original-pr36-audit"

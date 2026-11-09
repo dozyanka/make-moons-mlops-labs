@@ -737,6 +737,16 @@ def smoke_test() -> None:
     print("[OK] DEMO smoke test passed.")
 
 
+def open_labs_overview() -> None:
+    """Open the published LAB1-7 overview using the OS Markdown association."""
+    path = ROOT / "reports" / "LABS_OVERVIEW.md"
+    if not path.is_file():
+        raise FileNotFoundError(f"Сводка не найдена: {path}")
+    print("Общая сводка ЛР1–7:", path)
+    if os.name == "nt":
+        os.startfile(str(path))
+
+
 def show_menu() -> None:
     print("\n" + "=" * 72)
     print(" MAKE-MOONS MLOPS LABS — ЗАПУСК ДЛЯ ПРОВЕРКИ")
@@ -763,9 +773,7 @@ def show_menu() -> None:
     print("19. Открыть отчёт ЛР6")
     print("20. Запустить ЛР7 (joblib + Evidently + pytest)")
     print("21. Открыть отчёт ЛР7")
-    print("22. ЛР8: короткая техническая проверка (НЕ сдача)")
-    print("23. ЛР8: полный прогон с настоящей нагрузкой и C1–C5")
-    print("24. Открыть фактический отчёт ЛР8")
+    print("22. Открыть общую сводку по всем лабораторным")
     print()
     print(" 0. Выход")
     print()
@@ -823,11 +831,7 @@ def interactive() -> None:
             elif choice == "21":
                 open_lab7_report()
             elif choice == "22":
-                run_lab8(quick=True)
-            elif choice == "23":
-                run_lab8(quick=False)
-            elif choice == "24":
-                open_lab8_report()
+                open_labs_overview()
             elif choice == "0":
                 return
             else:
