@@ -1,0 +1,13 @@
+{
+  "status": "ACCEPTED",
+  "mode": "full",
+  "updated_utc": "2026-11-09T08:25:35.013405+00:00",
+  "stages_completed": [
+    "warmup",
+    "clean_ml_sequential",
+    "clean_dl_parallel",
+    "clean_dl_variable_rps",
+    "drift_dl_sequential",
+    "rollback_under_load"
+  ]
+}

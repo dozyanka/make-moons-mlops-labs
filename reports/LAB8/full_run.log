@@ -1,0 +1,219 @@
+$ C:\Users\shata\AppData\Local\Temp\moons_lab8_clean_9f0prgkt\venv\Scripts\python.exe -m pip install -e C:\Users\shata\Downloads\LAB8_WORKTREE_b9357cfd84[all,report]
+$ C:\Users\shata\AppData\Local\Temp\moons_lab8_clean_9f0prgkt\venv\Scripts\python.exe -c import moons_lab, torch, fastapi, evidently, mlflow, sklearn, pandas; print('FRESH_ENV_OK')
+$ C:\Users\shata\AppData\Local\Temp\moons_lab8_clean_9f0prgkt\venv\Scripts\python.exe -m pip freeze --all
+RESULT: PASS
+[warmup] 1000 requests, elapsed=59.9s
+[warmup] 2000 requests, elapsed=119.9s
+[warmup] 3000 requests, elapsed=179.9s
+[warmup] 4000 requests, elapsed=239.9s
+[warmup] 5000 requests, elapsed=299.9s
+{
+  "stage": "warmup",
+  "total": 5000,
+  "successful": 5000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 300.0004182999837,
+  "p50_ms": 1.8325000128243119,
+  "p95_ms": 2.181695023318753,
+  "p99_ms": 2.3901209805626427,
+  "rps": 16.666643427811085,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v2"
+  ],
+  "sample_interval_max_s": 1.0155903000268154,
+  "observed_validator_reject_rate": 0.030666666666666665,
+  "observed_service_error_rate": 0.0
+}
+[clean_ml_sequential] 1000 requests, elapsed=59.9s
+[clean_ml_sequential] 2000 requests, elapsed=119.9s
+[clean_ml_sequential] 3000 requests, elapsed=179.9s
+[clean_ml_sequential] 4000 requests, elapsed=239.9s
+[clean_ml_sequential] 5000 requests, elapsed=299.9s
+[clean_ml_sequential] 6000 requests, elapsed=359.9s
+[clean_ml_sequential] 7000 requests, elapsed=419.9s
+[clean_ml_sequential] 8000 requests, elapsed=479.9s
+[clean_ml_sequential] 9000 requests, elapsed=539.9s
+[clean_ml_sequential] 10000 requests, elapsed=599.9s
+{
+  "stage": "clean_ml_sequential",
+  "total": 10000,
+  "successful": 10000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 600.0003581999918,
+  "p50_ms": 1.8305499979760498,
+  "p95_ms": 2.14084000326693,
+  "p99_ms": 2.3588330327766025,
+  "rps": 16.666656716672836,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v2"
+  ],
+  "sample_interval_max_s": 1.0156308999867178,
+  "observed_validator_reject_rate": 0.030666666666666665,
+  "observed_service_error_rate": 0.0
+}
+[clean_dl_parallel] 1000 requests, elapsed=59.9s
+[clean_dl_parallel] 2000 requests, elapsed=119.9s
+[clean_dl_parallel] 3000 requests, elapsed=179.9s
+[clean_dl_parallel] 4000 requests, elapsed=239.9s
+[clean_dl_parallel] 5000 requests, elapsed=299.9s
+[clean_dl_parallel] 6000 requests, elapsed=359.9s
+[clean_dl_parallel] 7000 requests, elapsed=419.9s
+[clean_dl_parallel] 8000 requests, elapsed=479.9s
+[clean_dl_parallel] 9000 requests, elapsed=539.9s
+[clean_dl_parallel] 10000 requests, elapsed=599.9s
+{
+  "stage": "clean_dl_parallel",
+  "total": 10000,
+  "successful": 10000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 600.0005240999744,
+  "p50_ms": 2.2194500197656453,
+  "p95_ms": 2.5264049734687433,
+  "p99_ms": 2.6751109969336544,
+  "rps": 16.66665210834676,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v3_dl"
+  ],
+  "sample_interval_max_s": 1.0156858999980614,
+  "parallel_evidence": {
+    "requested_workers": 8,
+    "available_logical_cores": 8,
+    "simultaneous_executor_threads": 8,
+    "parallel_batches_completed": 10000,
+    "max_worker_threads_observed": 8
+  },
+  "observed_validator_reject_rate": 0.030666666666666665,
+  "observed_service_error_rate": 0.0
+}
+[clean_dl_variable_rps] 1000 requests, elapsed=80.0s
+[clean_dl_variable_rps] 2000 requests, elapsed=120.0s
+[clean_dl_variable_rps] 3000 requests, elapsed=200.0s
+[clean_dl_variable_rps] 4000 requests, elapsed=240.0s
+[clean_dl_variable_rps] 5000 requests, elapsed=320.0s
+[clean_dl_variable_rps] 6000 requests, elapsed=360.0s
+[clean_dl_variable_rps] 7000 requests, elapsed=440.0s
+[clean_dl_variable_rps] 8000 requests, elapsed=480.0s
+[clean_dl_variable_rps] 9000 requests, elapsed=560.0s
+[clean_dl_variable_rps] 10000 requests, elapsed=600.0s
+{
+  "stage": "clean_dl_variable_rps",
+  "total": 10000,
+  "successful": 10000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 600.0004188999883,
+  "p50_ms": 2.2482500062324107,
+  "p95_ms": 2.671814974746667,
+  "p99_ms": 3.153917975723744,
+  "rps": 16.666655030564005,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v3_dl"
+  ],
+  "sample_interval_max_s": 1.0156906000338495,
+  "parallel_evidence": {
+    "requested_workers": 8,
+    "available_logical_cores": 8,
+    "simultaneous_executor_threads": 8,
+    "parallel_batches_completed": 10000,
+    "max_worker_threads_observed": 8
+  },
+  "observed_validator_reject_rate": 0.030666666666666665,
+  "observed_service_error_rate": 0.0
+}
+[drift_dl_sequential] 1000 requests, elapsed=60.0s
+[drift_dl_sequential] 2000 requests, elapsed=120.0s
+[drift_dl_sequential] 3000 requests, elapsed=180.0s
+[drift_dl_sequential] 4000 requests, elapsed=240.0s
+[drift_dl_sequential] 5000 requests, elapsed=300.0s
+[drift_dl_sequential] 6000 requests, elapsed=360.0s
+[drift_dl_sequential] 7000 requests, elapsed=420.0s
+[drift_dl_sequential] 8000 requests, elapsed=480.0s
+[drift_dl_sequential] 9000 requests, elapsed=540.0s
+[drift_dl_sequential] 10000 requests, elapsed=600.0s
+{
+  "stage": "drift_dl_sequential",
+  "total": 10000,
+  "successful": 10000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 600.0001399000175,
+  "p50_ms": 1.5420000127051026,
+  "p95_ms": 1.9143049692502245,
+  "p99_ms": 2.2821500309510165,
+  "rps": 16.666662780555974,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v3_dl"
+  ],
+  "validator_rejected_samples": 79919,
+  "validator_total_samples": 80000,
+  "silent_accepts": 0,
+  "sample_interval_max_s": 1.0156207999680191,
+  "observed_validator_reject_rate": 0.999,
+  "observed_service_error_rate": 0.0,
+  "validator_reject_rate": 0.9989875,
+  "validator_offline_reject_rate": 0.999,
+  "validator_threshold_pass": true
+}
+[rollback_under_load] 1000 requests, elapsed=59.9s
+[rollback_under_load] 2000 requests, elapsed=119.9s
+[rollback_under_load] 3000 requests, elapsed=179.9s
+[rollback_under_load] 4000 requests, elapsed=239.9s
+[rollback_under_load] 5000 requests, elapsed=299.9s
+[rollback_under_load] 6000 requests, elapsed=359.9s
+[rollback_under_load] 7000 requests, elapsed=419.9s
+[rollback_under_load] 8000 requests, elapsed=479.9s
+[rollback_under_load] 9000 requests, elapsed=539.9s
+[rollback_under_load] 10000 requests, elapsed=599.9s
+{
+  "stage": "rollback_under_load",
+  "total": 10000,
+  "successful": 10000,
+  "lost_or_failed": 0,
+  "success_fraction": 1.0,
+  "elapsed_s": 600.000493700034,
+  "p50_ms": 1.705800008494407,
+  "p95_ms": 2.2952250117668878,
+  "p99_ms": 2.777523961849511,
+  "rps": 16.66665295278812,
+  "baseline_p95_ms": 9.367190024931915,
+  "latency_limit_ms": 14.050785037397873,
+  "pass": true,
+  "http_transport": "persistent_http_1_1_loopback",
+  "versions_observed": [
+    "v2",
+    "v3_dl"
+  ],
+  "rollback_status": 200,
+  "sample_interval_max_s": 1.0375541999819688,
+  "observed_validator_reject_rate": 0.030666666666666665,
+  "observed_service_error_rate": 0.0
+}
+{
+  "summary": "C:\\Users\\shata\\Downloads\\LAB8_WORKTREE_b9357cfd84\\reports\\LAB8\\summary.json",
+  "mode": "full",
+  "all_pass": true,
+  "mlflow": "a829fd3958724c8387059a9ce632822c"
+}
