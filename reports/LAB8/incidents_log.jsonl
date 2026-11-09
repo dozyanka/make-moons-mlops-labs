@@ -1,0 +1,5 @@
+{"time": "2026-11-09T08:25:28.150793+00:00", "case": "C1", "pass": true, "health_down": 0, "alert_detected_s": 1.0054140000138432, "recovery_s": 7.576564599992707, "smoke_codes": [200, 200, 200, 200, 200], "lost_requests_during_outage": 1, "declared_outage_loss_allowance": 1}
+{"time": "2026-11-09T08:25:28.150818+00:00", "case": "C2", "pass": true, "batch_code": 200, "health_code": 200, "recovery_health_code": 200, "fallbacks": 1, "workers": {"pids": [4704], "workers_configured": 2}}
+{"time": "2026-11-09T08:25:28.150829+00:00", "case": "C3", "pass": true, "promote_status": 409, "health_status": 200, "prediction_status": 200}
+{"time": "2026-11-09T08:25:28.150835+00:00", "case": "C4", "pass": true, "dropped_records": 500, "processed_before": 440000, "processed_after": 441500, "recovered_within_windows": 0, "gap_events": [{"kind": "stream_paused", "time": 1794212727.6845744, "at_processed": 440000}, {"kind": "stream_resumed", "time": 1794212727.6927977, "at_processed": 440000}]}
+{"time": "2026-11-09T08:25:28.150846+00:00", "case": "C5", "pass": true, "invalid_returncode": 1, "valid_returncode": 0, "rejected_field": "model_port"}

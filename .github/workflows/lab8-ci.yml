@@ -1,0 +1,62 @@
+name: LAB8 full-system smoke and frozen provenance
+on:
+  pull_request:
+    paths:
+      - 'src/moons_lab/lab8_*'
+      - 'scripts/lab8_*'
+      - 'scripts/run_lab8.py'
+      - 'tests/test_lab8_full.py'
+      - 'configs/lab8_full.json'
+      - 'DEMO/menu.py'
+      - '.github/workflows/lab8-ci.yml'
+      - '.gitattributes'
+      - 'reports/LAB8/**'
+  push:
+    paths:
+      - 'src/moons_lab/lab8_*'
+      - 'scripts/lab8_*'
+      - 'scripts/run_lab8.py'
+      - 'tests/test_lab8_full.py'
+      - 'configs/lab8_full.json'
+      - 'DEMO/menu.py'
+      - '.github/workflows/lab8-ci.yml'
+      - '.gitattributes'
+      - 'reports/LAB8/**'
+  workflow_dispatch:
+
+jobs:
+  lab8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[all,report]'
+      - name: Frozen LAB4 code provenance and data
+        run: python scripts/verify_lab4_data.py --check-git-index --check-published
+      - name: Test LAB8 Pydantic, alerting, checkpoint and live-acceptance rules
+        run: |
+          python -m pytest -q tests/test_lab8_full.py tests/test_lab7_frozen_config.py \
+            --cov=moons_lab.lab8_config --cov=moons_lab.lab8_live \
+            --cov=moons_lab.lab8_observability --cov-report=term-missing
+      - name: Reproducible short real HTTP smoke (not a full LAB8 result)
+        run: |
+          python scripts/run_lab8.py --quick \
+            --report-dir "$RUNNER_TEMP/lab8_quick" \
+            --runtime-dir "$RUNNER_TEMP/lab8_runtime"
+      - name: Full-run evidence is separate
+        run: echo "Full wall-clock drills >=55min must be run on target machine and reviewed separately."
+      - name: Verify full evidence if recorded (read-only SHA and acceptance audit)
+        run: |
+          if [ -f reports/LAB8/summary.json ]; then
+            python scripts/lab8_verify_full.py --report-dir reports/LAB8
+          else
+            echo 'Full evidence not yet published; quick smoke only.'
+          fi

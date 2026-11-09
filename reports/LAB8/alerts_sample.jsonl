@@ -1,0 +1,5 @@
+{"time": "2026-11-09T08:05:19.004853+00:00", "metric": "max_psi_csi", "value": 12.433855885838662, "threshold": 0.2, "level": "warning", "action": "investigate drift; rollback model"}
+{"time": "2026-11-09T08:15:15.431950+00:00", "metric": "validator_reject_rate", "value": 0.999, "threshold": 0.15, "level": "critical", "action": "inspect validator and data source"}
+{"time": "2026-11-09T08:25:16.604830+00:00", "metric": "service_up", "value": 0.0, "threshold": 1.0, "level": "critical", "action": "restart from registry checkpoint"}
+{"time": "2026-11-09T08:25:25.785078+00:00", "metric": "worker_pool_failure", "value": 1.0, "threshold": 0.5, "level": "warning", "action": "restore process pool"}
+{"time": "2026-11-09T08:25:27.684302+00:00", "metric": "candidate_hash_mismatch", "value": 1.0, "threshold": 0.5, "level": "critical", "action": "reject candidate"}
