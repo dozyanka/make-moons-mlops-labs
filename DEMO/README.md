@@ -183,4 +183,4 @@ GPU для ЛР4 не нужен. ЛР3 работает на CPU, если CUDA
 ## ЛР6 — FastAPI и мониторинг
 
 Пункты DEMO 16–19: полный запуск ЛР6, два отдельных сетевых сервиса и отчёт.
-Полное описание: [LAB6/README.md](../LAB6/README.md). Повторные запуски — `demo_output/LAB6`.
+Полное описание: [../reports/LAB6/lab6_report.md](../reports/LAB6/lab6_report.md). Повторные запуски — `demo_output/LAB6`.
