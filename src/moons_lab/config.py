@@ -111,18 +111,25 @@ class Lab7Config(BaseModel):
     benchmark_batch_size: int = Field(ge=100)
     benchmark_repeats: int = Field(ge=2)
     jobs: list[int] = Field(min_length=2)
+    reference_size: int = Field(default=5000, ge=100)
     window_size: int = Field(ge=100)
+    window_step: int = Field(default=500, ge=10)
     n_windows: int = Field(ge=3)
     drift_start_window: int = Field(ge=1)
     drift_shift_x: float
     drift_shift_y: float
+    drift_class_ratio: float = Field(default=0.9, ge=0.05, le=0.95)
     psi_alert_threshold: float = Field(gt=0)
     csi_alert_threshold: float = Field(gt=0)
+    detection_deadline_windows: int = Field(default=2, ge=0)
+    max_clean_false_alerts: int = Field(default=1, ge=0)
 
     @model_validator(mode="after")
     def validate_windows(self) -> "Lab7Config":
         if self.drift_start_window >= self.n_windows:
             raise ValueError("drift_start_window must be before n_windows")
+        if self.window_step > self.window_size:
+            raise ValueError("window_step must not exceed window_size")
         if any(j < 1 for j in self.jobs):
             raise ValueError("jobs must be positive")
         return self

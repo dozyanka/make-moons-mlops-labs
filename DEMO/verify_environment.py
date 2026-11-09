@@ -9,6 +9,7 @@ MODULES = [
     ("pandas", "pandas"),
     ("sklearn", "scikit-learn"),
     ("joblib", "joblib"),
+    ("evidently", "Evidently"),
     ("torch", "PyTorch"),
     ("mlflow", "MLflow"),
     ("pytest", "pytest"),

@@ -1,13 +1,21 @@
+"""LAB7 evidence: joblib benchmark, bounded streaming + Evidently, failure drills.
+
+Run (Windows): .venv\\Scripts\\python.exe scripts/run_lab7.py --report-dir demo_output/LAB7
+The official reports/LAB7 is only updated by the isolated Git worktree PR installer.
+"""
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 import os
 import sys
 import time
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-import joblib
 import numpy as np
 import pandas as pd
 import psutil
@@ -18,213 +26,283 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from moons_lab.config import Lab7Config, load_config
 from moons_lab.data import load_xy
-from moons_lab.drift import compute_drift
-from moons_lab.evidently_adapter import evidently_available, save_evidently_report
+from moons_lab.evidently_adapter import evaluate_evidently_window, evidently_available
 from moons_lab.generator import GeneratorSettings, generate_dataframe
+from moons_lab.lab6_bootstrap import build_registry
+from moons_lab.lab7_pipeline import SCENARIOS, collect_window_metrics, summarize_drill
 from moons_lab.service import ServiceState, create_app
 from moons_lab.tracking import tracked_run
-from moons_lab.utils import json_dump
+from moons_lab.utils import json_dump, sha256_file
 
 
-def _benchmark(client: TestClient, x: np.ndarray, cfg: Lab7Config) -> pd.DataFrame:
-    items = [{"x1": float(row[0]), "x2": float(row[1])} for row in x[: cfg.benchmark_batch_size]]
-    rows = []
+def _predict_via_api(client: TestClient, frame: pd.DataFrame) -> np.ndarray:
+    items = frame[["x1", "x2"]].to_dict(orient="records")
+    result = client.post("/predict/batch", json={"items": items, "n_jobs": 1})
+    if result.status_code != 200:
+        raise RuntimeError(f"API prediction failed ({result.status_code}): {result.text[:150]}")
+    content = result.json()
+    if content["count"] != len(items) or len(content["results"]) != len(items):
+        raise RuntimeError("API prediction count mismatch")
+    return np.asarray([p["probability"] for p in content["results"]], dtype=float)
+
+
+def _benchmark(client: TestClient, x: np.ndarray, cfg: Lab7Config, *, quick: bool) -> pd.DataFrame:
     cpu_count = max(1, os.cpu_count() or 1)
-    # Требование с лекции: отдельно проверяем режим, использующий все доступные ядра.
-    job_values = list(dict.fromkeys([*cfg.jobs, cpu_count]))
-    process = psutil.Process(os.getpid())
-    for jobs in job_values:
-        effective = min(jobs, cpu_count)
-        # warm-up
-        warm = items[: min(200, len(items))]
-        response = client.post("/predict/batch", json={"items": warm, "n_jobs": jobs})
-        if response.status_code != 200:
-            raise RuntimeError(response.text)
+    if cpu_count > 256:
+        raise RuntimeError("Service n_jobs field supports at most 256 logical cores")
+    jobs_to_try = list(dict.fromkeys([1, *cfg.jobs, cpu_count]))
+    if quick:
+        jobs_to_try = list(dict.fromkeys([1, min(2, cpu_count)]))
+    jobs_to_try = [j for j in jobs_to_try if 1 <= j <= cpu_count]
+    x = np.asarray(x, dtype=float)
+    required = cfg.benchmark_batch_size
+    if len(x) < required:
+        x = np.tile(x, (int(np.ceil(required / len(x))), 1))
+    items = [{"x1": float(a), "x2": float(b)} for a, b in x[:required]]
+    process = psutil.Process()
+    rows = []
+    # Verify parallel prediction parity against a deterministic single-worker answer.
+    single = client.post("/predict/batch", json={"items": items, "n_jobs": 1})
+    if single.status_code != 200:
+        raise RuntimeError(single.text)
+    expected_probabilities = np.asarray([r["probability"] for r in single.json()["results"]])
+    for jobs in jobs_to_try:
+        # Warmup is measured separately from the repeated benchmark.
+        for _ in range(2):
+            warmed = client.post("/predict/batch", json={"items": items[:min(200, len(items))], "n_jobs": jobs})
+            if warmed.status_code != 200:
+                raise RuntimeError("warmup failed: " + warmed.text[:150])
         for repeat in range(cfg.benchmark_repeats):
+            memory_before = process.memory_info().rss
             cpu_before = process.cpu_times()
-            rss_before = process.memory_info().rss
-            start = time.perf_counter()
+            fallbacks_before = client.get("/metrics").json()["batch_fallbacks"]
+            started = time.perf_counter()
             response = client.post("/predict/batch", json={"items": items, "n_jobs": jobs})
-            elapsed = time.perf_counter() - start
+            elapsed = max(1e-9, time.perf_counter() - started)
             cpu_after = process.cpu_times()
-            rss_after = process.memory_info().rss
             if response.status_code != 200:
-                raise RuntimeError(response.text)
-            cpu_s = (cpu_after.user - cpu_before.user) + (cpu_after.system - cpu_before.system)
+                raise RuntimeError(f"benchmark returned HTTP {response.status_code}: {response.text[:150]}")
+            fallbacks_after = client.get("/metrics").json()["batch_fallbacks"]
+            if fallbacks_after != fallbacks_before:
+                raise AssertionError("joblib failed and service silently used sequential fallback; invalid benchmark")
+            payload = response.json()
+            prediction_count = payload["count"]
+            observed = np.asarray([r["probability"] for r in payload["results"]])
+            parity = prediction_count == len(items) and np.allclose(
+                observed, expected_probabilities, atol=1e-12, rtol=0
+            )
+            if not parity:
+                raise AssertionError(f"n_jobs={jobs}: incorrect predictions or lost rows")
+            cpu_elapsed = (cpu_after.user + cpu_after.system) - (cpu_before.user + cpu_before.system)
             rows.append({
                 "requested_jobs": jobs,
-                "effective_jobs": response.json()["n_jobs"],
-                "uses_all_available_cores": response.json()["n_jobs"] == cpu_count,
-                "cpu_count": cpu_count,
+                "effective_jobs": payload["n_jobs"],
+                "logical_cores": cpu_count,
+                "all_cores": payload["n_jobs"] == cpu_count,
                 "repeat": repeat + 1,
+                "warmup_requests": 2,
                 "batch_size": len(items),
                 "elapsed_s": elapsed,
-                "latency_ms_per_item": 1000 * elapsed / len(items),
+                "batch_latency_ms": elapsed * 1000,
+                "latency_ms_per_item_amortized": elapsed * 1000 / len(items),
                 "throughput_items_s": len(items) / elapsed,
-                "process_cpu_s": cpu_s,
-                "cpu_utilization_pct_of_machine": 100.0 * cpu_s / max(elapsed * cpu_count, 1e-12),
-                "rss_before_mb": rss_before / (1024 * 1024),
-                "rss_after_mb": rss_after / (1024 * 1024),
-                "warmup_done": True,
-                "expected_effective_jobs": effective,
+                "cpu_time_s": cpu_elapsed,
+                "cpu_util_pct_machine": 100 * cpu_elapsed / (elapsed * cpu_count),
+                "rss_before_mb": memory_before / 1048576,
+                "rss_after_mb": process.memory_info().rss / 1048576,
+                "predictions_match_single_worker": bool(parity),
+                "measurement": "in_process_TestClient_not_external_http",
             })
     return pd.DataFrame(rows)
 
 
-def _predict(model, x: np.ndarray) -> np.ndarray:
-    p = np.asarray(model.predict_proba(x))
-    return p[:, 1] if p.ndim == 2 else p
-
-
-def _drift_drill(model, cfg: Lab7Config) -> tuple[pd.DataFrame, pd.DataFrame, str]:
-    ref_df = generate_dataframe(GeneratorSettings(mode="similar", n_samples=5000, seed=cfg.seed, noise=0.22))
-    ref_x = ref_df[["x1", "x2"]].to_numpy()
-    ref_p = _predict(model, ref_x)
-    rows = []
-    drill_rows = []
-    first_alert = None
-    last_df = None
-    for window in range(cfg.n_windows):
-        if window < cfg.drift_start_window:
-            settings = GeneratorSettings(
-                mode="similar", n_samples=cfg.window_size, seed=cfg.seed + 10 + window, noise=0.22
-            )
-            injected = False
-        else:
-            settings = GeneratorSettings(
-                mode="similar",
-                n_samples=cfg.window_size,
-                seed=cfg.seed + 10 + window,
-                noise=0.22,
-                shift_x=cfg.drift_shift_x,
-                shift_y=cfg.drift_shift_y,
-            )
-            injected = True
-        cur_df = generate_dataframe(settings)
-        last_df = cur_df
-        cur_x = cur_df[["x1", "x2"]].to_numpy()
-        cur_p = _predict(model, cur_x)
-        metrics = compute_drift(ref_x, cur_x, ref_p, cur_p)
-        alert = metrics.max_feature_psi > cfg.psi_alert_threshold or metrics.csi_prediction > cfg.csi_alert_threshold
-        if alert and first_alert is None:
-            first_alert = window
-        rows.append({
-            "window": window,
-            "injected_drift": injected,
-            "psi_x1": metrics.psi_x1,
-            "psi_x2": metrics.psi_x2,
-            "ks_x1": metrics.ks_x1,
-            "ks_x2": metrics.ks_x2,
-            "csi_prediction": metrics.csi_prediction,
-            "alert": alert,
-        })
-    pre = [row for row in rows if row["window"] < cfg.drift_start_window]
-    post = [row for row in rows if row["window"] >= cfg.drift_start_window]
-    drill_rows.append({
-        "drill": "clean_stream",
-        "expected": "no alerts",
-        "actual_alerts": sum(int(r["alert"]) for r in pre),
-        "pass": sum(int(r["alert"]) for r in pre) == 0,
-    })
-    drill_rows.append({
-        "drill": "shift_x_y",
-        "expected": f"detect no later than window {cfg.drift_start_window + 1}",
-        "actual_alerts": sum(int(r["alert"]) for r in post),
-        "pass": first_alert is not None and first_alert <= cfg.drift_start_window + 1,
-    })
-
-    status = "unavailable"
-    if evidently_available() and last_df is not None:
-        status = save_evidently_report(
-            ref_df[["x1", "x2", "y"]],
-            last_df[["x1", "x2", "y"]],
-            ROOT / "reports/LAB7/evidently_drift_report.html",
-        )
-    return pd.DataFrame(rows), pd.DataFrame(drill_rows), status
-
-
-def _worker_failure_fallback(client: TestClient) -> dict:
+def _worker_failure(client: TestClient) -> dict:
+    """Inject worker-pool exception (not a real OS process kill)."""
     class BrokenParallel:
         def __init__(self, *args, **kwargs):
             pass
-
         def __call__(self, *args, **kwargs):
-            raise RuntimeError("simulated worker-pool failure")
-
+            raise RuntimeError("injected joblib executor failure")
+    initial_fallbacks = client.get("/metrics").json()["batch_fallbacks"]
     with patch("moons_lab.service.Parallel", BrokenParallel):
-        response = client.post(
-            "/predict/batch",
-            json={"items": [{"x1": 0.1, "x2": 0.2}, {"x1": 0.2, "x2": 0.3}], "n_jobs": 2},
-        )
-    metrics = client.get("/metrics").json()
-    return {
-        "status_code": response.status_code,
-        "returned_predictions": response.json().get("count") if response.status_code == 200 else 0,
-        "batch_fallbacks": metrics["batch_fallbacks"],
-        "pass": response.status_code == 200 and response.json().get("count") == 2 and metrics["batch_fallbacks"] >= 1,
+        answer = client.post("/predict/batch", json={
+            "items": [{"x1": 0.1, "x2": 0.2}, {"x1": 0.3, "x2": 0.4}], "n_jobs": 2,
+        })
+        health = client.get("/health")
+    final_fallbacks = client.get("/metrics").json()["batch_fallbacks"]
+    outcome = {
+        "fault": "simulated joblib Parallel exception",
+        "batch_status": answer.status_code, "health_during_fault": health.status_code,
+        "predictions": answer.json().get("count", 0) if answer.status_code == 200 else 0,
+        "fallback_counter_delta": final_fallbacks - initial_fallbacks,
     }
+    outcome["pass"] = (outcome["batch_status"] == 200 and outcome["health_during_fault"] == 200
+                       and outcome["predictions"] == 2 and outcome["fallback_counter_delta"] == 1)
+    return outcome
+
+
+def _make_report(report: Path, cfg: Lab7Config, benchmark: pd.DataFrame,
+                 drills: pd.DataFrame, summary: dict, run_id: str, backend: str) -> None:
+    code_sha = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                                       text=True).strip() if (ROOT / ".git").exists() else "archive_without_git"
+    lines = [
+        "# ЛР7. Параллельный FastAPI-сервис и мониторинг дрейфа",
+        "",
+        "**Вариант:** 09, make_moons (нелинейность).",
+        f"**Дата UTC:** {datetime.now(timezone.utc).isoformat()}; автор: обучающийся проекта (Владимир).",
+        f"**Коммит кода до публикации:** `{code_sha}`.",
+        f"**SHA-256 исходной модели ЛР2:** `{summary['source_model_sha256']}`.",
+        f"**SHA-256 конфигурации ЛР7:** `{summary['config_sha256']}`.",
+        "**Источник настроек:** `configs/lab7.json` (Pydantic `Lab7Config`).",
+        f"**Прогон MLflow:** `{run_id}`; backend: `{backend}`.",
+        "**Источник данных:** управляемый генератор ЛР5; координаты x1/x2, предсказания v2 через FastAPI.",
+        "",
+        "## 1. Методика параллельного бенчмарка",
+        "", "`joblib.Parallel(prefer=threads)`; доступные логические ядра определяются `os.cpu_count()`; "
+        "измерения включают 2 прогревочных запроса на конфигурацию, затем независимые повторы.",
+        f"Размер пакета {cfg.benchmark_batch_size}; повторов {cfg.benchmark_repeats}; режим: TestClient в одном процессе, "
+        "поэтому это **не внешняя сетевая задержка**. p50/p95/p99 по повторам приведены для одного пакетного HTTP-вызова.",
+        "", "| Исполнители | Средняя производительность, элементов/с | Средняя задержка пакета, мс | p50 / p95 / p99 пакета, мс |",
+        "|---:|---:|---:|---:|",
+    ]
+    grouped = benchmark.groupby("effective_jobs", sort=True)
+    for jobs, group in grouped:
+        latency = group["batch_latency_ms"].to_numpy()
+        q = np.quantile(latency, [.5, .95, .99])
+        lines.append(f"| {jobs} | {group['throughput_items_s'].mean():.2f} | "
+                     f"{np.mean(latency):.2f} | {q[0]:.2f} / {q[1]:.2f} / {q[2]:.2f} |")
+    mean = grouped["throughput_items_s"].mean()
+    speedup = float(mean.max() / mean.loc[1])
+    lines.extend(["", f"Максимальное измеренное ускорение относительно одного исполнителя: "
+                  f"{speedup:.3f}× (при {int(mean.idxmax())} исполнителях). "
+                  "Ускорение может быть сублинейным либо отрицательным из-за накладных расходов Python/HTTP/задач joblib.",
+                  "", "## 2. Оконное наблюдение Evidently и PSI / KS / CSI", "",
+                  f"Окно: {cfg.window_size} наблюдений; шаг: {cfg.window_step}; "
+                  f"окон на сценарий: {cfg.n_windows}. Новый блок поступает из генератора ЛР5, "
+                  "окно хранится в `deque(maxlen=window_size)` без накопления всего потока.",
+                  f"Дрейф вводится на окне {cfg.drift_start_window} (отсчёт с нуля); "
+                  f"порог max(PSI(x1), PSI(x2)) > {cfg.psi_alert_threshold}, "
+                  f"или CSI(вероятность) > {cfg.csi_alert_threshold}; "
+                  f"срок обнаружения ≤ {cfg.detection_deadline_windows} окон после начала дрейфа.",
+                  "Evidently `DataDriftPreset()` рассчитывается **на каждом окне** по "
+                  "`x1`, `x2`, `probability`; отдельные HTML-снимки сохраняются для последних окон сценариев.",
+                  "", "| Сценарий | Первое окно с алертом | Задержка, окон | Ложных алертов | Вердикт |",
+                  "|---|---:|---:|---:|---|",
+                  ])
+    for _, row in drills.iterrows():
+        lines.append(f"| {row['scenario']} | {row['first_alert_window']} | "
+                     f"{row['detection_delay_windows']} | {row['false_alerts']} | "
+                     f"{'PASS' if row['accepted'] else 'FAIL'} |")
+    lines.extend(["", "## 3. Негативный контроль исполнителя", "",
+                  "Отказ joblib воспроизводится инъекцией исключения в `Parallel`: сервис "
+                  "переходит к последовательному расчёту, не теряя ответ. "
+                  "Это **моделирование отказа пула**, а не убийство OS-процесса.",
+                  f"Результат: `{json.dumps(summary['worker_failure'], ensure_ascii=False)}`.",
+                  "", "## 4. Машиночитаемые доказательства", "",
+                  "- `parallel_benchmark.csv` — каждый прогрев/повтор, число ядер, CPU, RSS, задержки, скорость, совпадение результатов.",
+                  "- `drift_metrics.csv` — PSI/KS/CSI, доля чужеродных входов, алерты и факт расчёта Evidently для каждого окна.",
+                  "- `drift_drills.csv` — контроль чистого потока, сдвига средних и смены доли классов.",
+                  "- `evidently_{clean,mean_shift,class_ratio_shift}.html` — визуальные отчёты Evidently.",
+                  "- `worker_failure_negative.json`, `summary.json`, `run_meta.json`, `lab7_tests.log` — контроли и трассировка.",
+                  "", "## 5. Воспроизводимость и ограничения", "",
+                  "Прогон использует фиксированные seed из конфигурации; при повторе совпадают значения генератора "
+                  "и метрики окон в пределах численной точности окружения. Производительность зависит от загруженности CPU.",
+                  "Все значения получены из сохранённых машинных CSV/JSON. "
+                  "Финальные сетевые испытания по настоящим портам нужно показывать отдельно от TestClient.",
+                  "", "**Итог:** " + ("все дриллы пройдены." if all(drills["accepted"]) and summary["worker_failure"]["pass"]
+                                      else "есть непройденные дриллы; работа не принята."),
+                  ""])
+    (report / "lab7_report.md").write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
-    cfg: Lab7Config = load_config(7)  # type: ignore[assignment]
-    state = ServiceState()
-    app = create_app(ROOT / "models/registry/registry.json", state=state)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--report-dir", type=Path, default=ROOT / "reports/LAB7")
+    parser.add_argument("--runtime-dir", type=Path, default=ROOT / "demo_output/LAB7_runtime")
+    parser.add_argument("--quick", action="store_true", help="Developer smoke only; not publishable evidence")
+    args = parser.parse_args()
+    if not evidently_available():
+        raise RuntimeError("Evidently is mandatory for LAB7; install with pip install -e '.[monitoring]'")
+    cfg: Lab7Config = load_config(7, ROOT / "configs/lab7.json")  # type: ignore[assignment]
+    if args.quick:
+        cfg = cfg.model_copy(update={"benchmark_batch_size": 300, "benchmark_repeats": 2,
+                                     "reference_size": 1000, "window_size": 400,
+                                     "window_step": 200, "n_windows": 5, "drift_start_window": 2})
+    report = args.report_dir.resolve()
+    report.mkdir(parents=True, exist_ok=True)
+    reg_path = build_registry(ROOT, args.runtime_dir / "registry", reset=True)
+    app = create_app(reg_path, state=ServiceState())
     client = TestClient(app)
-    x_test, _ = load_xy(ROOT / "data/processed/test.csv")
-    if cfg.benchmark_batch_size > len(x_test):
-        repeats = int(np.ceil(cfg.benchmark_batch_size / len(x_test)))
-        x_bench = np.tile(x_test, (repeats, 1))
-    else:
-        x_bench = x_test
-    benchmark = _benchmark(client, x_bench, cfg)
-    benchmark.to_csv(ROOT / "reports/LAB7/parallel_benchmark.csv", index=False)
+    x, _ = load_xy(ROOT / "data/processed/test.csv")
+    benchmark = _benchmark(client, x, cfg, quick=args.quick)
+    benchmark.to_csv(report / "parallel_benchmark.csv", index=False, lineterminator="\n")
+    reference = generate_dataframe(GeneratorSettings(
+        mode="similar", n_samples=cfg.reference_size, seed=cfg.seed, noise=.22,
+    ))
+    reference["probability"] = _predict_via_api(client, reference)
+    all_metrics = []
+    drill_rows = []
+    html_reports = []
+    for scenario in SCENARIOS:
+        def evidently_window(name: str, index: int, window: pd.DataFrame) -> dict:
+            html = (report / f"evidently_{name}.html") if index == cfg.n_windows - 1 else None
+            result = evaluate_evidently_window(reference, window, html_path=html)
+            if html is not None:
+                html_reports.append(html)
+            return result
 
-    model = joblib.load(ROOT / "models/registry/model_v2.joblib")
-    drift_metrics, drill, evidently_status = _drift_drill(model, cfg)
-    drift_metrics.to_csv(ROOT / "reports/LAB7/drift_metrics.csv", index=False)
-    drill.to_csv(ROOT / "reports/LAB7/drift_drills.csv", index=False)
-    (ROOT / "reports/LAB7/evidently_status.txt").write_text(
-        f"evidently_available={evidently_available()}\nresult={evidently_status}\n",
-        encoding="utf-8",
-    )
-    failure = _worker_failure_fallback(client)
-    json_dump(ROOT / "reports/LAB7/worker_failure_negative.json", failure)
-
-    grouped = benchmark.groupby("requested_jobs")["throughput_items_s"].mean().reset_index()
-    best_row = grouped.loc[grouped["throughput_items_s"].idxmax()]
-    all_cores = max(1, os.cpu_count() or 1)
-    all_core_rows = benchmark[benchmark["effective_jobs"] == all_cores]
+        metrics, last = collect_window_metrics(cfg, scenario, reference,
+                                               lambda frame: _predict_via_api(client, frame),
+                                               on_window=evidently_window)
+        all_metrics.append(metrics)
+        drill_rows.append(summarize_drill(metrics, scenario, cfg))
+    combined = pd.concat(all_metrics, ignore_index=True)
+    combined.to_csv(report / "drift_metrics.csv", index=False, lineterminator="\n")
+    drills = pd.DataFrame(drill_rows)
+    drills.to_csv(report / "drift_drills.csv", index=False, lineterminator="\n")
+    failure = _worker_failure(client)
+    json_dump(report / "worker_failure_negative.json", failure)
+    cpu = max(1, os.cpu_count() or 1)
+    best_by_jobs = benchmark.groupby("effective_jobs")["throughput_items_s"].mean()
     summary = {
-        "cpu_count": all_cores,
-        "all_cores_benchmarked": bool(len(all_core_rows)),
-        "all_cores_mean_throughput_items_s": float(all_core_rows["throughput_items_s"].mean()) if len(all_core_rows) else None,
-        "best_requested_jobs": int(best_row["requested_jobs"]),
-        "best_mean_throughput_items_s": float(best_row["throughput_items_s"]),
-        "clean_false_alerts": int(drift_metrics.loc[~drift_metrics["injected_drift"], "alert"].sum()),
-        "first_drift_alert_window": (
-            int(drift_metrics.loc[drift_metrics["alert"], "window"].min())
-            if drift_metrics["alert"].any()
-            else None
-        ),
-        "worker_failure_fallback": failure,
-        "evidently_status": evidently_status,
+        "variant": 9,
+        "logical_cores": cpu,
+        "all_cores_benchmarked": bool((benchmark["effective_jobs"] == cpu).any()) if not args.quick else None,
+        "best_effective_jobs": int(best_by_jobs.idxmax()),
+        "speedup_max_vs_1": float(best_by_jobs.max() / best_by_jobs.loc[1]),
+        "window_count": len(combined), "evidently_evaluations": int(combined["evidently_evaluated"].sum()),
+        "scenarios": list(SCENARIOS), "clean_false_alerts": int(drills.loc[drills.scenario == "clean", "false_alerts"].iloc[0]),
+        "worker_failure": failure, "all_drills_pass": bool(drills["accepted"].all()),
+        "source_model_sha256": sha256_file(ROOT / "reports/LAB2/ml_model.joblib"),
+        "config_sha256": sha256_file(ROOT / "configs/lab7.json"),
+        "quick": args.quick,
     }
-    json_dump(ROOT / "reports/LAB7/summary.json", summary)
-    with tracked_run("lab7_parallel_and_drift", experiment="lab7_monitoring") as run:
+    json_dump(report / "summary.json", summary)
+    if not (summary["all_drills_pass"] and failure["pass"]):
+        raise AssertionError("LAB7 negative/drift drill failed; inspect drift_drills.csv")
+    if not args.quick and not summary["all_cores_benchmarked"]:
+        raise AssertionError("LAB7: no full-core benchmark")
+    with tracked_run("lab7_parallel_stream_evidently", experiment="lab7_monitoring") as run:
+        if run.backend != "mlflow":
+            raise RuntimeError("LAB7 needs real MLflow backend, not a fallback")
+        _make_report(report, cfg, benchmark, drills, summary, run.run_id, run.backend)
         run.log_params(cfg.model_dump())
         run.log_metrics({
-            "best_mean_throughput_items_s": summary["best_mean_throughput_items_s"],
+            "best_throughput_items_s": float(best_by_jobs.max()),
+            "speedup_max_vs_1": summary["speedup_max_vs_1"],
             "clean_false_alerts": summary["clean_false_alerts"],
-            "first_drift_alert_window": summary["first_drift_alert_window"] or -1,
-            "worker_fallback_pass": float(failure["pass"]),
+            "all_drills_pass": float(summary["all_drills_pass"]),
+            "all_cores_benchmarked": float(bool(summary["all_cores_benchmarked"])),
         })
-        run.log_artifact(ROOT / "reports/LAB7/parallel_benchmark.csv")
-        run.log_artifact(ROOT / "reports/LAB7/drift_metrics.csv")
-        json_dump(ROOT / "reports/LAB7/run_meta.json", {"run_id": run.run_id, "tracking_backend": run.backend})
-
-    print(benchmark.groupby("requested_jobs")["throughput_items_s"].agg(["mean", "std"]).to_string())
-    print(drift_metrics.to_string(index=False))
-    print(json.dumps(summary, indent=2))
+        for artifact in ["parallel_benchmark.csv", "drift_metrics.csv", "drift_drills.csv",
+                         "summary.json", "worker_failure_negative.json", "lab7_report.md",
+                         *[p.name for p in html_reports]]:
+            run.log_artifact(report / artifact)
+        json_dump(report / "run_meta.json", {"run_id": run.run_id, "tracking_backend": run.backend})
+    print(benchmark.groupby("effective_jobs")["throughput_items_s"].agg(["mean", "std"]).to_string())
+    print(drills.to_string(index=False))
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    print("LAB7 PASSED:", report)
 
 
 if __name__ == "__main__":

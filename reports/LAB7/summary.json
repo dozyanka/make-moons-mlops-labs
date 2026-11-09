@@ -1,0 +1,27 @@
+{
+  "all_cores_benchmarked": true,
+  "all_drills_pass": true,
+  "best_effective_jobs": 1,
+  "clean_false_alerts": 0,
+  "config_sha256": "c275fa10588ede57102b3fa9cbd6ce6dcb0d8ae55ee8586cbfad3b7cd2920836",
+  "evidently_evaluations": 24,
+  "logical_cores": 8,
+  "quick": false,
+  "scenarios": [
+    "clean",
+    "mean_shift",
+    "class_ratio_shift"
+  ],
+  "source_model_sha256": "b42c4780f89b660f19c31d23bddd96ea76e20bc508b450db4764c114e68d596b",
+  "speedup_max_vs_1": 1.0,
+  "variant": 9,
+  "window_count": 24,
+  "worker_failure": {
+    "batch_status": 200,
+    "fallback_counter_delta": 1,
+    "fault": "simulated joblib Parallel exception",
+    "health_during_fault": 200,
+    "pass": true,
+    "predictions": 2
+  }
+}
