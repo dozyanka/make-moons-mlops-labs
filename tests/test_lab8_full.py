@@ -175,3 +175,132 @@ def test_validated_route_rejects_out_of_distribution_without_prediction(tmp_path
     assert data["rejected_count"] == 2 and data["accepted_count"] == 0
     assert all(v["rejected"] and "prediction" not in v and v["reason"] for v in data["results"])
     assert len(data["monitor_probabilities"]) == 2
+
+
+def test_fast_dl_adapter_matches_published_checkpoint_and_parallel_threads():
+    """Only LAB8 serving is optimized; published LAB3 math stays identical."""
+    from concurrent.futures import ThreadPoolExecutor
+    from moons_lab.dl_pipeline import load_checkpoint
+    root = Path(__file__).resolve().parents[1]
+    checkpoint = root / "reports/LAB3/dl_model.pt"
+    rng = np.random.default_rng(2048)
+    samples = rng.normal(size=(128, 2))
+    expected = load_checkpoint(checkpoint).predict_proba(samples)
+    adapter = DLJoblibAdapter(str(checkpoint))
+    adapter.warmup()
+    actual = adapter.predict_proba(samples)
+    np.testing.assert_allclose(actual, expected, rtol=1e-6, atol=1e-7)
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        chunks = list(executor.map(adapter.predict_proba, np.array_split(samples, 4)))
+    np.testing.assert_allclose(np.concatenate(chunks), expected, rtol=1e-6, atol=1e-7)
+
+
+def test_lab8_persistent_parallel_pool_uses_real_threads_and_preserves_versions(tmp_path):
+    import os
+    import sys
+    from fastapi.testclient import TestClient
+    from moons_lab.lab8_live import setup_registry
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    from lab8_runtime_api import make_app
+    registry = setup_registry(root, tmp_path / "registry")
+    jobs = min(4, max(1, os.cpu_count() or 1))
+    with TestClient(make_app(registry)) as client:
+        items = [{"x1": float(i) / 10, "x2": float(i % 7) / 10}
+                 for i in range(max(16, jobs * 8))]
+        # Original LAB6 ML route still works without the LAB8 adapter.
+        first = client.post("/predict/batch", json={"items": items, "n_jobs": 1})
+        assert first.status_code == 200
+        assert {v["model_version"] for v in first.json()["results"]} == {"v2"}
+        promoted = client.post("/promote", json={"version": "v3_dl", "reason": "LAB8 parallel proof"})
+        assert promoted.status_code == 200
+        warmed = client.post("/lab8/warmup")
+        assert warmed.status_code == 200 and warmed.json()["version"] == "v3_dl"
+        proof = client.get("/lab8/parallel-proof", params={"workers": jobs})
+        assert proof.status_code == 200 and proof.json()["simultaneous_threads"] == jobs
+        response = client.post("/predict/batch", json={"items": items, "n_jobs": jobs})
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data["count"] == len(items) and data["n_jobs"] == jobs
+        assert len(data["results"]) == len(items)
+        assert {v["model_version"] for v in data["results"]} == {"v3_dl"}
+        x = np.asarray([[item["x1"], item["x2"]] for item in items])
+        expected = DLJoblibAdapter(str(root / "reports/LAB3/dl_model.pt")).predict_proba(x)
+        np.testing.assert_allclose([v["probability"] for v in data["results"]], expected,
+                                   rtol=1e-6, atol=1e-7)
+        metrics = client.get("/lab8/parallel-stats").json()
+        assert metrics["parallel_batches"] >= 1
+        assert metrics["last_requested_workers"] == jobs
+        assert metrics["max_workers_observed"] >= min(2, jobs)
+        rollback = client.post("/rollback")
+        assert rollback.status_code == 200 and rollback.json()["active"] == "v2"
+        recovered = client.post("/predict/batch", json={"items": items, "n_jobs": 1})
+        assert recovered.status_code == 200
+        assert {v["model_version"] for v in recovered.json()["results"]} == {"v2"}
+
+
+def test_lab8_api_lifespan_without_legacy_event_handler(tmp_path, monkeypatch):
+    """Starlette 1.x removed FastAPI.add_event_handler; cleanup uses lifespan."""
+    import sys
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from moons_lab.lab8_live import setup_registry
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "scripts"))
+    from lab8_runtime_api import make_app
+
+    monkeypatch.setattr(FastAPI, "add_event_handler", None, raising=False)
+    registry = setup_registry(root, tmp_path / "registry")
+    app = make_app(registry)
+    with TestClient(app) as client:
+        assert client.get("/health").status_code == 200
+        response = client.get("/lab8/parallel-stats")
+        assert response.status_code == 200
+        assert response.json()["backend"] == "persistent_thread_pool"
+
+
+def test_lab8_keepalive_reuses_connection_and_no_remote_hosts():
+    """Real loopback HTTP/1.1, verify three POSTs use the same TCP connection."""
+    import json
+    import threading
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+    from moons_lab.lab8_live import KeepAliveHTTP
+
+    remote_ports = []
+
+    class Handler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def do_POST(self):
+            size = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(size))
+            remote_ports.append(self.client_address[1])
+            raw = json.dumps({"count": len(payload["items"]), "results": []}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        base = f"http://127.0.0.1:{server.server_port}"
+        with KeepAliveHTTP(base, timeout=4) as client:
+            for _ in range(3):
+                status, response = client.request(
+                    "/predict/batch", "POST", {"items": [{"x1": .2, "x2": .3}], "n_jobs": 1}
+                )
+                assert status == 200 and response["count"] == 1
+        assert len(remote_ports) == 3 and len(set(remote_ports)) == 1
+        with pytest.raises(ValueError, match="local"):
+            KeepAliveHTTP("http://example.com:8080")
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=4)

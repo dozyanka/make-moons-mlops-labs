@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import subprocess
 import sys
@@ -30,7 +31,7 @@ from moons_lab.data import load_xy
 from moons_lab.dl_pipeline import load_checkpoint
 from moons_lab.generator import GeneratorSettings, generate_dataframe
 from moons_lab.lab8_config import Lab8FullConfig, load_lab8_config
-from moons_lab.lab8_live import (fault_suite, http, plot_usage, setup_registry,
+from moons_lab.lab8_live import (KeepAliveHTTP, fault_suite, http, plot_usage, setup_registry,
                                   stage_summary, start_service, stop_service, utc, wait_healthy,
                                   write_csv)
 from moons_lab.lab8_observability import StreamGuard, hash_manifest
@@ -113,55 +114,56 @@ def measure_stage(name: str, base: str, monitor: str, cfg: Lab8FullConfig,
     target_rate = requests / max(seconds, 1)
     next_due = starting
     try:
-        while len(timestamps) < requests or time.monotonic() - starting < seconds:
-            if switch_to and switch_status is None and len(timestamps) >= requests // 2:
-                switch_status, state = http(base, "/rollback", "POST", timeout=cfg.request_timeout_s)
-                if switch_status != 200 or state.get("active") != switch_to:
-                    raise RuntimeError(f"rollback under load failed: {switch_status} {state}")
-                model_version = switch_to
-                n_jobs = 1
-                if switched_reference is not None:
-                    stream.rebase(switched_reference, "rollback_after")
-            minute = int((time.monotonic() - starting) // 60)
-            factor = (0.5 if minute % 2 == 0 else 1.5) if name == "clean_dl_variable_rps" else 1.0
-            dynamic_rate = max(0.01, target_rate * factor)
-            now = time.monotonic()
-            if next_due > now:
-                time.sleep(min(next_due - now, 0.2))
-                continue
-            batch = raw[np.arange(rowidx, rowidx + batch_size) % len(raw)]
-            rowidx += len(batch)
-            items = [{"x1": float(a), "x2": float(b)} for a, b in batch]
-            payload = {"items": items, "n_jobs": n_jobs}
-            next_due += 1 / dynamic_rate
-            t0 = time.perf_counter()
-            endpoint = "/lab8/predict/validated" if validated else "/predict/batch"
-            status, answer = http(base, endpoint, "POST", payload, timeout=cfg.request_timeout_s)
-            latency = (time.perf_counter() - t0) * 1000
-            valid = (status == 200 and answer.get("count") == batch_size and
-                     len(answer.get("results", [])) == batch_size and
-                     all(r.get("model_version") == model_version for r in answer["results"]))
-            if validated:
-                valid = valid and answer.get("silent_accepts") == 0 and (
-                    answer.get("accepted_count", -1) + answer.get("rejected_count", -1) == batch_size)
-            row = {"request_id": len(timestamps), "stage": name, "time_utc": utc(),
-                   "status": 200 if valid else (status or 0),
-                   "http_status": status, "latency_ms": latency, "batch_size": batch_size,
-                   "n_jobs": n_jobs, "target_rps": dynamic_rate, "minute": minute, "expected_version": model_version,
-                   "success": valid,
-                   "rejected_count": answer.get("rejected_count", 0) if validated else 0,
-                   "silent_accepts": answer.get("silent_accepts", 0) if validated else 0}
-            timestamps.append(row)
-            if valid:
-                probabilities = (np.asarray(answer["monitor_probabilities"], dtype=float) if validated else
-                                 np.asarray([r["probability"] for r in answer["results"]], dtype=float))
-                events = stream.add(batch, probabilities)
-            if len(timestamps) % 1000 == 0:
-                print(f"[{name}] {len(timestamps)} requests, elapsed={time.monotonic()-starting:.1f}s", flush=True)
-            # Real monitor HTTP observations; batch sampling prevents gratuitous 10x HTTP overhead.
-            if valid and len(timestamps) % 20 == 0:
-                http(monitor, "/ingest", "POST", {"x1": items[0]["x1"], "x2": items[0]["x2"],
-                                                       "probability": float(probabilities[0])})
+        with KeepAliveHTTP(base, timeout=cfg.request_timeout_s) as client:
+            while len(timestamps) < requests or time.monotonic() - starting < seconds:
+                if switch_to and switch_status is None and len(timestamps) >= requests // 2:
+                    switch_status, state = http(base, "/rollback", "POST", timeout=cfg.request_timeout_s)
+                    if switch_status != 200 or state.get("active") != switch_to:
+                        raise RuntimeError(f"rollback under load failed: {switch_status} {state}")
+                    model_version = switch_to
+                    n_jobs = 1
+                    if switched_reference is not None:
+                        stream.rebase(switched_reference, "rollback_after")
+                minute = int((time.monotonic() - starting) // 60)
+                factor = (0.5 if minute % 2 == 0 else 1.5) if name == "clean_dl_variable_rps" else 1.0
+                dynamic_rate = max(0.01, target_rate * factor)
+                now = time.monotonic()
+                if next_due > now:
+                    time.sleep(min(next_due - now, 0.2))
+                    continue
+                batch = raw[np.arange(rowidx, rowidx + batch_size) % len(raw)]
+                rowidx += len(batch)
+                items = [{"x1": float(a), "x2": float(b)} for a, b in batch]
+                payload = {"items": items, "n_jobs": n_jobs}
+                next_due += 1 / dynamic_rate
+                t0 = time.perf_counter()
+                endpoint = "/lab8/predict/validated" if validated else "/predict/batch"
+                status, answer = client.request(endpoint, "POST", payload)
+                latency = (time.perf_counter() - t0) * 1000
+                valid = (status == 200 and answer.get("count") == batch_size and
+                         len(answer.get("results", [])) == batch_size and
+                         all(r.get("model_version") == model_version for r in answer["results"]))
+                if validated:
+                    valid = valid and answer.get("silent_accepts") == 0 and (
+                        answer.get("accepted_count", -1) + answer.get("rejected_count", -1) == batch_size)
+                row = {"request_id": len(timestamps), "stage": name, "time_utc": utc(),
+                       "status": 200 if valid else (status or 0),
+                       "http_status": status, "latency_ms": latency, "batch_size": batch_size,
+                       "n_jobs": n_jobs, "target_rps": dynamic_rate, "minute": minute, "expected_version": model_version,
+                       "success": valid,
+                       "rejected_count": answer.get("rejected_count", 0) if validated else 0,
+                       "silent_accepts": answer.get("silent_accepts", 0) if validated else 0}
+                timestamps.append(row)
+                if valid:
+                    probabilities = (np.asarray(answer["monitor_probabilities"], dtype=float) if validated else
+                                     np.asarray([r["probability"] for r in answer["results"]], dtype=float))
+                    events = stream.add(batch, probabilities)
+                if len(timestamps) % 1000 == 0:
+                    print(f"[{name}] {len(timestamps)} requests, elapsed={time.monotonic()-starting:.1f}s", flush=True)
+                # Real monitor HTTP observations; batch sampling prevents gratuitous 10x HTTP overhead.
+                if valid and len(timestamps) % 20 == 0:
+                    http(monitor, "/ingest", "POST", {"x1": items[0]["x1"], "x2": items[0]["x2"],
+                                                           "probability": float(probabilities[0])})
         elapsed = time.monotonic() - starting
     finally:
         stop.set()
@@ -172,6 +174,7 @@ def measure_stage(name: str, base: str, monitor: str, cfg: Lab8FullConfig,
     plot_usage(resource_rows, usage_path)
     summary = stage_summary(name, timestamps, elapsed, seconds, requests, baseline,
                             cfg.max_latency_ratio)
+    summary["http_transport"] = "persistent_http_1_1_loopback"
     summary["versions_observed"] = sorted({r["expected_version"] for r in timestamps if r["success"]})
     if validated:
         summary["validator_rejected_samples"] = sum(r["rejected_count"] for r in timestamps)
@@ -251,6 +254,23 @@ def full_drills(report: Path, runtime: Path, cfg: Lab8FullConfig, quick: bool) -
                         shift_x=cfg.drift_shift_x if shifted else 0.0))
             sec = 3 if quick else (cfg.warmup_seconds if name == "warmup" else cfg.stage_seconds)
             reqs = 30 if quick else (max(100, cfg.min_stage_requests // 2) if name == "warmup" else cfg.min_stage_requests)
+            if quick and shifted:
+                # At least one *real* drift window must fit in smoke. Previously
+                # 30*8=240 samples could never fill the 500-sample window, so
+                # quick reported all_pass=False even with correct monitoring.
+                reqs = max(reqs, math.ceil(cfg.window_size / max(1, cfg.batch_size)))
+                sec = max(sec, math.ceil(reqs / 10))
+            parallel_before = {}
+            proof = None
+            if version == "v3_dl":
+                status, warmed = http(base, "/lab8/warmup", "POST")
+                if status != 200 or warmed.get("version") != version:
+                    raise RuntimeError(f"DL warmup failed: {status} {warmed}")
+                if jobs > 1:
+                    proof_status, proof = http(base, "/lab8/parallel-proof")
+                    if proof_status != 200 or not proof.get("all_workers_reachable"):
+                        raise RuntimeError(f"parallel executor proof failed: {proof_status} {proof}")
+                    parallel_before = http(base, "/lab8/parallel-stats")[1]
             if name == "clean_dl_variable_rps" and not quick:
                 # Per-minute pacing varies between 0.5x and 1.5x target; see requests CSV.
                 pass
@@ -263,6 +283,23 @@ def full_drills(report: Path, runtime: Path, cfg: Lab8FullConfig, quick: bool) -
                                           validated=shifted)
             if name == "warmup":
                 summary["pass"] = summary["elapsed_s"] >= sec and summary["total"] >= reqs and summary["lost_or_failed"] == 0
+            if jobs > 1 and version == "v3_dl":
+                after_code, after = http(base, "/lab8/parallel-stats")
+                if after_code != 200:
+                    raise RuntimeError(f"cannot read LAB8 parallel evidence: {after_code}")
+                actual_parallel = after["parallel_batches"] - parallel_before["parallel_batches"]
+                summary["parallel_evidence"] = {
+                    "requested_workers": jobs,
+                    "available_logical_cores": after["available_logical_cores"],
+                    "simultaneous_executor_threads": proof["simultaneous_threads"],
+                    "parallel_batches_completed": actual_parallel,
+                    "max_worker_threads_observed": after["max_workers_observed"],
+                }
+                # Proof covers simultaneous executor capacity; execution counter
+                # proves the load stage genuinely made parallel DL calls.
+                summary["pass"] &= (actual_parallel > 0 and
+                                    proof["simultaneous_threads"] == jobs and
+                                    after["max_workers_observed"] >= 2)
             # Every stage evaluates applicability and service health; alerts are real and deduplicated.
             current_features = data[["x1", "x2"]].to_numpy()
             current_mlp = positive(ml, current_features)
@@ -337,6 +374,7 @@ def write_report(report: Path, cfg: Lab8FullConfig, e2e_data: pd.DataFrame,
              "", "## Нагрузочные этапы", "",
              "Числа ниже получены по реальному HTTP на двух Uvicorn-процессах, не через TestClient.",
              "Порог p95 из `reports/LAB6/service_metrics.json` либо явно заданный baseline; источник и допуск записаны в JSON.",
+             "Для сравнимого HTTP/HTTP теста ЛР6 и ЛР8 выполните scripts/lab8_compare_latency.py; он **не меняет** порог приёмки.",
              "", "| Этап | Запросы | Время, с | Успешно | p95, мс | RPS | Выполнено |",
              "|---|---:|---:|---:|---:|---:|---|",]
     for item in result["stage_results"]:

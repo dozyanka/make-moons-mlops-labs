@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from http.client import HTTPConnection
+from urllib.parse import urlsplit
 
 import joblib
 import matplotlib
@@ -49,6 +51,41 @@ def http(base: str, path: str, method: str = "GET", body: dict | None = None, ti
     except (OSError, TimeoutError) as exc:
         return 0, {"error": str(exc)}
 
+
+
+class KeepAliveHTTP:
+    """One real HTTP/1.1 connection per measured stage; no retries on POST.
+
+    urllib's urlopen sets Connection: close for each individual request. Keeping a
+    loopback connection open removes connection setup from successive observations,
+    as is normal for production HTTP clients. Latency still includes serialization,
+    the TCP round trip, FastAPI execution and response parsing.
+    """
+
+    def __init__(self, base: str, timeout: float = 10.0) -> None:
+        parsed = urlsplit(base)
+        if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost"}:
+            raise ValueError("LAB8 load clients require local plain HTTP")
+        self.connection = HTTPConnection(parsed.hostname, parsed.port or 80, timeout=timeout)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.connection.close()
+
+    def request(self, path: str, method: str = "GET", body: dict | None = None) -> tuple[int, dict]:
+        raw = json.dumps(body).encode("utf-8") if body is not None else None
+        try:
+            self.connection.request(method, path, body=raw,
+                                    headers={"Content-Type": "application/json"})
+            response = self.connection.getresponse()
+            payload = response.read()
+            return response.status, json.loads(payload) if payload else {}
+        except (OSError, TimeoutError, ValueError) as exc:
+            # Do not repeat POST: a disconnect can occur *after* the server acted.
+            self.connection.close()
+            return 0, {"error": str(exc)}
 
 def wait_healthy(base: str, timeout_s: float = 30) -> None:
     started = time.monotonic()
