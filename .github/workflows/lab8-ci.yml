@@ -83,6 +83,7 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)tests/test_lab7_complete.py' \
               ':(exclude)reports/LABS_OVERVIEW.md' \
               ':(exclude).github/workflows/lab4-ci.yml' \
               ':(exclude)LAB4/COVERAGE_SCOPE.md' \
@@ -118,6 +119,7 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)tests/test_lab7_complete.py' \
               ':(exclude)reports/LABS_OVERVIEW.md' \
               ':(exclude).github/workflows/lab4-ci.yml' \
               ':(exclude)LAB4/COVERAGE_SCOPE.md' \

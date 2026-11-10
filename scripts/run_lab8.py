@@ -467,7 +467,7 @@ def main():
         result["tracking_backend"] = run.backend
         result["evidence_mode"] = "full" if args.full else "SMOKE_ONLY"
         (report / "summary.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-        write_report(report, cfg, e, result, result["evidence_mode"], run.run_id)
+        # Авторский lab8_report.md не создаётся при повторном прогоне.
         for k, v in (("all_pass", float(result["all_pass"])),
                      ("false_alerts", float(result["false_alerts_on_clean"]))):
             run.log_metrics({k: v})
@@ -476,7 +476,7 @@ def main():
             run.log_metrics({f"{slug}_p95_ms": float(stage["p95_ms"]),
                              f"{slug}_rps": float(stage["rps"]),
                              f"{slug}_successful": float(stage["successful"])})
-        for filename in ("summary.json", "lab8_report.md", "end_to_end.csv"):
+        for filename in ("summary.json", "end_to_end.csv"):
             run.log_artifact(report / filename)
     from moons_lab.lab8_observability import hash_manifest
     (report / "defense_checklist.md").write_text(
