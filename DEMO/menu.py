@@ -200,6 +200,65 @@ def reproduced_report(lab: str):
         shutil.rmtree(temp_root, ignore_errors=True)
 
 
+
+@contextlib.contextmanager
+def preserved_training_data(lab: str):
+    """Save published LAB1 datasets byte-for-byte across a DEMO rerun.
+
+    Training scripts deliberately recreate data/raw, data/processed and 24
+    train chunks.  Preserve only the files they can change and keep the
+    regenerated copies under ignored demo_output/ for inspection.
+    """
+    fixed = [
+        Path("data/raw/moons.csv"),
+        Path("data/processed/train.csv"),
+        Path("data/processed/validation.csv"),
+        Path("data/processed/test.csv"),
+    ]
+    chunks = ROOT / "data/chunks"
+    existing = set(fixed)
+    existing.update(p.relative_to(ROOT) for p in chunks.glob("train_chunk_*.csv"))
+    backed_up = {}
+    backup = DEMO_OUTPUT / "_input_backups" / f"{lab}_{uuid.uuid4().hex}"
+    backup.mkdir(parents=True, exist_ok=False)
+    try:
+        for rel in sorted(existing):
+            path = ROOT / rel
+            if path.is_file():
+                target = backup / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(path, target)
+                backed_up[rel] = target
+
+        try:
+            yield
+        finally:
+            # Record regenerated inputs separately, even if the run failed.
+            # A failure to copy evidence must not prevent restoring originals.
+            try:
+                output = DEMO_OUTPUT / lab / "data"
+                output.mkdir(parents=True, exist_ok=True)
+                actual = set(fixed)
+                actual.update(p.relative_to(ROOT) for p in chunks.glob("train_chunk_*.csv"))
+                for rel in sorted(actual):
+                    source = ROOT / rel
+                    if source.is_file():
+                        target = output / rel.relative_to("data")
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(source, target)
+            finally:
+                current = set(fixed)
+                current.update(p.relative_to(ROOT) for p in chunks.glob("train_chunk_*.csv"))
+                for rel in sorted(current - backed_up.keys()):
+                    (ROOT / rel).unlink(missing_ok=True)
+                for rel, copy in backed_up.items():
+                    original = ROOT / rel
+                    original.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(copy, original)
+                print(f"[OK] {lab}: исходные CSV восстановлены побайтово")
+    finally:
+        shutil.rmtree(backup, ignore_errors=True)
+
 def prepare_data() -> None:
     run(["scripts/prepare_data.py"])
 
@@ -209,7 +268,7 @@ def run_lab1() -> None:
     print("ЛР1 — ВОСПРОИЗВЕДЕНИЕ")
     print("=" * 72)
 
-    with reproduced_report("LAB1"):
+    with preserved_training_data("LAB1"), reproduced_report("LAB1"):
         prepare_data()
         run(["scripts/run_lab1.py"], log_name="LAB1")
 
@@ -248,7 +307,7 @@ def run_lab2() -> None:
     print("ЛР2 — ВОСПРОИЗВЕДЕНИЕ")
     print("=" * 72)
 
-    with reproduced_report("LAB2"):
+    with preserved_training_data("LAB2"), reproduced_report("LAB2"):
         prepare_data()
         run(["scripts/run_lab2.py"], log_name="LAB2")
 
@@ -277,7 +336,7 @@ def run_lab3() -> None:
     print("ЛР3 — ВОСПРОИЗВЕДЕНИЕ")
     print("=" * 72)
 
-    with reproduced_report("LAB3"):
+    with preserved_training_data("LAB3"), reproduced_report("LAB3"):
         prepare_data()
         run(["scripts/run_lab3.py"], log_name="LAB3")
 
@@ -422,9 +481,9 @@ def open_lab8_report() -> None:
 
 def open_lab7_report() -> None:
     published = ROOT / "reports" / "LAB7" / "lab7_report.md"
-    regenerated = DEMO_OUTPUT / "LAB7" / "lab7_report.md"
-    print("ЛР7 — опубликованный отчёт:", published)
-    print("ЛР7 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 20")
+    metrics = DEMO_OUTPUT / "LAB7" / "summary.json"
+    print("ЛР7 - опубликованный отчёт:", published)
+    print("ЛР7 - новые результаты:", metrics if metrics.is_file() else "для расчёта выберите пункт 20")
     if os.name == "nt" and published.is_file():
         os.startfile(published)
 
