@@ -164,112 +164,6 @@ def run_pytest(output: Path) -> int:
     return coverage
 
 
-def make_report(
-    metrics: pd.DataFrame, scores: dict[str, object],
-    settings: dict[str, GeneratorSettings], hashes: dict[str, str],
-    reference_hash: str, coverage: int,
-) -> str:
-    lines = [
-        "# Лабораторная работа № 5. Управляемый генератор синтетических данных",
-        "",
-        "**Выполнил:** Владимир Шаталов, ЕТ-122",
-        "**Вариант:** 09 — `sklearn.datasets.make_moons` (нелинейная классификация), профиль P1.",
-        "",
-        "## 1. Цель и исходные данные",
-        "",
-        "Создать генератор с управляемыми режимами и дрейфом, получить воспроизводимые "
-        "выборки и проверить статистическое сходство с исходными данными ЛР1.",
-        "Оригинальный набор `data/raw/moons.csv` **только читается**, SHA-256: "
-        f"`{reference_hash}`.",
-        "",
-        "## 2. Схема настроек и алгоритм",
-        "",
-        "`GeneratorSettings` (Pydantic) проверяет `mode` (`similar`/`random`), `n_samples`, "
-        "`seed`, `noise`, `shift_x`, `shift_y`, `rotation_deg`, `scale`, "
-        "`class_1_ratio`, `label_flip_rate`, `random_range`, "
-        "`seasonality_amplitude`, `seasonality_period`, `output_columns`.",
-        "Выходная схема строго фиксирована: **x1, x2 (float64), y (0 или 1)**; "
-        "некорректные режимы, лишние поля, NaN и выходящие за диапазон значения отклоняются.",
-        "",
-        "- `similar`: исходная нелинейная геометрия двух полумесяцев (`make_moons`), "
-        "с шумом 0.22 и управляемым бутстрэпом по классам.",
-        "- `random`: независимый равномерный шум признаков в заданных границах, "
-        "бинарная метка формируется отдельно.",
-        "- `drifted`: исходная геометрия с поворотом и сдвигами, "
-        "изменённой долей класса 1, инверсией части меток и периодической добавкой к x2.",
-        "",
-        "Периодическая добавка является *искусственным контролируемым возмущением "
-        "табличных данных*, а не моделью реального временного ряда.",
-        "Конкретные значения всех ручек сохранены в `generator_config.json`.",
-        "",
-        "## 3. Сравнение с исходным распределением",
-        "",
-        "PSI рассчитан по 10 квантильным корзинам **эталона**; KS — "
-        "двухвыборочная статистика Колмогорова–Смирнова. Для бинарного `y` "
-        "PSI вычисляется по фиксированным классам 0/1.",
-        "",
-        "| Режим | Признак | Среднее эталона | Среднее генератора | PSI | KS |",
-        "|---|---|---:|---:|---:|---:|",
-    ]
-    for row in metrics.itertuples():
-        lines.append(
-            f"| {row.mode} | {row.feature} | {row.reference_mean:.4f} | "
-            f"{row.generated_mean:.4f} | {row.psi:.4f} | {row.ks:.4f} |"
-        )
-    lines.extend([
-        "",
-        "**Критерий похожести:** для минимум 80% числовых признаков "
-        "PSI ≤ 0.10 **или** KS ≤ 0.10. Поскольку признаков два, должны пройти оба.",
-        f"**Результат:** {scores['similar_fraction']:.0%} (" +
-        ("PASS" if scores["similar_pass"] else "FAIL") + ").",
-        "",
-        "**Критерий случайного режима:** минимум у 50% признаков PSI ≥ 0.20 "
-        "(достаточно одного из двух).",
-        f"**Результат:** {scores['random_fraction']:.0%} (" +
-        ("PASS" if scores["random_pass"] else "FAIL") + ").",
-        "",
-        "## 4. Воспроизводимость и негативные контроли",
-        "",
-        "Генерация с одним seed выполняется дважды; сравниваются **байты CSV**, "
-        "а не только числовые значения. Сохранение фиксирует UTF-8, LF и десять "
-        "знаков после запятой. Смена seed должна изменять SHA-256.",
-        "",
-        "| Режим | SHA-256 CSV | Повтор |",
-        "|---|---|---|",
-    ])
-    for name in ("similar", "random", "drifted"):
-        lines.append(f"| {name} | `{hashes[name]}` | побайтово совпал |")
-    lines.extend([
-        "",
-        "Тесты отдельно проверяют поворот, сдвиг, масштаб, изменение долей классов, "
-        "переворот меток, шум, периодическую добавку, два режима, "
-        "некорректные конфигурации и переключение настроек без перезапуска.",
-        "",
-        "## 5. Тесты и покрытие",
-        "",
-        "| Проверка | Результат |",
-        "|---|---:|",
-        "| pytest: схема, режимы, дрейф, seed, API и метрики | PASS |",
-        f"| Покрытие `src/moons_lab/generator.py` | **{coverage}%** |",
-        "| Требуемый минимум покрытия | 80% |",
-        "",
-        "Полный лог выполнения и пропущенные строки: `generator_tests.log`. "
-        "Режимы и числовые сравнения: `synthetic_metrics.csv`. "
-        "Все конфигурации: `generator_config.json`. "
-        "Свидетельство повтора: `reproducibility.json`. "
-        "Три CSV находятся в `data/synthetic/`.",
-        "",
-        "## 6. Выводы",
-        "",
-        "1. Реализован типизированный генератор для варианта 09 и двух режимов выборки.",
-        "2. Режим `similar` проходит установленный критерий статистической близости.",
-        "3. Режим `random` создаёт заметно отличающееся распределение.",
-        "4. Все объявленные ручки дрейфа проверены тестами; результаты по seed воспроизводимы побайтово.",
-        f"5. Покрытие генератора составляет {coverage}% и удовлетворяет требованию 80%; "
-        "оригиналы ЛР1–4 не изменялись.",
-        "",
-    ])
-    return "\n".join(lines)
 
 
 def execute(report_dir: Path, data_dir: Path, *, skip_tests: bool = False) -> None:
@@ -319,16 +213,11 @@ def execute(report_dir: Path, data_dir: Path, *, skip_tests: bool = False) -> No
         encoding="utf-8", newline="\n",
     )
     coverage = run_pytest(report_dir) if not skip_tests else -1
-    if coverage >= 80:
-        (report_dir / "lab5_report.md").write_text(
-            make_report(metrics, scores, settings, hashes, source_sha, coverage),
-            encoding="utf-8", newline="\n",
-        )
     print(metrics.to_string(index=False, float_format=lambda x: f"{x:.4f}"))
     print("LAB5 distribution thresholds:", scores)
     print("LAB5 data SHA-256:", hashes)
     if coverage >= 80:
-        print(f"LAB5 PASSED; generator coverage {coverage}%; report: {report_dir / 'lab5_report.md'}")
+        print(f"LAB5 PASSED; generator coverage {coverage}%; artifacts: {report_dir}")
 
 
 def main() -> None:

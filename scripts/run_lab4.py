@@ -322,112 +322,6 @@ def verify_repeated_runs(
     return checks
 
 
-def _format_report(
-    cfg: Lab4Config, rows: list[dict[str, object]], comparisons: dict[str, object],
-    negativity: dict[str, float], integrity: dict[str, str], replay: dict[str, object],
-    backend: str, repeat: dict[str, object], negatives_summary: dict[str, object],
-    code_fingerprint: str,
-) -> None:
-    full, chunks = rows
-
-    def fm(value: object, digits: int = 6) -> str:
-        return f"{float(value):.{digits}f}"
-
-    commit = git_head()
-    text = f"""# Лабораторная работа 4. Пайплайн модели-валидатора
-
-## Паспорт
-
-- Вариант: 09 – make_moons, нелинейность.
-- Автор: Владимир Шаталов ЕТ-122.
-- Дата формирования: {datetime.now(timezone.utc).date().isoformat()} (UTC).
-- Git HEAD в момент запуска: `{commit}`.
-- SHA-256 содержимого кода ЛР4: `{code_fingerprint}` (`source_manifest.json`).
-- Рабочая ML-модель: `reports/LAB2/ml_model.joblib`; SHA-256 `{integrity['model']}`.
-- Обучение/калибровка/тест: SHA-256 `{integrity['train']}` / `{integrity['validation']}` / `{integrity['test']}`.
-- Код вычислений: `scripts/run_lab4.py`, `src/moons_lab/validator.py`; таблица исходных чисел `validator_metrics.csv`.
-
-## Задача и схема
-
-Рабочая модель ЛР2 уже классифицирует две переплетённые луны. Валидатор определяет, можно ли доверять ответу существующей ML-модели при данном входе. Признаки `x1`, `x2` – числовые, порядок фиксирован `['x1', 'x2']`. Метод: минимальное расстояние Махаланобиса до двух распределений классов с регуляризацией ковариаций `{cfg.covariance_regularization}` (`configs/lab4.json`).
-
-Отказ, если расстояние > T или максимальная предсказанная вероятность принадлежности к классу `max(p, 1-p) < {cfg.confidence_threshold}`. Если указан заявленный класс, несогласие класса с предсказанием – дополнительный отказ.
-
-На `train` оцениваются статистики, на `validation` единожды выбирается `T` с учётом допустимой доли ложных отказов {cfg.target_false_reject_rate:.2%} и порога предсказанной вероятности класса. На test качество оценивается без дополнительной настройки. Заранее установленные критерии: полнота отказов на числовых чужеродных данных (OOD) ≥ {cfg.min_ood_recall:.0%}, доля ложных отказов на test ≤ {cfg.max_test_false_reject_rate:.0%}. Настройки задаются моделью Pydantic Lab4Config.
-
-## Сравнение full и chunks
-
-| Показатель | Full | Chunks |
-|---|---:|---:|
-| Число объектов train | {full['train_n']} | {chunks['train_n']} |
-| Precision отказа (OOD vs свои) | {fm(full['rejection_precision'])} | {fm(chunks['rejection_precision'])} |
-| Recall отказа OOD | {fm(full['rejection_recall'])} | {fm(chunks['rejection_recall'])} |
-| Доля ложных отказов на test | {fm(full['false_reject_rate'])} | {fm(chunks['false_reject_rate'])} |
-| ROC-AUC score отказа | {fm(full['roc_auc'])} | {fm(chunks['roc_auc'])} |
-| Порог расстояния | {fm(full['distance_threshold'])} | {fm(chunks['distance_threshold'])} |
-| Пик памяти обучения, MiB (`tracemalloc`) | {fm(full['peak_memory_mb'])} | {fm(chunks['peak_memory_mb'])} |
-| Время обучения, с | {fm(full['elapsed_s'])} | {fm(chunks['elapsed_s'])} |
-| ID прогона | `{full['run_id']}` | `{chunks['run_id']}` |
-
-Источник всех величин таблицы: `validator_metrics.csv`, строится `scripts/run_lab4.py`, Run IDs указаны в строках. Память/время измеряют накопление статистик train. Чанки читаются по одному CSV из `data/chunks/`, каждый ≤ `{cfg.chunk_size}` строк.
-
-### Согласованность статистик
-
-- Максимальная разница средних: `{comparisons['means_max_abs_diff']:.12g}`.
-- Максимальная разница ковариаций: `{comparisons['cov_max_abs_diff']:.12g}`.
-- Максимальная разница обратных ковариаций: `{comparisons['inv_cov_max_abs_diff']:.12g}`.
-- Разница порогов: `{comparisons['threshold_abs_diff']:.12g}`.
-- Допуск: `{cfg.stats_atol}`; итог: **{comparisons['stats_within_tolerance']}**.
-
-Источник: `comparison.json`/`scripts/run_lab4.py`.
-
-## Негативные контроли
-
-| Сценарий | Доля отказов | Интерпретация |
-|---|---:|---|
-| Сдвиг средних | {negativity['shifted_mean_reject_rate']:.4f} | Числовой чужеродный поток |
-| Выбросы | {negativity['outliers_reject_rate']:.4f} | Числовой чужеродный поток |
-| Чужие категории | {negativity['foreign_categories_reject_rate']:.4f} | Схема запроса отклоняет текст в `x1` |
-| Строковое число/логическое значение/пустое поле | {negativity['wrong_feature_types_reject_rate']:.4f} | Строгая проверка типов, без приведения к float |
-| Перевёрнутые метки *при предоставленной метке* | {negativity['label_flip_with_claimed_label_reject_rate']:.4f} | Сравнение с решением рабочей модели |
-| Чистые данные, отказы (справочно) | {negativity['own_unlabeled_reject_rate']:.4f} | Контрольная подвыборка из 20 точек; общая доля на test выше |
-
-Источник: все строки и объяснения содержатся в `validator_negative.log`; итоги/число ошибочных приёмов в `negative_summary.json`. Для перевёрнутых заявленных меток было принято вопреки ожиданию **{negatives_summary['label_flip_with_claimed_label']['accepted']} из {negatives_summary['label_flip_with_claimed_label']['total']}**. Они записаны с `verdict_match=false` (не скрыты). Для отдельного числового примера нельзя гарантировать 100% детекцию; критерий объявлен через recall.
-
-Дополнительные проверки: `config_negative_test.log` – 6 невалидных pydantic-конфигураций; `reproducibility.json` – сохранение/перезагрузка и сравнение режимов; `repeat_verification.json` – **вторые независимые вычисления** full/chunks с новыми MLflow Run IDs и проверкой SHA-256, метрик и решений; `validator_negative.log` – подробные ожидаемые и фактические решения.
-
-## Артефакты и регистрация
-
-- `validator_params.npz`: full-статистики и пороги; SHA-256 `{replay['full']['sha256']}`.
-- `validator_params_chunk.npz`: chunks-статистики и пороги; SHA-256 `{replay['chunks']['sha256']}`.
-- `validator_metrics.csv`, `validator_negative.log`, `negative_summary.json`, `comparison.json`, `reproducibility.json`, `repeat_verification.json`, `source_manifest.json`, `config_negative_test.log`.
-- Система экспериментов: **{backend}**; ID указаны в таблице выше; требование MLflow выполнено **{backend == 'mlflow'}**.
-
-## Отдельный повтор полного эксперимента
-
-Два дополнительных расчёта `lab4_full_repeat` / `lab4_chunks_repeat` используют те же фиксированные исходные CSV, зерно, ML-модель и калибровочную выборку, независимо вычисляют статистики и метрики, сохраняют новые NPZ. Исходные результаты не заменяются.
-
-| Контроль | Full repeat | Chunks repeat |
-|---|---|---|
-| MLflow Run ID повторения | `{repeat['full']['repeat_run_id']}` | `{repeat['chunks']['repeat_run_id']}` |
-| SHA-256 NPZ точно совпал | {repeat['full']['npz_sha256_equal']} | {repeat['chunks']['npz_sha256_equal']} |
-| Максимальная разница метрик | {repeat['full']['metrics_max_abs_diff']:.12g} | {repeat['chunks']['metrics_max_abs_diff']:.12g} |
-| Решения на test совпали | {repeat['full']['decisions_equal']} | {repeat['chunks']['decisions_equal']} |
-
-Источник: `repeat_verification.json`, вычисляется `scripts/run_lab4.py`.
-
-Два режима обучаются только на train, оба отдельно калибруются на validation.
-
-## Нумерованные выводы
-
-1. Полнота отказа числовых OOD для full = `{fm(full['rejection_recall'])}` (источник: `validator_metrics.csv`, прогон `{full['run_id']}`).
-2. Доля ложных отказов на test для full = `{fm(full['false_reject_rate'])}` (тот же источник/прогон).
-3. ROC-AUC для full = `{fm(full['roc_auc'])}` (тот же источник/прогон).
-4. Максимальное расхождение средних full/chunks = `{comparisons['means_max_abs_diff']:.12g}` (источник: `comparison.json`).
-5. Ошибки числовых OOD при данном пороге не исключены: принятых доля `{fm(full['ood_accept_rate'])}` (источник: `validator_metrics.csv`, прогон `{full['run_id']}`).
-"""
-    # One final LF; avoids `git diff --cached --check` failing with blank EOF.
-    (OUT / "lab4_report.md").write_bytes((text.rstrip("\n") + "\n").encode("utf-8"))
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description="Lab4 validator full/chunks experiment")
@@ -536,14 +430,11 @@ def main(argv: list[str] | None = None) -> None:
     _json(OUT / "repeat_verification.json", repeat)
     manifest = code_source_manifest()
     _json(OUT / "source_manifest.json", manifest)
-    _format_report(cfg, rows, comps, negatives, integrity, replay,
-                   "offline_diagnostic" if args.offline_test else "mlflow", repeat,
-                   negatives_summary, str(manifest["combined_sha256"]))
     if not args.offline_test:
         import mlflow
         for row in rows:
             with mlflow.start_run(run_id=str(row["run_id"])):
-                for name in ("validator_metrics.csv", "comparison.json", "reproducibility.json", "lab4_report.md",
+                for name in ("validator_metrics.csv", "comparison.json", "reproducibility.json",
                              "repeat_verification.json", "negative_summary.json", "source_manifest.json"):
                     mlflow.log_artifact(str(OUT / name))
     for row in rows:

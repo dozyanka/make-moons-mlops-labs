@@ -163,7 +163,7 @@ def test_evidently_v07_real_html(tmp_path):
 
 
 def test_runner_benchmark_and_report_helpers(tmp_path):
-    """Exercise real TestClient joblib timing, parity and the report writer."""
+    """Exercise real TestClient joblib timing, parity and worker fallback."""
     import importlib.util
 
     spec = importlib.util.spec_from_file_location("lab7_runner_for_tests", ROOT / "scripts/run_lab7.py")
@@ -182,17 +182,3 @@ def test_runner_benchmark_and_report_helpers(tmp_path):
     assert (benchmark["batch_latency_ms"] > 0).all()
     failure = runner._worker_failure(client)
     assert failure["pass"] is True
-    drill = pd.DataFrame([
-        {"scenario": "clean", "first_alert_window": None,
-         "detection_delay_windows": None, "false_alerts": 0, "accepted": True},
-    ])
-    run_id = "test-run-id"
-    report = tmp_path / "report"
-    report.mkdir()
-    runner._make_report(report, cfg, benchmark, drill, {
-        "worker_failure": failure,
-        "source_model_sha256": "sha-test",
-        "config_sha256": "config-test",
-    }, run_id, "test")
-    content = (report / "lab7_report.md").read_text(encoding="utf-8")
-    assert run_id in content and "p50 / p95 / p99" in content

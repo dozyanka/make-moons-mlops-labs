@@ -28,7 +28,6 @@ def main() -> None:
         run(f"scripts/run_lab{lab}.py")
     run("-m", "pytest", "--cov=moons_lab", "--cov-report=term-missing", log=ROOT / "reports/LAB8/all_tests.log")
     run("scripts/build_coverage_logs.py")
-    run("scripts/build_reports.py")
     run("scripts/update_manifest.py")
     run("scripts/precommit_checks.py", "--all")
     print("All labs completed successfully.")

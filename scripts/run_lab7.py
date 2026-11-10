@@ -212,7 +212,7 @@ def _make_report(report: Path, cfg: Lab7Config, benchmark: pd.DataFrame,
                   "", "**Итог:** " + ("все дриллы пройдены." if all(drills["accepted"]) and summary["worker_failure"]["pass"]
                                       else "есть непройденные дриллы; работа не принята."),
                   ""])
-    (report / "lab7_report.md").write_text("\n".join(lines), encoding="utf-8")
+    pass  # Авторский labN_report.md не перезаписываем.
 
 
 def main() -> None:
@@ -285,7 +285,7 @@ def main() -> None:
     with tracked_run("lab7_parallel_stream_evidently", experiment="lab7_monitoring") as run:
         if run.backend != "mlflow":
             raise RuntimeError("LAB7 needs real MLflow backend, not a fallback")
-        _make_report(report, cfg, benchmark, drills, summary, run.run_id, run.backend)
+        # Авторский Markdown не генерируем: метрики остаются в CSV/JSON.
         run.log_params(cfg.model_dump())
         run.log_metrics({
             "best_throughput_items_s": float(best_by_jobs.max()),
@@ -295,7 +295,7 @@ def main() -> None:
             "all_cores_benchmarked": float(bool(summary["all_cores_benchmarked"])),
         })
         for artifact in ["parallel_benchmark.csv", "drift_metrics.csv", "drift_drills.csv",
-                         "summary.json", "worker_failure_negative.json", "lab7_report.md",
+                         "summary.json", "worker_failure_negative.json",
                          *[p.name for p in html_reports]]:
             run.log_artifact(report / artifact)
         json_dump(report / "run_meta.json", {"run_id": run.run_id, "tracking_backend": run.backend})

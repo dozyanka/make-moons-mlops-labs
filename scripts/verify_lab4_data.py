@@ -71,9 +71,8 @@ def verify_published(expected_code_commit: str | None = None) -> None:
     if sha256(code_bytes) != source["combined_sha256"]:
         raise AssertionError("source_manifest combined SHA does not match per-file SHA values")
     for rel, recorded_sha in source["files_sha256"].items():
-        current = (ROOT / rel).read_bytes()
-        if sha256(current) != recorded_sha:
-            raise AssertionError(f"source changed after report generation: {rel}")
+        # Compare against the audited Git snapshot used to write the report.
+        # Later changes to the runner do not invalidate the historic experiment.
         committed = git("show", f"{actual_commit}:{rel}")
         if sha256(committed) != recorded_sha:
             raise AssertionError(

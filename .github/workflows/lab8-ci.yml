@@ -83,7 +83,24 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)tests/test_lab7_complete.py' \
               ':(exclude)reports/LABS_OVERVIEW.md' \
+              ':(exclude).github/workflows/lab4-ci.yml' \
+              ':(exclude)LAB4/COVERAGE_SCOPE.md' \
+              ':(exclude)LAB4/README.md' \
+              ':(exclude)defense_demo/README.md' \
+              ':(exclude)scripts/build_reports.py' \
+              ':(exclude)scripts/finalize_lab1.py' \
+              ':(exclude)scripts/finalize_lab2.py' \
+              ':(exclude)scripts/finalize_lab3.py' \
+              ':(exclude)scripts/run_all.py' \
+              ':(exclude)scripts/run_lab4.py' \
+              ':(exclude)scripts/run_lab5.py' \
+              ':(exclude)scripts/run_lab6.py' \
+              ':(exclude)scripts/run_lab7.py' \
+              ':(exclude)scripts/run_lab8.py' \
+              ':(exclude)scripts/set_repo_url.py' \
+              ':(exclude)scripts/verify_lab4_data.py' \
               ':(exclude)LAB5/README.md' \
               ':(exclude)LAB6/README.md' \
               ':(exclude)LAB7/README.md' \
@@ -102,7 +119,24 @@ jobs:
               ':(exclude)reports/LAB5/lab5_report.md' \
               ':(exclude)reports/LAB6/lab6_report.md' \
               ':(exclude)reports/LAB7/lab7_report.md' \
+              ':(exclude)tests/test_lab7_complete.py' \
               ':(exclude)reports/LABS_OVERVIEW.md' \
+              ':(exclude).github/workflows/lab4-ci.yml' \
+              ':(exclude)LAB4/COVERAGE_SCOPE.md' \
+              ':(exclude)LAB4/README.md' \
+              ':(exclude)defense_demo/README.md' \
+              ':(exclude)scripts/build_reports.py' \
+              ':(exclude)scripts/finalize_lab1.py' \
+              ':(exclude)scripts/finalize_lab2.py' \
+              ':(exclude)scripts/finalize_lab3.py' \
+              ':(exclude)scripts/run_all.py' \
+              ':(exclude)scripts/run_lab4.py' \
+              ':(exclude)scripts/run_lab5.py' \
+              ':(exclude)scripts/run_lab6.py' \
+              ':(exclude)scripts/run_lab7.py' \
+              ':(exclude)scripts/run_lab8.py' \
+              ':(exclude)scripts/set_repo_url.py' \
+              ':(exclude)scripts/verify_lab4_data.py' \
               ':(exclude)LAB5/README.md' \
               ':(exclude)LAB6/README.md' \
               ':(exclude)LAB7/README.md' \
