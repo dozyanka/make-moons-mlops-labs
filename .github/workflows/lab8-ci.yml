@@ -78,6 +78,7 @@ jobs:
               ':(exclude).github/workflows/lab8-ci.yml' \
               ':(exclude)DEMO/README.md' \
               ':(exclude)DEMO/menu.py' \
+              ':(exclude)scripts/serve_lab6.py' \
               ':(exclude)README.md' \
               ':(exclude)reports/LAB4/lab4_report.md' \
               ':(exclude)reports/LAB5/lab5_report.md' \
@@ -117,6 +118,7 @@ jobs:
               ':(exclude).github/workflows/lab8-ci.yml' \
               ':(exclude)DEMO/README.md' \
               ':(exclude)DEMO/menu.py' \
+              ':(exclude)scripts/serve_lab6.py' \
               ':(exclude)README.md' \
               ':(exclude)reports/LAB4/lab4_report.md' \
               ':(exclude)reports/LAB5/lab5_report.md' \

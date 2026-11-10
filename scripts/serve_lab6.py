@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 import uvicorn
+from fastapi.responses import RedirectResponse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -64,7 +65,12 @@ def main() -> None:
         app = create_app(registry, monitor_sink=sink if args.monitor_url else None,
                          monitor_request_sink=request_sink if args.monitor_url else None)
         port = args.port or 8000
-    print(f"LAB6 {args.service} online: http://{args.host}:{port}/docs")
+    # Uvicorn prints the bare host URL. Redirect it to Swagger for both services.
+    @app.get("/", include_in_schema=False)
+    def open_swagger() -> RedirectResponse:
+        return RedirectResponse(url="/docs")
+
+    print(f"LAB6 {args.service} Swagger UI: http://{args.host}:{port}/docs", flush=True)
     uvicorn.run(app, host=args.host, port=port, log_level="info")
 
 
