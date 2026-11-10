@@ -428,7 +428,7 @@ def write_report(report: Path, cfg: Lab8FullConfig, e2e_data: pd.DataFrame,
                   f"задержка детекции: {result['drift_delay_windows']} окон. "
                   "См. `alerts_sample.jsonl` и `stream_windows.csv`.",
                   "", "## Итоговый вердикт", "", f"`all_pass={result['all_pass']}`. Для сдачи полный прогон обязателен; quick — не доказательство."])
-    (report / "lab8_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    pass  # Авторский labN_report.md не перезаписываем.
 
 
 def main():

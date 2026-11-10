@@ -364,11 +364,9 @@ def run_lab5() -> None:
 
 def open_lab5_report() -> None:
     published = ROOT / "reports" / "LAB5" / "lab5_report.md"
-    regenerated = DEMO_OUTPUT / "LAB5" / "lab5_report.md"
     if not published.is_file():
         raise FileNotFoundError(published)
     print("ЛР5 — опубликованный отчёт:", published)
-    print("ЛР5 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 14")
     if os.name == "nt":
         os.startfile(published)
 
@@ -433,9 +431,7 @@ def open_lab7_report() -> None:
 
 def open_lab6_report() -> None:
     published = ROOT / "reports" / "LAB6" / "lab6_report.md"
-    regenerated = DEMO_OUTPUT / "LAB6" / "lab6_report.md"
     print("ЛР6 — опубликованный отчёт:", published)
-    print("ЛР6 — новый отчёт:", regenerated if regenerated.is_file() else "запустите пункт 16")
     if os.name == "nt" and published.is_file():
         os.startfile(published)
 

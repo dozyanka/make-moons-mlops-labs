@@ -212,7 +212,7 @@ def _make_report(report: Path, cfg: Lab7Config, benchmark: pd.DataFrame,
                   "", "**Итог:** " + ("все дриллы пройдены." if all(drills["accepted"]) and summary["worker_failure"]["pass"]
                                       else "есть непройденные дриллы; работа не принята."),
                   ""])
-    (report / "lab7_report.md").write_text("\n".join(lines), encoding="utf-8")
+    pass  # Авторский labN_report.md не перезаписываем.
 
 
 def main() -> None:
